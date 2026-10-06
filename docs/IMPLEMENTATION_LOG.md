@@ -134,15 +134,15 @@ Belum ada task yang dikerjakan. Format entri:
 
 | Tool/pemeriksaan | Hasil |
 |---|---|
-| Node.js | 22.16.0; di bawah syarat 22.20.0 untuk `neon skills` pada prompt; peningkatan diperlukan sebelum H-02 |
+| Node.js | 22.23.3 dipakai melalui PATH lokal command; memenuhi syarat prompt |
 | pnpm | 12.4.2 |
-| Git | 2.45.2; binary tersedia, membuat `.git` ditolak sandbox |
-| PostgreSQL | psql/postgres/initdb 16.13 (Homebrew), tersedia; `pg_isready -h 127.0.0.1 -p 5432` exit 2, no response; cluster uji belum disiapkan |
-| Docker | CLI 29.6.1; `docker info` exit 1, socket Docker tidak tersedia; daemon belum dapat dipakai |
-| Neon CLI | 8.0.11; `neon auth status` tidak didukung (`Unknown command: status`); status login belum terverifikasi; tidak memulai login interaktif |
+| Git | 2.45.2; main/worktree/commit berfungsi setelah izin dipulihkan |
+| PostgreSQL | PostgreSQL 18 via Docker pada loopback 55433; sama dengan metadata Neon project; client dump18 via wrapper Docker |
+| Docker | CLI/daemon 29.6.1; Docker Desktop dimulai dan image postgres:18 berhasil ditarik |
+| Neon CLI | 8.0.11; DEFAULT profile OAuth tersedia; metadata project rough-dawn-85427948 dibaca tanpa SQL. H-02/penautan development belum selesai |
 | Vercel CLI | Tidak ditemukan pada PATH |
 | GitHub CLI | Tidak ditemukan pada PATH |
-| Batas sesi | Workspace writable, `.git` read-only; eskalasi sandbox tidak tersedia. File biasa dapat disiapkan, workflow commit/branch belum dapat berjalan |
+| Batas sesi | Filesystem unrestricted; network tersedia. Larangan data nyata/SQL produksi/deploy produksi/push tetap berlaku |
 
 ### Pemulihan lingkungan: 7 Oktober 2026
 
@@ -186,3 +186,9 @@ Belum ada task yang dikerjakan. Format entri:
 - Penerimaan lokal: pg_dump18 custom → age dengan public recipient, sukses tanpa private identity tersedia; dekripsi/restore DB uji baru; counts/hash seluruh tabel domain/auth/audit/exports dan contoh totals cocok; session dipurge dan login baru sukses; 30 dari 31 salinan dipertahankan, unrelated file aman; kegagalan upload/enkripsi/dekripsi/CLI nonzero, target existing/nonlokal ditolak.
 - Pending H-07: runner nyata, tujuan terpisah, keys, pemilik, notifikasi, adapter rclone dan drill produksi oleh operator. Bukti lokal tidak menutup gerbang operasional.
 - Harness diberi namespace TEST_DB_SUFFIX per suite (e57b638) agar worker paralel tidak mereset DB milik worker lain.
+
+### Pemeriksaan lintas task: 7 Oktober 2026
+
+- Clone lokal bersih a609476 di /private/tmp/elementary-school-clean-check, tanpa .env: pnpm install --frozen-lockfile/lint/typecheck/test:domain/build → seluruhnya exit 0. Memenuhi penerimaan clone baru S1-01 untuk implementasi saat ini.
+- Namespace TEST_DB_SUFFIX=main_check: integration gabungan 23 lulus, membuktikan harness tetap berjalan dengan namespace worker.
+- Bootstrap diberi assertLocalTestDatabase sebelum query sehingga APP_ENV=test yang salah menunjuk cloud pun ditolak. Uji auth/CLI terkait diulang.
