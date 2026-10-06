@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Inisialisasi Git selesai; S1-01 sedang dikerjakan |
-| Task berikutnya | S1-01 |
+| Status saat ini | S1-01 selesai; fondasi database S1-02 berikutnya |
+| Task berikutnya | S1-02 |
 
 ## 1. Aturan pencatatan
 
@@ -22,7 +22,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 
 | Task | Lane | Dependensi | Status | Bukti/berikutnya |
 |---|---|---|---|---|
-| [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | in_progress | Izin dipulihkan; baseline d7f51fc; scaffold sedang dikerjakan |
+| [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | done | 8875e7f; build/lint/typecheck, domain 1, smoke browser 4 lulus |
 | [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | not_started | Menunggu S1-01 |
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | not_started | Menunggu S1-02 |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-05 |
@@ -149,3 +149,14 @@ Belum ada task yang dikerjakan. Format entri:
 - Filesystem unrestricted; Git sudah dapat ditulis. Node 22.23.3 tersedia dan dipakai melalui PATH lokal command.
 - PostgreSQL 16.13: cluster uji baru di /private/tmp/elementary-school-pg, port 55432, hanya loopback; data seluruhnya sintetis.
 - Tidak ada deployment atau akses data produksi.
+
+### S1-01: 7 Oktober 2026
+
+- Branch task/S1-01 commit 8875e7f → main melalui merge --no-ff.
+- Berkas: Next 16.4.0/React 19.3.0, TS strict, Tailwind 4, package/lockfile, CI, struktur src/tests, http/errors, env contoh, README, PRODUCT/DESIGN dan placeholder halaman.
+- Checks benar-benar dijalankan: pnpm install --frozen-lockfile, pnpm build, pnpm lint, pnpm typecheck → exit 0; pnpm test:domain → 1 lulus; pnpm test:e2e → 4 lulus (360/768/1024 dan health tanpa DB). Di main install/lint/typecheck/domain/integration diulang dan exit 0.
+- Integration: belum ada test pada scaffold; --passWithNoTests hanya dipakai sampai S1-02, tidak menjadi bukti PostgreSQL.
+- UI: review independen ship untuk scope scaffold saja; screenshot tanpa overflow, lang id, kontras 12.36:1; warning detector Arial diterima sesuai Operate. Antislop hard/purpose/liveliness/craftsmanship PASS pada placeholder, bukan penerimaan fitur guru.
+- Secret: env contoh tanpa credential rahasia, modul server dibatasi server-only; tidak ada cloud deployment atau akses SQL production.
+- Lingkungan: izin Git pulih; Node 22.23.3; Docker Desktop berhasil dimulai (daemon 29.6.1). Neon CLI profile OAuth tersedia; metadata project yang ditentukan menunjukkan pg_version 18, region ap-southeast-1. PostgreSQL 16 lokal tidak memenuhi major version S1-02; image Docker postgres:18 sedang disiapkan.
+- Gerbang M1 teknis tetap pending sampai S1-06. H-01 sampai H-09 tetap pending. ENV-01 selesai.
