@@ -9,3 +9,11 @@ p { max-width: 65ch; }
 ::selection { background: #d9eadd; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 a { color: var(--accent); text-underline-offset: 3px; }
+.account-form { max-width: 28rem; display: grid; gap: 1.25rem; margin: 2rem 0; }
+.account-form label { display: grid; gap: .375rem; font-weight: 600; }
+input { width: 100%; min-height: 44px; padding: .75rem; font: inherit; color: inherit; background: white; border: 1px solid #68796b; border-radius: 6px; }
+button { min-width: 44px; min-height: 44px; padding: .75rem 1.25rem; font: inherit; font-weight: 600; border: 0; border-radius: 6px; background: var(--accent); color: white; cursor: pointer; }
+button:hover { background: #194b31; }
+button:disabled { opacity: .65; cursor: wait; }
+small { font-size: .875rem; font-weight: 400; }
+[role="alert"] { color: #8a2222; }
