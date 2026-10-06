@@ -1,0 +1,34 @@
+# Runbook operasional
+
+## Backup harian dan pemulihan (S2-E1)
+
+Status: drill lokal dengan data sintetis tersedia. H-07 masih membutuhkan repository/runner nyata, tujuan penyimpanan terpisah, pasangan kunci age, pemilik backup, notifikasi kegagalan dan drill production ke database terpisah. Target RPO satu hari belajar dan RTO satu hari kerja belum menjadi hasil pengukuran produksi.
+
+### Konfigurasi runner
+
+Workflow `.github/workflows/backup.yml` berjalan setiap hari pukul 18:00 WIB (11:00 UTC), termasuk hari libur, atau lewat workflow_dispatch. Gunakan runner khusus berlabel `school-backup` dengan Node 22.23.3, pnpm 12.4.2, `age`, `rclone` dan `pg_dump` major minimal sama dengan server (saat ini PostgreSQL 18). Runner harus memiliki ruang sementara yang terbatas aksesnya dan koneksi TLS ke database. Batasi siapa yang boleh mengubah workflow serta menjalankannya di environment `backup`.
+
+Isi secret environment runner `BACKUP_DATABASE_URL` (akun backup dengan SELECT pada semua tabel domain/auth/audit, akses sequence dan schema). Isi variable `BACKUP_AGE_RECIPIENT` dengan public recipient age dan `BACKUP_TARGET` dengan folder remote rclone khusus aplikasi ini. `BACKUP_ADAPTER=rclone`; secret `RCLONE_CONFIG_PATH` menunjuk file konfigurasi rclone yang sudah dipasang aman pada runner, bukan isi file. Batasi credential storage ke folder backup. Private identity age disimpan offline oleh pemilik, tidak dipasang pada runner backup. Atur notifikasi failed workflow untuk pemilik runner dan buktikan penerimaannya saat H-07.
+
+Jalankan `pnpm exec tsx scripts/backup/backup.ts`. Credential koneksi diteruskan ke client lewat environment PostgreSQL; URL/password tidak dicetak. pg_dump format custom mencakup semua schema/data, auth, audit, export history, constraints dan sequence. Dump dialirkan langsung ke age; hanya ciphertext dibuat di folder sementara privat. Upload harus berhasil sebelum retensi berjalan. Retensi mempertahankan 30 nama `school-<timestamp UTC>-<UUID>.dump.age` terbaru, hanya pada folder target. Berkas lain tidak dihapus. Job gagal dengan exit nonzero pada kegagalan dump/enkripsi/upload/retensi; pemilik memeriksa status run dan backup terbaru, bukan hanya keberadaan nama file. File sementara dibersihkan saat proses selesai normal atau gagal; operator juga membersihkan sisa folder privat apabila runner mati mendadak.
+
+Adapter `local` memakai `BACKUP_TARGET` berupa direktori di luar repo untuk fixture/drill; upload memakai file pending dan rename. Adapter `rclone` memakai remote terpisah sesuai H-07. Interface `BackupStore` di `scripts/backup/core.ts` dapat diganti untuk storage lain. Jangan memakai direktori fixture sebagai backup produksi. Mingguan, periksa umur backup terbaru, kuota, dan lakukan dekripsi sebagai pemilik identity offline.
+
+### Restore drill lokal
+
+Restore CLI sengaja menerima hanya `APP_ENV=test`, host loopback dan nama `elementary_test_*`, sesuai guard database proyek. Database target harus belum ada: script tidak drop atau mengganti database. Siapkan `RESTORE_DATABASE_URL`, `RESTORE_FILE` (ciphertext yang diunduh), dan `RESTORE_AGE_IDENTITY` (path identity di luar repo), lalu jalankan `pnpm exec tsx scripts/backup/restore.ts`. `age` mendekripsi ke dump sementara privat; `pg_restore --single-transaction --exit-on-error --no-owner --no-acl` memuat DB baru. Restore gagal dapat meninggalkan DB baru kosong untuk investigasi; jangan menganggapnya siap dipakai.
+
+Hasil JSON berisi counts/hash seluruh tabel public, contoh rekap bulanan per siswa/status, dan jumlah sesi login dicabut. Evidence diambil sebelum pencabutan seluruh baris auth `session`. Bandingkan dengan evidence dari sumber drill yang dibekukan atau fixture sebelum backup; jangan membandingkan sumber aktif yang berubah sesudah dump. Script test membuktikan seluruh isi domain/auth/audit/export history cocok, 10 siswa dan 10 penempatan, absensi/rekap cocok, semua sesi lama hilang dan login baru memakai password akun yang dipulihkan berhasil. Token lama harus ditolak oleh guard aplikasi yang membaca tabel sesi. Hash/counters merupakan bukti teknis, bukan data yang ditampilkan kepada guru.
+
+Untuk client yang tidak ada di PATH, gunakan `PG_TOOL_DIR` berisi executable `pg_dump`/`pg_restore`, `AGE_BIN`, serta `AGE_KEYGEN_BIN` khusus test. Wrapper test dapat memakai `docker exec -i` pada container PostgreSQL 18 lokal dan memetakan host/port ke loopback container; jangan memakai wrapper yang mengabaikan target untuk produksi.
+
+Pemeriksaan drill: `APP_ENV=test TEST_DB_SUFFIX=s2_e1 pnpm exec vitest run tests/integration/backup.test.ts`. Siapkan binary age/age-keygen dan PostgreSQL 18 terlebih dahulu. Test hanya membuat data sintetis, identity temporer di luar repo dan DB dengan suffix task; setelah selesai artefak dan DB drill dihapus. Tidak ada identity/password/dump yang ditambahkan ke Git.
+
+### Insiden produksi
+
+1. Pemilik insiden menghentikan writes aplikasi dan menyimpan catatan absensi sementara guru. Catat waktu backup terakhir serta perkiraan data yang belum tercakup.
+2. Simpan snapshot kondisi rusak untuk investigasi. Pertahankan database lama dan batasi akses; jangan menimpanya dengan restore.
+3. Unduh backup terakhir yang berhasil ke mesin operator terbatas aksesnya. Dekripsi memakai identity offline. Buat database baru di lingkungan tujuan terpisah, lalu gunakan client PostgreSQL sesuai major untuk restore dalam transaksi dengan exit-on-error. CLI lokal di atas tidak menerima URL production; langkah produksi dijalankan operator pada tujuan yang disetujui H-07.
+4. Sebelum membuka koneksi aplikasi, cabut seluruh sesi auth (`DELETE FROM "session"`) dan rotasi secret/credential yang relevan. Periksa counts siswa/penempatan/sesi absensi/records/audit, export history, sample rekap, schema/migration dan sequence. Uji login baru dan pastikan token lama ditolak. Pemilik menyetujui hasil sebelum pengalihan.
+5. Alihkan koneksi aplikasi ke DB baru, buka writes, dan monitor login serta submit. Jika verifikasi gagal, tetap hentikan writes dan simpan DB baru untuk diagnosis.
+6. Rekonsiliasi catatan sementara sejak backup terakhir dengan alasan pemulihan dan audit. Catat waktu mulai/selesai, kehilangan data yang ditemukan, hasil verifikasi, pemilik dan pelajaran drill. Tidak menyatakan RPO nol. Hapus plaintext sementara dan lepaskan akses identity setelah selesai.

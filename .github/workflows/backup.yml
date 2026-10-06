@@ -1,0 +1,30 @@
+name: Daily encrypted backup
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: school-daily-backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    # H-07: dedicated runner with pg_dump >= server major, age, rclone, Node 22 and pnpm.
+    runs-on: [self-hosted, school-backup]
+    timeout-minutes: 30
+    environment: backup
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Dump, encrypt, upload and retain 30 copies
+        run: pnpm exec tsx scripts/backup/backup.ts
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+          BACKUP_TARGET: ${{ vars.BACKUP_TARGET }}
+          BACKUP_ADAPTER: rclone
+          RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG_PATH }}
+      - name: Record failure for runner owner
+        if: failure()
+        run: echo '::error::Backup failed. Runner owner must inspect this run and the latest stored backup.'
