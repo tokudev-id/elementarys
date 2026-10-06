@@ -2,14 +2,14 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { DomainError } from "@/domain/errors";
 
-export function json(data: unknown, requestId = randomUUID(), status = 200) {
+export function json(data: unknown, requestId: string = randomUUID(), status = 200) {
   return Response.json(data, {
     status,
     headers: { "Cache-Control": "private, no-store", "X-Request-Id": requestId },
   });
 }
 
-export function errorResponse(error: unknown, requestId = randomUUID()) {
+export function errorResponse(error: unknown, requestId: string = randomUUID()) {
   const known = error instanceof DomainError;
   return json({
     error: {

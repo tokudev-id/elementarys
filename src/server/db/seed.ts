@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { Pool } from "pg";
 import { createAuth } from "../auth/factory";
+import { createManagedAccount } from "../auth/accounts";
 import { assertLocalTestDatabase } from "./safety";
 
 export async function seedTestDatabase(url: string, password: string, env = process.env.APP_ENV) {
@@ -10,8 +11,8 @@ export async function seedTestDatabase(url: string, password: string, env = proc
   try {
     const existing = await source.query('SELECT id FROM "user" LIMIT 1');
     if (existing.rowCount) throw new Error("Seed hanya untuk database kosong yang sudah dimigrasi.");
-    const first = await auth.api.createUser({ body: { email: "admin@example.test", password, name: "Guru Admin Contoh", role: "admin" } });
-    const second = await auth.api.createUser({ body: { email: "guru@example.test", password, name: "Guru Contoh", role: "teacher" } });
+    const first = await createManagedAccount(auth, { email: "admin@example.test", password, name: "Guru Admin Contoh", role: "admin", mustChangePassword:false });
+    const second = await createManagedAccount(auth, { email: "guru@example.test", password, name: "Guru Contoh", role: "teacher", mustChangePassword:false });
     const client = await source.connect();
     try {
       await client.query("BEGIN");

@@ -31,6 +31,14 @@ Task dikerjakan pada `task/<ID>`, commit `<ID>: <ringkasan huruf kecil>` dengan 
 
 Tidak ada deploy atau push otomatis. Preview hanya Neon development project rough-dawn-85427948 dan Vercel yang ditautkan Toku. Data produksi tidak digunakan untuk seed atau test.
 
+## Akun dan akses
+
+Login email/password memakai Better Auth di aplikasi. HTTP auth hanya menerima sign-in/email, sign-out, dan get-session; public signup dan semua jalur admin plugin ditolak. Guard data membaca role, banned, must_change_password dan profil guru dari database setiap request. Password sementara hanya memberi akses ganti password/logout. Cookie sesi dirotasi library saat ganti password, diteruskan ke browser; sesi lain dicabut.
+
+Bootstrap awal: isi BOOTSTRAP_EMAIL, BOOTSTRAP_NAME dan BOOTSTRAP_PASSWORD melalui environment lokal aman, bukan argumen command atau berkas tracked. Password minimal 12 karakter. `pnpm auth:bootstrap-admin` hanya untuk APP_ENV=test pada tahap ini dan menolak bila admin aktif sudah ada. BOOTSTRAP_TEACHER_ID opsional menautkan profil guru aktif yang belum berakun. Jangan menempelkan password pada command shell yang masuk history; gunakan input tersembunyi terminal atau password manager lalu hapus variabel setelah selesai.
+
+Percobaan login dibatasi lima kali per email per menit, memakai key HMAC tanpa email mentah dalam tabel rate_limit. Batas library lintas IP/path adalah 50 login per menit; kedua guru dalam Wi-Fi sama tidak saling mengunci pada percobaan satu akun. TRUSTED_ORIGINS dan BETTER_AUTH_URL harus sesuai origin browser lokal/preview. Tidak ada polling sesi atau dashboard berkala.
+
 ## Pemeriksaan visual scaffold
 
 Halaman awal adalah placeholder pengembangan tanpa kontrol interaktif. Review independen pada 360/768/1024: ship pada scope S1-01; kontras teks 12.36:1, tanpa overflow. Detector menandai Arial sebagai overused-font; pengecualian Operate dan brief mengizinkan font sistem untuk UI tugas sekolah. Antislop: hard gate PASS (tidak ada aset/klaim/kontrol buatan); purpose PASS (font sistem dipilih untuk keterbacaan dan tanpa unduhan); liveliness PASS pada scope placeholder (fokus judul, ruang terstruktur, ENERGY/RHYTHM/MOTION 1); craftsmanship PASS berdasarkan screenshot dan smoke test, bukan penerimaan fitur guru.
