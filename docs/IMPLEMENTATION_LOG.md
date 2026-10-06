@@ -23,7 +23,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | Task | Lane | Dependensi | Status | Bukti/berikutnya |
 |---|---|---|---|---|
 | [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | done | 8875e7f; build/lint/typecheck, domain 1, smoke browser 4 lulus |
-| [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | not_started | Menunggu S1-01 |
+| [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | in_progress | PostgreSQL 18 via Docker; schema/harness en cours |
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | not_started | Menunggu S1-02 |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-05 |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-04 |
