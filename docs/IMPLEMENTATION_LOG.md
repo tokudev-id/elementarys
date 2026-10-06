@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S1-02 selesai; login dan backup siap dikerjakan |
-| Task berikutnya | S1-03 dan S2-E1 |
+| Status saat ini | Login dan backup lokal selesai; shell mobile dan API absensi siap |
+| Task berikutnya | S1-04 dan S1-05 |
 
 ## 1. Aturan pencatatan
 
@@ -24,7 +24,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 |---|---|---|---|---|
 | [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | done | 8875e7f; build/lint/typecheck, domain 1, smoke browser 4 lulus |
 | [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | done | 89d5110; domain 2, integration PostgreSQL 18: 10 lulus; migrasi ulang tanpa drift |
-| [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | in_progress | Login S1-03 / backup S2-E1 dikerjakan pada branch terpisah |
+| [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | done | 6214b00; integration auth 10, e2e 8 lulus |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-05 |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-04 |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | not_started | Menunggu S1-04, S1-05 |
@@ -37,7 +37,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | not_started | Menunggu S2-B2 |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | not_started | Menunggu S1-06 |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | not_started | Menunggu S1-06 |
-| [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | in_progress | Login S1-03 / backup S2-E1 dikerjakan pada branch terpisah |
+| [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | not_started | Menunggu Slice 2 |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | not_started | Menunggu S3-01 |
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | not_started | Menunggu Slice 2 |
@@ -170,3 +170,19 @@ Belum ada task yang dikerjakan. Format entri:
 - Penerimaan: migrasi DB kosong dan ulang (test migrasi); overlap, duplicate session/records, student/date/class mismatch, config kedua, dua current ditolak; transaksi commit/rollback memulangkan client; seed/reset produksi ditolak; dua suffix terisolasi; seed 10 siswa termasuk dua nama sama, dua akun library tertaut guru dan kelas utama.
 - Harness hanya DB uji lokal; kata sandi seed dari input environment lokal dan tidak dicetak. Integration wajib memiliki test (passWithNoTests dihapus).
 - Sisa: tidak ada pada scope S1-02; security runtime login dikerjakan S1-03.
+
+### S1-03: 7 Oktober 2026
+
+- Commit 6214b00 di-merge --no-ff; schema rate_limit diterapkan orchestrator di main sebagai 277813c.
+- Berkas auth config/guard/dispatch/password/accounts/runtime, login/logout/change-password, api auth/me/account, bootstrap, tests dan README.
+- Penerimaan: 10 test auth integration membuktikan role aktual, signup/plugin deny, guru/admin, profil tidak aktif/tidak tertaut, banned, password sementara, Origin, rate limit per email tanpa mengunci akun lain, perubahan password dan bootstrap tanpa password dalam output.
+- Checks: lint/typecheck/domain 2/integration 20/build lulus; 8 e2e login/logout/ganti password pada 360/768/1024 lulus. Secret auth tidak ditemukan pada .next/static (0 hits). Main install/lint/typecheck/domain/integration diulang lulus.
+- Temuan diperbaiki: Origin Playwright disamakan localhost; cookie rotasi password diteruskan; hint password dipisah dari accessible label. Tidak ada endpoint admin library yang terbuka; wrapper domain manajemen akun menyusul S2-C1.
+
+### S2-E1: 7 Oktober 2026
+
+- Worker commit efcd8b8 di-merge --no-ff setelah diff/runbook/workflow ditinjau. Berkas scripts/backup, workflow, runbook dan integration backup.
+- Checks worker dan main: frozen install/lint/typecheck/domain 2/integration 23 (gabungan auth/database/backup) lulus dengan PG_TOOL_DIR=/private/tmp/s2-e1-pg-tools, AGE_BIN=/private/tmp/age/age dan AGE_KEYGEN_BIN=/private/tmp/age/age-keygen. Binaries sementara, bukan dependency sistem atau berkas repo.
+- Penerimaan lokal: pg_dump18 custom → age dengan public recipient, sukses tanpa private identity tersedia; dekripsi/restore DB uji baru; counts/hash seluruh tabel domain/auth/audit/exports dan contoh totals cocok; session dipurge dan login baru sukses; 30 dari 31 salinan dipertahankan, unrelated file aman; kegagalan upload/enkripsi/dekripsi/CLI nonzero, target existing/nonlokal ditolak.
+- Pending H-07: runner nyata, tujuan terpisah, keys, pemilik, notifikasi, adapter rclone dan drill produksi oleh operator. Bukti lokal tidak menutup gerbang operasional.
+- Harness diberi namespace TEST_DB_SUFFIX per suite (e57b638) agar worker paralel tidak mereset DB milik worker lain.
