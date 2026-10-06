@@ -22,8 +22,9 @@ beforeEach(async () => {
 
 describe("integritas PostgreSQL 18", () => {
   it("migrasi dapat diulang tanpa drift", async () => {
+    const before = (await source.query("SELECT count(*)::int n FROM drizzle.__drizzle_migrations")).rows[0].n;
     await migrateDatabase(url);
-    expect((await source.query("SELECT count(*)::int n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(2);
+    expect((await source.query("SELECT count(*)::int n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(before);
     expect((await source.query("SHOW server_version")).rows[0].server_version).toMatch(/^18\./);
   });
   it("menolak overlap enrollment", async () => {

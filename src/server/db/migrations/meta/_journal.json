@@ -15,6 +15,13 @@
       "when": 1791330234665,
       "tag": "0001_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791330453431,
+      "tag": "0002_auth-rate-limit",
+      "breakpoints": true
     }
   ]
 }

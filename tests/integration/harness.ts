@@ -19,5 +19,5 @@ export async function createTestDatabase(suffix = process.env.TEST_DB_SUFFIX ?? 
 
 export async function resetDatabase(pool: Pool) {
   assertLocalTestDatabase(String(pool.options.connectionString), process.env.APP_ENV);
-  await pool.query('TRUNCATE attendance_records,attendance_sessions,audit_events,report_exports,teacher_classes,teachers,enrollments,students,school_day_overrides,school_weekdays,classes,academic_years,school_config,"session",account,"verification","user" CASCADE');
+  await pool.query('TRUNCATE attendance_records,attendance_sessions,audit_events,report_exports,teacher_classes,teachers,enrollments,students,school_day_overrides,school_weekdays,classes,academic_years,school_config,"session",account,"verification","user",rate_limit CASCADE');
 }

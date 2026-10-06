@@ -7,6 +7,7 @@ import { Pool } from "pg";
 export const auth = betterAuth({
   database: drizzleAdapter(drizzle(new Pool({ connectionString: process.env.DATABASE_URL })), { provider: "pg" }),
   emailAndPassword: { enabled: true, disableSignUp: true },
+  rateLimit: { enabled: true, storage: "database" },
   user: { additionalFields: { mustChangePassword: { type: "boolean", defaultValue: false, input: false } } },
   plugins: [admin()],
 });
