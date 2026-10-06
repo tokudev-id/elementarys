@@ -24,7 +24,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 |---|---|---|---|---|
 | [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | done | 8875e7f; build/lint/typecheck, domain 1, smoke browser 4 lulus |
 | [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | done | 89d5110; domain 2, integration PostgreSQL 18: 10 lulus; migrasi ulang tanpa drift |
-| [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | not_started | Menunggu S1-02 |
+| [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | in_progress | Login S1-03 / backup S2-E1 dikerjakan pada branch terpisah |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-05 |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-04 |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | not_started | Menunggu S1-04, S1-05 |
@@ -37,7 +37,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | not_started | Menunggu S2-B2 |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | not_started | Menunggu S1-06 |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | not_started | Menunggu S1-06 |
-| [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | not_started | Menunggu S1-02 |
+| [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | in_progress | Login S1-03 / backup S2-E1 dikerjakan pada branch terpisah |
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | not_started | Menunggu Slice 2 |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | not_started | Menunggu S3-01 |
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | not_started | Menunggu Slice 2 |
