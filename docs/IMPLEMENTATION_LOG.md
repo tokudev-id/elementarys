@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S1-01 selesai; fondasi database S1-02 berikutnya |
-| Task berikutnya | S1-02 |
+| Status saat ini | S1-02 selesai; login dan backup siap dikerjakan |
+| Task berikutnya | S1-03 dan S2-E1 |
 
 ## 1. Aturan pencatatan
 
@@ -23,7 +23,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | Task | Lane | Dependensi | Status | Bukti/berikutnya |
 |---|---|---|---|---|
 | [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | done | 8875e7f; build/lint/typecheck, domain 1, smoke browser 4 lulus |
-| [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | in_progress | PostgreSQL 18 via Docker; schema/harness en cours |
+| [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | done | 89d5110; domain 2, integration PostgreSQL 18: 10 lulus; migrasi ulang tanpa drift |
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | not_started | Menunggu S1-02 |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-05 |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-04 |
@@ -160,3 +160,13 @@ Belum ada task yang dikerjakan. Format entri:
 - Secret: env contoh tanpa credential rahasia, modul server dibatasi server-only; tidak ada cloud deployment atau akses SQL production.
 - Lingkungan: izin Git pulih; Node 22.23.3; Docker Desktop berhasil dimulai (daemon 29.6.1). Neon CLI profile OAuth tersedia; metadata project yang ditentukan menunjukkan pg_version 18, region ap-southeast-1. PostgreSQL 16 lokal tidak memenuhi major version S1-02; image Docker postgres:18 sedang disiapkan.
 - Gerbang M1 teknis tetap pending sampai S1-06. H-01 sampai H-09 tetap pending. ENV-01 selesai.
+
+### S1-02: 7 Oktober 2026
+
+- Commit 89d5110 task/S1-02 di-merge --no-ff ke main.
+- Schema Drizzle 17 tabel (auth dihasilkan CLI Better Auth 1.7.7); seluruh tabel TRD 3.1, version, report_exports, audit dan sequence kode siswa. SQL 0000/0001 ditinjau: btree_gist, exclusion year/enrollment, partial unique current, checks, trigger relasi records, history append-only.
+- PostgreSQL 18 Docker container elementary-school-test-pg18 pada 127.0.0.1:55433; versi sama dengan metadata project yang ditentukan. Cluster 16 dihentikan. Tidak ada SQL cloud.
+- Checks: frozen install, lint, typecheck, domain 2, integration 10, build → exit 0; install/lint/typecheck/domain/integration diulang pada main dan exit 0. drizzle-kit generate → No schema changes.
+- Penerimaan: migrasi DB kosong dan ulang (test migrasi); overlap, duplicate session/records, student/date/class mismatch, config kedua, dua current ditolak; transaksi commit/rollback memulangkan client; seed/reset produksi ditolak; dua suffix terisolasi; seed 10 siswa termasuk dua nama sama, dua akun library tertaut guru dan kelas utama.
+- Harness hanya DB uji lokal; kata sandi seed dari input environment lokal dan tidak dicetak. Integration wajib memiliki test (passWithNoTests dihapus).
+- Sisa: tidak ada pada scope S1-02; security runtime login dikerjakan S1-03.
