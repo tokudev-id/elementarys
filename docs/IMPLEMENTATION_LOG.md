@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Inisialisasi tertahan izin sandbox untuk membuat `.git`; belum ada implementasi aplikasi |
-| Task berikutnya | Pulihkan izin Git lokal, lalu lanjutkan S1-01 |
+| Status saat ini | Inisialisasi Git selesai; S1-01 sedang dikerjakan |
+| Task berikutnya | S1-01 |
 
 ## 1. Aturan pencatatan
 
@@ -22,7 +22,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 
 | Task | Lane | Dependensi | Status | Bukti/berikutnya |
 |---|---|---|---|---|
-| [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | needs_human | Inisialisasi `.git` ditolak sandbox; baseline commit dan branch task belum dapat dibuat |
+| [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | in_progress | Izin dipulihkan; baseline d7f51fc; scaffold sedang dikerjakan |
 | [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | not_started | Menunggu S1-01 |
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | not_started | Menunggu S1-02 |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | not_started | Menunggu S1-03; paralel dengan S1-05 |
@@ -85,7 +85,7 @@ Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah reg
 - B: Inisialisasi repo dari terminal Toku dengan `git init -b main`, kemudian buka sesi yang mengizinkan penulisan metadata Git. Inisialisasi saja tidak cukup bila sesi berikutnya masih membatasi `.git` menjadi read-only.
 - C: Menunggu sampai lingkungan yang mengizinkan workflow Git tersedia. Seluruh task implementasi tetap tertahan; workflow tanpa commit tidak memenuhi prompt yang disetujui.
 
-Rekomendasi A. Tidak ada perubahan scope atau keputusan produk yang diperlukan.
+Selesai 7 Oktober 2026: izin filesystem dipulihkan; `git init -b main` dan baseline commit d7f51fc berhasil. Tidak ada perubahan scope atau keputusan produk.
 
 ## 6. Riwayat sesi
 
@@ -143,3 +143,9 @@ Belum ada task yang dikerjakan. Format entri:
 | Vercel CLI | Tidak ditemukan pada PATH |
 | GitHub CLI | Tidak ditemukan pada PATH |
 | Batas sesi | Workspace writable, `.git` read-only; eskalasi sandbox tidak tersedia. File biasa dapat disiapkan, workflow commit/branch belum dapat berjalan |
+
+### Pemulihan lingkungan: 7 Oktober 2026
+
+- Filesystem unrestricted; Git sudah dapat ditulis. Node 22.23.3 tersedia dan dipakai melalui PATH lokal command.
+- PostgreSQL 16.13: cluster uji baru di /private/tmp/elementary-school-pg, port 55432, hanya loopback; data seluruhnya sintetis.
+- Tidak ada deployment atau akses data produksi.
