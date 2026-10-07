@@ -34,7 +34,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | done | f4dda26; integration 60, reports+print e2e 7; PDF dua halaman lulus; H-06 pending |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | done | 01750ea; integration 64, settings+print e2e 7 lulus |
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | done | 681cf62; integration 68, e2e school-master+shell 2 lulus |
-| [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | in_progress | Identitas siswa dan enrollment awal atomik |
+| [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | done | 3ff50ef + FIX-02 08bcdb9; integration 71, students+shell e2e 2 lulus |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | not_started | Menunggu S1-06 |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | not_started | Menunggu S1-06 |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
@@ -46,6 +46,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
 
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
+| FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -284,3 +285,10 @@ Belum ada task yang dikerjakan. Format entri:
 - Calendar PUT mengunci tahun FOR UPDATE sebelum memeriksa sesi submitted; pesan CALENDAR_HAS_ATTENDANCE memuat kelas/tanggal dan ID sesi yang perlu dibatalkan. Calendar GET, roster dan laporan memakai resolver yang sama. Pergantian current menaikkan versi periode sebelumnya agar form lama tidak menimpa perubahan.
 - Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 68, build/start dan e2e school-master+shell 2 lulus. Uji pg_stat_activity membuktikan update kalender benar-benar menunggu lock submit, lalu ditolak sesudah submit commit; kalender dan catatan tetap konsisten.
 - Browser membuat/mengedit tahun dan kelas, mengatur weekday, menambah/menghapus pengecualian, membaca dengan akun guru, dan menolak POST guru. Sapuan360/768/1024 tanpa overflow. Anti-slop empat gate PASS: grid merupakan kalender nyata, kontrol aktif diuji, tanpa field/identitas fiktif di luar fixture sintetis.
+
+### S2-B3 dan FIX-02: 7 Oktober 2026
+
+- Commit 3ff50ef, lalu perbaikan format assertion 08bcdb9 di-merge --no-ff. API/page daftar/filter/detail/tambah/edit identitas siswa, NIS/NISN string opsional, kode sequence otomatis, enrollment awal sampai akhir tahun dan audit dalam satu transaksi. Urutan lock: year SHARE → siswa baru → class UPDATE; penambahan yang mengubah roster submitted ditolak dengan tanggal aman.
+- Sequence tidak memotong digit di atas9999. Fixture membuktikan pembuatan lima siswa bersamaan dengan nama sama/kode unik, roster sebelum/sesudah mulai, rollback siswa bila enrollment gagal, penolakan historis/duplicate code/stale edit/guru dan pelestarian leading-zero NIS.
+- Task/main final: frozen install, format:check, lint, typecheck, domain 8, integration 71, build/start dan students+shell e2e 2 lulus. Browser membuat sepuluh siswa pada360px, filter, membuka detail, mengedit nama dan memeriksa360/768/1024. Test detail sempat mengisi form list sebelum navigasi selesai; heading detail ditunggu lalu alur lulus. Satu assertion belum diformat menyebabkan main format:check gagal; FIX-02 memperbaikinya dan seluruh gate diulang lulus, tanpa rewrite history.
+- Anti-slop empat gate PASS pada scope siswa: nama/kode/data hanya dari DB/fixture sintetis, kontrol create/filter/detail/edit/role diuji, form tanpa inline, arah Operate 1/1/1. Transfer/keluar/naik kelas/arsip siswa tetap scope S3-01.
