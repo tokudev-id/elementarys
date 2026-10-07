@@ -7,12 +7,10 @@ import { pool, transaction } from "@/server/db/pool";
 import { projectMonthlyReport } from "./monthly";
 
 export function sheetName(name: string, used: Set<string>) {
-  const base =
-    name
-      .replace(/[\\/*?:\[\]]/g, " ")
-      .replace(/^'+|'+$/g, "")
-      .trim() || "Kelas";
-  let candidate = truncateSheetName(base, 31);
+  const sanitized = name.replace(/[\\/*?:\[\]]/g, " ").replace(/^[\s']+|[\s']+$/g, "") || "Kelas";
+  const shortened = truncateSheetName(sanitized, 31);
+  const base = shortened.toLowerCase() === "history" ? `${shortened} (kelas)` : shortened;
+  let candidate = base;
   for (let index = 2; used.has(candidate.toLowerCase()); index++) {
     const suffix = ` (${index})`;
     candidate = `${truncateSheetName(base, 31 - suffix.length)}${suffix}`;
@@ -27,7 +25,7 @@ function truncateSheetName(value: string, limit: number) {
     if (result.length + character.length > limit) break;
     result += character;
   }
-  return result;
+  return result.replace(/[\s']+$/g, "");
 }
 
 export function createReportWorkbook(report: MonthlyReport, actor: Pick<Actor, "name">) {

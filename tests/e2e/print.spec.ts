@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import { assertLocalTestDatabase } from "../../src/server/db/safety";

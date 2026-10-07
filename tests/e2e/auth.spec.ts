@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 for (const width of [360, 768, 1024]) {
   test(`login dan logout ${width}px`, async ({ page }) => {

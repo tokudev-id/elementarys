@@ -45,7 +45,7 @@ export function useMutation(url: string, method: "POST" | "PATCH" | "PUT", onRel
         message:
           error instanceof HttpError
             ? error.message
-            : "Belum dapat menyimpan. Periksa koneksi dan coba kembali; isian tetap di halaman ini.",
+            : "Belum mendapat konfirmasi perubahan. Periksa koneksi dan coba kembali; isian tetap di halaman ini.",
       });
       return false;
     } finally {

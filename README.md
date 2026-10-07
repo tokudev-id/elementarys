@@ -4,9 +4,9 @@ Satu aplikasi Next.js untuk guru dan admin sekolah. Kebutuhan dan penerimaan ada
 
 ## Setup lokal
 
-Gunakan Node.js 22.23.3 dan pnpm 12.4.2. Jalankan `pnpm install --frozen-lockfile`, salin `.env.example` ke `.env.local`, lalu `pnpm dev`. Secret auth diisi lokal dengan nilai acak, tidak dimasukkan Git. Script tidak membuat atau memakai database cloud.
+Gunakan Node.js 22.23.3 atau lebih baru dan pnpm 12.4.2. Sesi validasi memakai Node.js 24.21.0. Jalankan `pnpm install --frozen-lockfile`, salin `.env.example` ke `.env.local`, lalu `pnpm dev`. Secret auth diisi lokal dengan nilai acak, tidak dimasukkan Git. Script tidak membuat atau memakai database cloud.
 
-PostgreSQL uji memakai major 18, sama dengan metadata project Neon rough-dawn-85427948 (diperiksa 7 Oktober 2026). Jalankan `docker compose up -d` pada clone baru: port 55433 hanya loopback, user school_test, volume uji terpisah. Docker sesi ini memakai container elementary-school-test-pg18 pada port yang sama; hentikan container itu sebelum menjalankan Compose. Konfigurasi trust hanya untuk database uji lokal ini.
+PostgreSQL uji memakai major 18, sama dengan metadata project Neon rough-dawn-85427948 (diperiksa 7 Oktober 2026). Jalankan `docker compose up -d`: port 55433 hanya loopback, user school_test, volume uji terpisah. Container Compose sesi ini adalah elementarys-postgres-1. Bila port dipakai container lama, periksa target uji sebelum menghentikannya. Konfigurasi trust hanya untuk database uji lokal ini.
 
 Harness membuat `elementary_test_<TEST_DB_SUFFIX>`, menjalankan kedua migrasi, lalu reset tabel antar test. Seed/reset menolak host nonlokal, APP_ENV selain test dan nama database tanpa prefix uji. Beri TEST_ACCOUNT_PASSWORD lokal, buat database uji kosong, jalankan `pnpm db:migrate` dan `pnpm db:seed:test`; seed menghasilkan 10 siswa contoh dan admin@example.test/guru@example.test. Tidak ada password dalam seed atau log. Untuk CLI migrasi, environment dibaca dari `.env.local`.
 
@@ -31,7 +31,9 @@ Task dikerjakan pada `task/<ID>`, commit `<ID>: <ringkasan huruf kecil>` dengan 
 
 ## Pemeriksaan
 
-`pnpm lint`, `pnpm typecheck`, `pnpm test:domain`, `pnpm build`, lalu `pnpm start`. Script integration/e2e dan operasi database ditambahkan ketika harness terkait tersedia; jangan menganggap pemeriksaan yang belum tersedia sebagai lulus.
+Jalankan `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test:domain`, `pnpm test:integration`, `pnpm build`, lalu `pnpm test:e2e`. `pnpm start` menjalankan hasil build untuk pemeriksaan manual.
+
+Harness browser memakai database uji aplikasi terpisah dan data sintetis. Test berjalan serial karena beberapa alur mengedit konfigurasi sekolah yang sama. Fixture membersihkan tabel transient rate_limit sebelum setiap test untuk memberi window login baru pada akun seed bersama. Aturan batas login diverifikasi pada database integrasi tersendiri. Build ulang sebelum e2e setelah perubahan source; global setup e2e menyiapkan ulang fixture aplikasi.
 
 `pnpm test:integration` membaca `.env.local` bila tersedia. Untuk drill backup di Windows, arahkan `PG_TOOL_DIR` ke folder bin PostgreSQL 18, `AGE_BIN` ke age.exe, dan `AGE_KEYGEN_BIN` ke age-keygen.exe. Binary lokal dapat ditempatkan di `.local/tools` yang diabaikan Git. Test tetap menolak database nonlokal; jangan memakai credential produksi.
 
@@ -45,8 +47,19 @@ Bootstrap awal: isi BOOTSTRAP_EMAIL, BOOTSTRAP_NAME dan BOOTSTRAP_PASSWORD melal
 
 Percobaan login dibatasi lima kali per email per menit, memakai key HMAC tanpa email mentah dalam tabel rate_limit. Batas library lintas IP/path adalah 50 login per menit; kedua guru dalam Wi-Fi sama tidak saling mengunci pada percobaan satu akun. TRUSTED_ORIGINS dan BETTER_AUTH_URL harus sesuai origin browser lokal/preview. Tidak ada polling sesi atau dashboard berkala.
 
-## Pemeriksaan visual scaffold
+Halaman Guru mendukung profil tanpa akun, buat/tautkan akun, kelas utama, status aktif, akses dan reset password. Wrapper Better Auth memakai API server dan adapter yang terikat client transaksi domain untuk pembuatan/penautan/reset. Arsip profil sekaligus menonaktifkan akses dan mencabut sesi. Admin aktif terakhir dilindungi dari arsip, penonaktifan dan demosi. Guru aktif dapat mencatat semua kelas; kelas utama menentukan urutan dashboard.
 
-Halaman awal adalah placeholder pengembangan tanpa kontrol interaktif. Review independen pada 360/768/1024: ship pada scope S1-01; kontras teks 12.36:1, tanpa overflow. Detector menandai Arial sebagai overused-font; pengecualian Operate dan brief mengizinkan font sistem untuk UI tugas sekolah. Antislop: hard gate PASS (tidak ada aset/klaim/kontrol buatan); purpose PASS (font sistem dipilih untuk keterbacaan dan tanpa unduhan); liveliness PASS pada scope placeholder (fokus judul, ruang terstruktur, ENERGY/RHYTHM/MOTION 1); craftsmanship PASS berdasarkan screenshot dan smoke test, bukan penerimaan fitur guru.
+## Fitur Slice 2
+
+- Sekolah/Persiapan sekolah: identitas, lokasi, timezone, preview waktu dan checklist minimum. Konfigurasi sintetis diberi penanda dan belum dianggap siap produksi.
+- Tahun ajaran/Kelas/Kalender: periode current, versi master, hari belajar dan pengecualian tanggal. Perubahan kalender yang bertentangan dengan sesi submitted menunjuk catatan yang perlu dibatalkan dahulu.
+- Siswa: daftar/filter/detail, input identitas dan penempatan awal bertanggal dalam satu transaksi. Transfer, keluar, naik kelas dan arsip siswa termasuk Slice 3.
+- Absensi: Koreksi catatan atau Isi ulang catatan membuka status dari versi terbaru dengan alasan wajib. Konflik memuat ulang data sebelum koreksi berikutnya. Riwayat menampilkan pencatat, waktu, alasan dan status sebelum/sesudah. Pembatalan satu sesi hanya admin; guru mencatat tahun current dan admin juga dapat melengkapi tahun lama dengan alasan.
+- Rekap: filter tahun/bulan/kelas, totals dan tabel tanggal, Excel serta cetak A4 landscape. Proyeksi memakai snapshot transaksi yang sama. Setiap ekspor mencatat versi yang dirender; perubahan berikutnya menampilkan tanggal yang berubah. Membuka halaman cetak tetap read-only, tombol Cetak mencatat ekspor sebelum dialog print.
+- Backup: enkripsi age, retensi 30 dan restore drill tersedia pada [runbook](docs/RUNBOOK.md). Tujuan/kunci/runner/pemilik operasional menunggu H-07; Excel/printer sekolah menunggu H-06.
+
+## Pemeriksaan visual
+
+Arah UI ada di [DESIGN.md](DESIGN.md): Operate untuk pekerjaan guru/admin, ENERGY 1 / RHYTHM 1 / MOTION 1, font sistem dan aksen hijau. [Laporan anti-slop](docs/ANTI_SLOP_REPORT.md) mencatat gate, kontras, viewport, keyboard dan interaksi yang diuji. Bukti emulator dan PDF lokal melengkapi pemeriksaan teknis; penerimaan perangkat nyata tetap pada checkpoint manusia di log.
 
 Build membersihkan folder hasil generate `.next` terlebih dahulu. Ini mencegah CSS lama dari cache build lokal terbawa ke artefak baru; kode sumber dan data database tidak disentuh. Assertion browser S1-04 turut memeriksa computed tap-highlight style, bukan source CSS saja.

@@ -12,6 +12,8 @@ const port = process.env.PORT ?? "3101";
 if (process.env.APP_ENV === "test") process.env.BETTER_AUTH_URL = `http://localhost:${port}`;
 export default defineConfig({
   testDir: "./tests/e2e",
+  // These flows edit the same school configuration and seed accounts.
+  workers: 1,
   globalSetup: "./tests/e2e/setup.ts",
   use: {
     baseURL: `http://localhost:${port}`,

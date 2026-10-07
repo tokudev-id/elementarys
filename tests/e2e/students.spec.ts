@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
 import { assertLocalTestDatabase } from "../../src/server/db/safety";
@@ -61,6 +61,9 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
     await expectNoPageOverflow(page);
   }
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
+  ).toBeVisible();
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();

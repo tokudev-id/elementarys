@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./fixtures";
 import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import { assertLocalTestDatabase } from "../../src/server/db/safety";
@@ -237,6 +237,9 @@ test("admin records and corrects a historical year while teacher can only read i
   ).toBeVisible();
   await expectNoPageOverflow(page);
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
+  ).toBeVisible();
   await login(page, "guru");
   await page.goto(data.url);
   await expect(page.getByRole("button", { name: "Koreksi catatan", exact: true })).toHaveCount(0);
