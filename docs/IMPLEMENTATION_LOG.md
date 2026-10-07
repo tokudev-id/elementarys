@@ -32,7 +32,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | done | 426bf92; domain 8/integration 57/e2e rekap+shell 5 lulus |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | done | f570906; roundtrip ExcelJS, integration 59, e2e rekap/download 5 lulus; H-06 pending |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | done | f4dda26; integration 60, reports+print e2e 7; PDF dua halaman lulus; H-06 pending |
-| [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | in_progress | Settings/version/timezone serta checklist kesiapan |
+| [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | done | 01750ea; integration 64, settings+print e2e 7 lulus |
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | not_started | Menunggu S2-B1 |
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | not_started | Menunggu S2-B2 |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | not_started | Menunggu S1-06 |
@@ -270,3 +270,10 @@ Belum ada task yang dikerjakan. Format entri:
 - Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 60, build/start serta e2e reports+print 7 lulus. Pengujian menolak token/map/aktor/scope yang berubah dan Origin tidak sesuai; tanpa sesi ditolak. PDF A4 landscape dengan dua kelas, masing-masing 10 siswa × 31 tanggal, memiliki dua halaman. Tabel memakai proyeksi yang sama dengan UI/Excel, header berulang, page break kelas dan ruang tanda tangan kosong.
 - PDF awal empat halaman karena line-height tabel terlalu besar; diperbaiki khusus print menjadi1.15, mempertahankan font8pt, lalu PDF ulang dua halaman. JSX dipisah dari blok try agar penanganan error hanya menangkap pembacaan data. Screenshot print diperiksa. Anti-slop empat gate PASS pada scope ini; warna/font mengikuti arah operasi sekolah, tidak ada nama/tanda tangan pejabat buatan.
 - window.print distub pada automation untuk membuktikan urutanan receipt→print, bukan bukti dialog OS/printer fisik. H-06 tetap pending. Tidak ada deployment, akses cloud atau data nyata.
+
+### S2-B1: 7 Oktober 2026
+
+- Commit 01750ea di-merge --no-ff. Settings GET/PATCH, versi config, validasi timezone, preview waktu, alasan setelah absensi, audit, checklist serta configured_at hanya saat minimum valid. Singleton pertama diserialkan agar dua form kosong tidak saling menimpa. Konfigurasi sintetis tidak dianggap siap produksi.
+- Helper mutasi/feedback menjadi bagian bersama: guard admin, versi, retry deadlock terbatas, pending/gagal/konflik/sesi habis/sukses. Identitas sekolah pada halaman setup/settings berasal dari config. Pesan setup yang kurang menunjuk bagian kosong.
+- Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 64, build/start dan e2e settings+print 7 lulus. Pengujian membuktikan penolakan timezone/guru/stale update, tanggal lama tetap date-only, submit berikutnya memakai timezone baru, dua initial settings hanya satu sukses, dan reload konflik menampilkan lokasi terbaru. CSS print memakai selector yang memastikan latar putih; regression PDF tetap dua halaman.
+- Anti-slop empat gate PASS: form/preview/validasi/save/reload dan role diuji pada360/768/1024, tidak ada inline style/handler, tidak membuat identitas sekolah nyata atau klaim produksi siap. H-01/H-05 tetap pending untuk nilai nyata.
