@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Slice 2 A1 sampai E1 teknis selesai; pemeriksaan akhir berlangsung; S1-07 cloud menunggu H-02 |
-| Task berikutnya | Pemeriksaan akhir Slice 2 dan perbaikan nama sheet Excel |
+| Status saat ini | Slice 2 A1 sampai E1 teknis selesai dan pemeriksaan main lulus; S1-07 cloud menunggu H-02 |
+| Task berikutnya | Scope Slice 2 selesai; S3 belum dikerjakan; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
 
@@ -47,7 +47,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
-| FIX-03 | Validasi S2 | S2-A2, S2-D1 | in_progress | Nama sheet History/apostrof; isolasi fixture browser untuk suite penuh |
+| FIX-03 | Validasi S2 | S2-A2, S2-D1 | done | ca07a54 → a4676c3; roundtrip9kelas, integration81, seluruh e2e44 lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -312,3 +312,12 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 
 - Semua task A1-A3/B1-B3/C1/D1/E1 teknis selesai. S3 tetap di luar permintaan sesi ini. Backup tiga test termasuk enkripsi/dekripsi/restore/retensi/login telah diulang dalam integration81; H-07 operasional tetap pending.
 - Pemeriksaan lokal ExcelJS mengonfirmasi nama History dan apostrof di awal/akhir menolak worksheet. FIX-03 menormalkan nama tersebut dan menambahkan fixture roundtrip. Suite browser penuh memiliki44 test yang memakai sekolah dan akun seed bersama; isolasi window login antar test dan eksekusi serial diperlukan agar test tidak saling mengubah konfigurasi atau menghabiskan kuota login satu akun.
+
+### FIX-03 dan penutupan scope Slice 2: 7 Oktober 2026
+
+- Commit ca07a54 di-merge --no-ff menjadi a4676c3. Normalisasi sheet menangani History sebelum/sesudah pemotongan, case, apostrof/spasi tepi dan apostrof pada batas31. Sembilan kelas plus ringkasan di-encode/decode dengan nama unik/valid, kode00123 dan nama=1+1 sebagai string, serta totals numerik sesuai proyeksi. Metadata kelas tetap memakai nama aslinya.
+- Fixture browser loopback/test-only membersihkan tabel transient rate_limit sebelum tiap test; worker serial karena sekolah dan akun seed dipakai bersama. Policy login tetap diuji pada DB integration tersendiri. Logout ditunggu sampai halaman login agar navigasi berikutnya tidak membatalkan request sign-out. Pesan jaringan pada mutasi menyatakan belum mendapat konfirmasi perubahan. README/runbook diperbarui sesuai fitur/commands S2 dan container Compose aktif.
+- Main a4676c3: `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test:domain`8, `pnpm test:integration`81, `pnpm build`, `pnpm test:e2e --workers=1`44 seluruhnya lulus. E2E penuh mencakup12 file dan berjalan3.4menit. Test APP_ENV=production/port3102 dengan database uji lokal menolak component-preview404: satu lulus. Tidak ada production data/cloud/push/deploy.
+- Capture tambahan guru/kalender/siswa/settings/setup pada360/768/1024 sebanyak15 tidak overflow/pageerror; lima capture360 diperiksa langsung. History360, rekap, absensi dan print diperiksa saat task terkait. Anti-slop hard/purpose/liveliness/craftsmanship PASS untuk scope ini; tabel per aturan dan bukti diperbarui di ANTI_SLOP_REPORT.md. Palette/font/dials Operate1/1/1 tetap, form menggunakan kontrol native dan handler bernama; format serta larangan inline ditegakkan ESLint/Prettier.
+- S2-E1 efcd8b8 diverifikasi ulang melalui tiga test backup pada integration81: enkripsi tanpa identity runner, dekripsi/restore DB baru, evidence/hash, revoke/login, retensi30 dan kegagalan nonzero lulus. H-07 tetap memerlukan runner, storage terpisah, pasangan kunci offline, pemilik/notifikasi serta drill operasional nyata. H-06 memerlukan Excel perangkat sekolah dan cetak fisik; H-02 memerlukan Neon login/project Vercel untuk preview S1-07.
+- S2-A1/A2/A3/B1/B2/B3/C1/D1/E1 teknis done. Gerbang M1 teknis tetap done; M1 preview/guru, M2 fitur (termasuk S3-01 sampai S3-04), M2 backup/release/perangkat, M3 dan M4 tetap pending sesuai checkpoint. Pertanyaan ENV-01 sudah selesai; tidak ada pertanyaan scope baru. S3 tidak dikerjakan dalam permintaan A1 sampai E1 ini. Rilis belum selesai.
