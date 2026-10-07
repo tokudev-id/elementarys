@@ -28,7 +28,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | done | bd237a7 + 18bb1b2; main e2e16/production404; review fresh capture ship |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | done | 6e83a4e → 39bd418; main domain7/integration52/e2e27 lulus |
-| [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | not_started | Menunggu S1-06; bagian cloud butuh H-02 |
+| [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | in_progress | Runbook dan pengukuran lokal; cloud menunggu H-02 |
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | not_started | Menunggu S1-06 |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
