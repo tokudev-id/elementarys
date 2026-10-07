@@ -26,7 +26,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | done | 89d5110; domain 2, integration PostgreSQL 18: 10 lulus; migrasi ulang tanpa drift |
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | done | 6214b00; integration auth 10, e2e 8 lulus |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | in_progress | Worker shell mobile, slot 1 |
-| [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | in_progress | Worker API absensi, slot 2 |
+| [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | not_started | Menunggu S1-04, S1-05 |
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | not_started | Menunggu S1-06; bagian cloud butuh H-02 |
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | not_started | Menunggu S1-06 |
@@ -192,3 +192,18 @@ Belum ada task yang dikerjakan. Format entri:
 - Clone lokal bersih a609476 di /private/tmp/elementary-school-clean-check, tanpa .env: pnpm install --frozen-lockfile/lint/typecheck/test:domain/build → seluruhnya exit 0. Memenuhi penerimaan clone baru S1-01 untuk implementasi saat ini.
 - Namespace TEST_DB_SUFFIX=main_check: integration gabungan 23 lulus, membuktikan harness tetap berjalan dengan namespace worker.
 - Bootstrap diberi assertLocalTestDatabase sebelum query sehingga APP_ENV=test yang salah menunjuk cloud pun ditolak. Uji auth/CLI terkait diulang.
+
+### S1-05: 7 Oktober 2026
+
+- Worker commit 4e36ca8 di-merge --no-ff sebagai 773968c. Berkas domain calendar/status/totals, kontrak Zod, roster/dashboard queries, service save/context, tiga route API dan tests.
+- Diff ditinjau: year SHARE → class UPDATE → session UPDATE, himpunan roster persis, state no-op sebelum versi/alasan, batch insert records + audit actorId/actorName atomik, retry deadlock terbatas dua kali, payload bounded128KiB.
+- Checks worker: frozen install/lint/typecheck/domain 5/integration 52/build lulus. Main frozen install/lint/typecheck/domain 5/integration 52 diulang lulus.
+- Penerimaan: GET tanpa write/defaultH, error tanggal/setup/roster, dua penulis initial dan koreksi, retry isi sama tanpa versi/audit baru, metadata pencatat sebenarnya, roster berubah, rollback SQL nyata, midnight KualaLumpur/NewYork, dashboard holiday/empty/missing dengan count null. Route integration memakai sesi auth nyata dan memverifikasi Origin/payload/no-store/runtime pool.
+- Tidak ada schema/SQL cloud/UI/deploy/push. Dashboard per-class query tetap sesuai target pilot; batch proyeksi laporan merupakan S2-A1.
+
+### S1-04: verifikasi berjalan, 7 Oktober 2026
+
+- Commit bd237a7 sudah di-merge sebagai af77538. Main gabungan lulus frozen install/lint/typecheck/domain7/integration52/build.
+- Worker browser16 + production404 lulus; tujuh test komponen diulang setelah CSS tap highlight.
+- Review independen menemukan empat keyboard-resize screenshot menunjukkan label Konfirmasi tertutup. State tetap in_progress sampai seluruh capture segar diperiksa dan review menyatakan bukti layak. Tidak ditemukan defect source pada review itu.
+- Keyboard pada screenshot disimulasikan dengan resize360×340; bukan bukti keyboard native/perangkat fisik H-03.
