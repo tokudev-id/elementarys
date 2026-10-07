@@ -45,6 +45,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | not_started | Menunggu S3-04 |
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
 
+| FIX-01 | Tooling | S1-01 | in_progress | Temuan automation S1-04: bersihkan artefak build agar CSS cache usang tidak terpublikasi |
+
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
 ## 3. Register checkpoint manusia
