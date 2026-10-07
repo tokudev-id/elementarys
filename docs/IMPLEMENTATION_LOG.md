@@ -35,8 +35,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | done | 01750ea; integration 64, settings+print e2e 7 lulus |
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | done | 681cf62; integration 68, e2e school-master+shell 2 lulus |
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | done | 3ff50ef + FIX-02 08bcdb9; integration 71, students+shell e2e 2 lulus |
-| [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | in_progress | Profil, akun, akses, reset dan kelas utama |
-| [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | not_started | Menunggu S1-06 |
+| [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | done | b4130b6; integration78, e2e teachers+shell2 lulus |
+| [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | in_progress | Koreksi, audit riwayat, pembatalan dan isi ulang |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | not_started | Menunggu Slice 2 |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | not_started | Menunggu S3-01 |
@@ -292,3 +292,10 @@ Belum ada task yang dikerjakan. Format entri:
 - Sequence tidak memotong digit di atas9999. Fixture membuktikan pembuatan lima siswa bersamaan dengan nama sama/kode unik, roster sebelum/sesudah mulai, rollback siswa bila enrollment gagal, penolakan historis/duplicate code/stale edit/guru dan pelestarian leading-zero NIS.
 - Task/main final: frozen install, format:check, lint, typecheck, domain 8, integration 71, build/start dan students+shell e2e 2 lulus. Browser membuat sepuluh siswa pada360px, filter, membuka detail, mengedit nama dan memeriksa360/768/1024. Test detail sempat mengisi form list sebelum navigasi selesai; heading detail ditunggu lalu alur lulus. Satu assertion belum diformat menyebabkan main format:check gagal; FIX-02 memperbaikinya dan seluruh gate diulang lulus, tanpa rewrite history.
 - Anti-slop empat gate PASS pada scope siswa: nama/kode/data hanya dari DB/fixture sintetis, kontrol create/filter/detail/edit/role diuji, form tanpa inline, arah Operate 1/1/1. Transfer/keluar/naik kelas/arsip siswa tetap scope S3-01.
+
+### S2-C1: 7 Oktober 2026
+
+- Commit b4130b6 di-merge --no-ff. Profil tanpa akun, edit/status aktif, kelas utama, buat/tautkan akun, akses dan reset password melalui wrapper admin. Arsip menonaktifkan profil, banned user dan mencabut sesi secara atomik. Mutasi akses diserialkan dan membaca ulang otorisasi; admin aktif terakhir dilindungi pada arsip, demosi dan penonaktifan.
+- API server Better Auth memakai adapter Drizzle terikat PoolClient transaksi yang sama, tanpa HTTP. Trigger PostgreSQL menggagalkan penautan dan membuktikan rollback akun/credential tanpa akses parsial. TRD diperbarui dari asumsi dua transaksi ke implementasi atomik yang terbukti, tanpa mengubah scope atau kebijakan. Audit tidak memuat password. Nama pencatat diambil dari snapshot audit saat simpan.
+- Checks task dan main: frozen install, format:check, lint, typecheck, domain8, integration78, build/start, e2e teachers+shell2 lulus. Uji meliputi tautan ganda, reset/revoke/wajib ganti, archive race, akun non-utama mencatat dan nama historis setelah rename. Browser membuat profil/akun, kelas utama, reset, disable/enable, login password sementara, ganti password, dan archive; 360/768/1024 tanpa overflow.
+- Anti-slop empat gate PASS pada scope guru: data DB sintetis, kontrol aktif teruji, detail akun hanya admin, handler bernama dan stylesheet, desain Operate1/1/1. Tidak membuat akun nyata atau melakukan push/deploy.
