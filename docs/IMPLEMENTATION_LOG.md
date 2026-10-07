@@ -34,7 +34,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | done | f4dda26; integration 60, reports+print e2e 7; PDF dua halaman lulus; H-06 pending |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | done | 01750ea; integration 64, settings+print e2e 7 lulus |
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | done | 681cf62; integration 68, e2e school-master+shell 2 lulus |
-| [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | not_started | Menunggu S2-B2 |
+| [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | in_progress | Identitas siswa dan enrollment awal atomik |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | not_started | Menunggu S1-06 |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | not_started | Menunggu S1-06 |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
