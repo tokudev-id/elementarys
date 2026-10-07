@@ -1,5 +1,100 @@
 @import "tailwindcss";
 
+.print-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.print-signature {
+  margin-top: 2rem;
+  text-align: right;
+}
+.print-class {
+  margin-block: 2rem;
+}
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  .print-controls,
+  .app-header,
+  .app-nav,
+  .skip-link {
+    display: none;
+  }
+  main.print-page {
+    width: auto;
+    margin: 0;
+  }
+  .print-class {
+    margin: 0;
+    break-after: page;
+    line-height: 1.3;
+  }
+  .print-class:last-of-type {
+    break-after: auto;
+  }
+  .print-class h1 {
+    font-size: 14pt;
+    margin: 0 0 2mm;
+  }
+  .print-class h2 {
+    font-size: 11pt;
+    margin: 0 0 2mm;
+  }
+  .print-class p {
+    font-size: 9pt;
+    margin: 1mm 0;
+    max-width: none;
+  }
+  .print-class .report-table-scroll {
+    overflow: visible;
+    margin: 2mm 0;
+  }
+  .print-class .report-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    line-height: 1.15;
+  }
+  .print-class .report-table th,
+  .print-class .report-table td {
+    font-size: 8pt;
+    min-width: 0;
+    padding: 1mm 0.5mm;
+  }
+  .print-class .report-table th:first-child {
+    position: static;
+    width: 46mm;
+    min-width: 0;
+    max-width: none;
+  }
+  .print-class .report-table small {
+    font-size: 7pt;
+  }
+  .print-class .report-table caption {
+    padding: 1mm 0;
+    font-size: 9pt;
+  }
+  .print-class .report-table thead {
+    display: table-header-group;
+  }
+  .print-class .report-table tr {
+    break-inside: avoid;
+  }
+  .print-signature {
+    margin-top: 8mm;
+    break-inside: avoid;
+  }
+}
+
 select,
 textarea {
   width: 100%;

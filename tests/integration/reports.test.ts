@@ -9,6 +9,7 @@ import {
 import { transaction } from "../../src/server/db/pool";
 import ExcelJS from "exceljs";
 import { createReportWorkbook, exportAttendanceWorkbook } from "../../src/server/reports/workbook";
+import { printSnapshot, recordPrintExport } from "../../src/server/reports/print";
 
 let source: Pool;
 let yearId: string;
@@ -283,4 +284,40 @@ it("records workbook export from the same projection and leaves its versions unc
   expect(decoded.worksheets[1].getCell("C10").value).toBe("H");
   await source.query("UPDATE attendance_sessions SET version=2 WHERE id=$1", [id]);
   expect((await read()).classes[0].exportReference?.changedDates).toEqual(["2024-02-01"]);
+});
+
+it("opening a print snapshot does not write; pressing print records the rendered versions even after a correction", async () => {
+  const enrollment = await enroll(classes[0], "2024-02-01", "2024-03-01");
+  const id = await record(classes[0], enrollment, "2024-02-01");
+  const actor = {
+    id: "reporter",
+    name: "Guru Laporan",
+    role: "teacher" as const,
+    teacherId: null,
+    mustChangePassword: false,
+  };
+  const secret = randomUUID();
+  const snapshot = printSnapshot(await read(), actor, secret);
+  expect((await source.query("SELECT count(*)::int n FROM report_exports")).rows[0].n).toBe(0);
+  await source.query("UPDATE attendance_sessions SET version=2 WHERE id=$1", [id]);
+  const result = await recordPrintExport(snapshot, actor, source, secret);
+  expect(result.exportId).toBeDefined();
+  expect(
+    (await source.query("SELECT session_versions FROM report_exports")).rows[0].session_versions,
+  ).toEqual({ [id]: 1 });
+  expect((await read()).classes[0].exportReference?.changedDates).toEqual(["2024-02-01"]);
+  await expect(
+    recordPrintExport({ ...snapshot, sessionVersions: { [id]: 2 } }, actor, source, secret),
+  ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  await expect(
+    recordPrintExport(snapshot, { ...actor, id: "other" }, source, secret),
+  ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+  const outside = printSnapshot(
+    { ...(await read()), input: { yearId, month: "2024-02", classId: classes[1] } },
+    actor,
+    secret,
+  );
+  await expect(recordPrintExport(outside, actor, source, secret)).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+  });
 });

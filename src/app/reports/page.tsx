@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell";
+import Link from "next/link";
 import { StateBanner } from "@/components/state-banner";
 import { Button } from "@/components/button";
 import { Field } from "@/components/field";
@@ -106,6 +107,14 @@ export default async function Reports({
           </p>
           <ReportLegend />
           <ReportDownload input={report.input} />
+          <p>
+            <Link
+              className="button-link"
+              href={`/reports/print?${new URLSearchParams({ yearId: report.input.yearId, month: report.input.month, ...(report.input.classId ? { classId: report.input.classId } : {}) })}`}
+            >
+              Buka halaman cetak
+            </Link>
+          </p>
           {!report.classes.length && (
             <StateBanner state="empty">Belum ada kelas pada tahun ajaran ini.</StateBanner>
           )}
