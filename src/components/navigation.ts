@@ -1,0 +1,16 @@
+export type NavigationItem = { id: string; label: string; href: string; roles: readonly ("admin" | "teacher")[]; ready: boolean };
+export const navigation: readonly NavigationItem[] = [
+  { id: "home", label: "Beranda", href: "/", roles: ["admin", "teacher"], ready: true },
+  { id: "attendance", label: "Absensi", href: "/attendance", roles: ["admin", "teacher"], ready: false },
+  { id: "reports", label: "Rekap", href: "/reports", roles: ["admin", "teacher"], ready: false },
+  { id: "students", label: "Siswa", href: "/students", roles: ["admin", "teacher"], ready: false },
+  { id: "teachers", label: "Guru", href: "/teachers", roles: ["admin", "teacher"], ready: false },
+  { id: "classes", label: "Kelas", href: "/classes", roles: ["admin", "teacher"], ready: false },
+  { id: "calendar", label: "Kalender", href: "/calendar", roles: ["admin", "teacher"], ready: false },
+  { id: "academic-years", label: "Tahun ajaran", href: "/academic-years", roles: ["admin", "teacher"], ready: false },
+  { id: "settings", label: "Sekolah", href: "/settings", roles: ["admin"], ready: false },
+  { id: "audit", label: "Audit", href: "/audit", roles: ["admin"], ready: false },
+  { id: "setup", label: "Persiapan sekolah", href: "/setup", roles: ["admin"], ready: false },
+  { id: "account", label: "Ganti password", href: "/change-password", roles: ["admin", "teacher"], ready: true },
+];
+export function availableNavigation(role: "admin" | "teacher") { return navigation.filter(item => item.ready && item.roles.includes(role)); }
