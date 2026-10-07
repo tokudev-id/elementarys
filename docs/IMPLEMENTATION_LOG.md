@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S1-06 selesai; M1 teknis lulus; persiapan preview S1-07 |
-| Task berikutnya | S1-07, kemudian S2-A1 |
+| Status saat ini | S1-06 selesai; M1 teknis lulus; S1-07 lokal teruji, cloud menunggu H-02 |
+| Task berikutnya | S2-A1; bagian cloud S1-07 setelah H-02 |
 
 ## 1. Aturan pencatatan
 
@@ -28,7 +28,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | done | bd237a7 + 18bb1b2; main e2e16/production404; review fresh capture ship |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | done | 6e83a4e → 39bd418; main domain7/integration52/e2e27 lulus |
-| [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | in_progress | Runbook dan pengukuran lokal; cloud menunggu H-02 |
+| [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | needs_human | d622d11 → 0a8637a; runbook/benchmark lokal lulus; cloud pending H-02 |
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | not_started | Menunggu S1-06 |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
@@ -237,3 +237,14 @@ Belum ada task yang dikerjakan. Format entri:
 - Antislop Liveliness PASS: ENERGY1/RHYTHM1/MOTION1; fokus kelas/tanggal dan tindakan simpan, pola nama/kode/status berulang sesuai tugas sekolah, motion hanya feedback pilihan.
 - Antislop Craftsmanship PASS: pemeriksaan screenshot konfirmasi dan hasil simpan360px; keyboard/fokus/rotasi/state/error melalui Playwright. Rasio WCAG dihitung dengan rumus: teks12.36:1, tombol7.46:1, muted5.87:1, pesan error9.36:1, border4.63:1. Tidak ada klaim review independen atau bukti perangkat fisik dari sesi ini.
 - M1 teknis done. M1preview/guru dan seluruh gerbang lapangan tetap pending; rilis belum selesai.
+
+### S1-07: 7 Oktober 2026, persiapan lokal dan checkpoint cloud
+
+- Commit d622d11 → merge main 0a8637a. Berkas: scripts/measure-attendance.ts, perintah pnpm measure:attendance, dan bagian preview pada RUNBOOK.md. Bagian cloud needs_human karena H-02 belum selesai: Neon CLI login/skills/MCP dan project Vercel yang ditautkan Toku belum tersedia di lingkungan Windows ini.
+- Script membuat database uji sendiri, memakai seed sintetis 10 siswa dan password acak, menjalankan proses Next baru dengan APP_ENV=production serta koneksi database uji, lalu membersihkan proses/database. Guard sumber APP_ENV=test, host loopback dan prefix database tetap berlaku. Tidak ada SQL/deploy cloud, akses data nyata, push atau layanan Neon tambahan.
+- Hasil benar-benar diukur: login page pertama 596,98 ms, login 333,96 ms, halaman absensi pertama 346,82 ms. Sepuluh simpan yang benar-benar mengubah catatan: 72,35; 42,19; 35,53; 34,69; 35,19; 37,04; 49,78; 58,41; 52,90; 47,89 ms; p95 72,35 ms. Proses Next lokal baru, PostgreSQL tetap berjalan. Ini bukan latensi provider atau waktu guru.
+- Checks sebelum/sesudah merge: lint, typecheck, frozen install, format:check, domain 7, integration 52, serta e2e absensi 11 lulus. Build/start dan production-preview404 telah diuji pada source aplikasi yang sama di S1-06; S1-07 tidak mengubah UI/runtime aplikasi. Benchmark berjalan sukses dan seluruh sampel berubah=true.
+- Sapuan console tambahan memakai konfigurasi Playwright sementara: tiga alur simpan pada 360/768/1024 menangkap pageerror dan console error; ketiganya lulus dengan array kosong. Konfigurasi sementara berada di .local dan dibersihkan setelah pemeriksaan. Source/test permanen tidak diganti untuk pemeriksaan ini.
+- Laporan anti-slop per aturan tersedia pada [ANTI_SLOP_REPORT.md](ANTI_SLOP_REPORT.md): Hard Gate, Purpose Gate, Liveliness dan Craftsmanship PASS untuk scope S1-06/konvensi. H-03 tetap pending untuk perangkat dan keyboard OS nyata.
+- Runbook menyatakan CLI migrasi/seed saat ini hanya menerima database uji lokal. Adapter development, verifikasi metadata koneksi, Neon deployment serta Vercel preview masih memerlukan H-02; guard lokal tidak dilewati atau dilemahkan. Status needs_human tidak menghalangi S2-A1/B1/C1/D1 yang dependensinya telah selesai.
+- Gerbang M1 teknis done; M1 preview/guru dan gerbang M2 sampai M4 tetap pending. Pertanyaan ENV-01 sudah selesai; belum ada pertanyaan scope baru. Task berikutnya menurut urutan plan: S2-A1. Rilis belum selesai.
