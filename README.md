@@ -23,11 +23,17 @@ Schema auth dihasilkan oleh `pnpm dlx auth@1.7.7 generate --config ./auth.genera
 
 TypeScript strict, nama komponen PascalCase, fungsi camelCase, tanggal kerja date-only. Semua query dalam satu transaksi memakai client yang sama. Respons data memakai no-store dan id korelasi; error tidak mengembalikan SQL, token atau stack.
 
+Format kode memakai Prettier: indentasi dua spasi, double quotes, semicolon, trailing comma, dan lebar 100 karakter. Jalankan `pnpm format` lalu `pnpm format:check`. ESLint menolak style inline, mutasi DOM style, serta callback inline pada event JSX; gunakan stylesheet dan handler bernama. Callback transformasi array tetap diperbolehkan.
+
+Pisahkan aturan murni, kontrak, akses jaringan/database, state interaksi, dan komponen tampilan. Komponen tidak menjalankan SQL; hook bergantung pada kontrak client yang kecil dan dapat diinjeksi. Gunakan guard clause, tipe respons eksplisit, dan validasi respons sebelum menyatakan berhasil. Komentar menjelaskan batasan atau alasan yang tidak terlihat dari kode.
+
 Task dikerjakan pada `task/<ID>`, commit `<ID>: <ringkasan huruf kecil>` dengan penerimaan dan checks pada body, lalu merge `--no-ff` ke main. Orchestrator satu-satunya penulis log. Worker memakai `PORT=3101..3103` dan suffix database `TEST_DB_SUFFIX` dari ID task huruf kecil dengan garis bawah.
 
 ## Pemeriksaan
 
 `pnpm lint`, `pnpm typecheck`, `pnpm test:domain`, `pnpm build`, lalu `pnpm start`. Script integration/e2e dan operasi database ditambahkan ketika harness terkait tersedia; jangan menganggap pemeriksaan yang belum tersedia sebagai lulus.
+
+`pnpm test:integration` membaca `.env.local` bila tersedia. Untuk drill backup di Windows, arahkan `PG_TOOL_DIR` ke folder bin PostgreSQL 18, `AGE_BIN` ke age.exe, dan `AGE_KEYGEN_BIN` ke age-keygen.exe. Binary lokal dapat ditempatkan di `.local/tools` yang diabaikan Git. Test tetap menolak database nonlokal; jangan memakai credential produksi.
 
 Tidak ada deploy atau push otomatis. Preview hanya Neon development project rough-dawn-85427948 dan Vercel yang ditautkan Toku. Data produksi tidak digunakan untuk seed atau test.
 

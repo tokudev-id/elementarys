@@ -6,6 +6,10 @@ import { fileURLToPath } from "node:url";
 export async function migrateDatabase(url: string) {
   const source = new Pool({ connectionString: url, max: 1 });
   try {
-    await migrate(drizzle(source), { migrationsFolder: fileURLToPath(new URL("./migrations", import.meta.url)) });
-  } finally { await source.end(); }
+    await migrate(drizzle(source), {
+      migrationsFolder: fileURLToPath(new URL("./migrations", import.meta.url)),
+    });
+  } finally {
+    await source.end();
+  }
 }

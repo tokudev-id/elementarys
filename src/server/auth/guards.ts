@@ -5,20 +5,57 @@ import { pool } from "../db/pool";
 import { getAuth } from "./runtime";
 import type { createAuth } from "./factory";
 
-export type Actor = { id: string; name: string; role: "admin" | "teacher"; teacherId: string | null; mustChangePassword: boolean };
-export async function requireActor(headers: Headers, options: { admin?: boolean; allowPasswordChange?: boolean } = {}, source: Pool = pool, auth: ReturnType<typeof createAuth> = getAuth()): Promise<Actor> {
+export type Actor = {
+  id: string;
+  name: string;
+  role: "admin" | "teacher";
+  teacherId: string | null;
+  mustChangePassword: boolean;
+};
+export async function requireActor(
+  headers: Headers,
+  options: { admin?: boolean; allowPasswordChange?: boolean } = {},
+  source: Pool = pool,
+  auth: ReturnType<typeof createAuth> = getAuth(),
+): Promise<Actor> {
   const session = await auth.api.getSession({ headers });
   if (!session) throw new DomainError("SESSION_EXPIRED", "Silakan masuk kembali.", 401);
-  const result = await source.query('SELECT u.id,u.name,u.role,u.banned,u.must_change_password,t.id teacher_id,t.active FROM "user" u LEFT JOIN teachers t ON t.user_id=u.id WHERE u.id=$1', [session.user.id]);
+  const result = await source.query(
+    'SELECT u.id,u.name,u.role,u.banned,u.must_change_password,t.id teacher_id,t.active FROM "user" u LEFT JOIN teachers t ON t.user_id=u.id WHERE u.id=$1',
+    [session.user.id],
+  );
   const u = result.rows[0];
-  if (!u || u.banned || !["admin","teacher"].includes(u.role) || (u.teacher_id && !u.active) || (u.role === "teacher" && !u.teacher_id)) {
-    throw new DomainError("ACCESS_DENIED", "Akun tidak memiliki akses sekolah. Hubungi admin.", 403);
+  if (
+    !u ||
+    u.banned ||
+    !["admin", "teacher"].includes(u.role) ||
+    (u.teacher_id && !u.active) ||
+    (u.role === "teacher" && !u.teacher_id)
+  ) {
+    throw new DomainError(
+      "ACCESS_DENIED",
+      "Akun tidak memiliki akses sekolah. Hubungi admin.",
+      403,
+    );
   }
-  if (u.must_change_password && !options.allowPasswordChange) throw new DomainError("PASSWORD_CHANGE_REQUIRED", "Ganti password sementara sebelum membuka data sekolah.", 403);
-  if (options.admin && u.role !== "admin") throw new DomainError("ACCESS_DENIED", "Tindakan ini memerlukan akun admin.", 403);
-  return { id:u.id, name:u.name, role:u.role, teacherId:u.teacher_id, mustChangePassword:u.must_change_password };
+  if (u.must_change_password && !options.allowPasswordChange)
+    throw new DomainError(
+      "PASSWORD_CHANGE_REQUIRED",
+      "Ganti password sementara sebelum membuka data sekolah.",
+      403,
+    );
+  if (options.admin && u.role !== "admin")
+    throw new DomainError("ACCESS_DENIED", "Tindakan ini memerlukan akun admin.", 403);
+  return {
+    id: u.id,
+    name: u.name,
+    role: u.role,
+    teacherId: u.teacher_id,
+    mustChangePassword: u.must_change_password,
+  };
 }
 
 export function requireOrigin(request: Request, baseURL = process.env.BETTER_AUTH_URL) {
-  if (!baseURL || request.headers.get("origin") !== new URL(baseURL).origin) throw new DomainError("ACCESS_DENIED", "Asal permintaan tidak diizinkan.", 403);
+  if (!baseURL || request.headers.get("origin") !== new URL(baseURL).origin)
+    throw new DomainError("ACCESS_DENIED", "Asal permintaan tidak diizinkan.", 403);
 }
