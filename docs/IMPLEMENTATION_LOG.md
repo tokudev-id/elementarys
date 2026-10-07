@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-01 selesai; S3-02 mulai; S1-07 cloud menunggu H-02 |
+| Status saat ini | S3-02 selesai; S3-03 mulai; S1-07 cloud menunggu H-02 |
 | Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
@@ -39,8 +39,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | done | dd79ace; integration81, e2e corrections+attendance13 lulus |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | done | d20e60f; main integration88, lifecycle+students e2e2 lulus |
-| [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | in_progress | Persiapan tahun baru, pindah current dan arsip |
-| [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | not_started | Menunggu Slice 2 |
+| [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | done | d731e9e; integration91, year+lifecycle+school-master e2e3 lulus |
+| [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | in_progress | Audit admin, pagination/filter dan log teknis aman |
 | [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | not_started | Menunggu S3-02, S3-03 |
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | not_started | Menunggu S3-04 |
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
@@ -328,3 +328,10 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Main: frozen install, format:check, lint, typecheck, domain8, integration88, build/start dan lifecycle+students e2e2 lulus. Transfer/exit tepat pada [mulai,akhir), old records tetap, report tidak memberi ?/Alpa sesudah keluar, overlap/stale/role ditolak, new year tidak diblokir old enrollment, batch seluruhnya rollback bila satu versi usang, SQL failure tidak meninggalkan interval terpotong/versi/audit parsial.
 - Uji pg_stat_activity membuktikan transfer menunggu class lock submit, lalu menolak HISTORICAL_ROSTER_CHANGE dengan tanggal aman. Fixture awal menunggu kelas tetapi tertahan oleh foreign-key KEY SHARE pada siswa, dan cleanup failure belum menunggu promise; diperbaiki dengan student FOR NO KEY UPDATE serta drain promises. Mode baru tetap eksklusif untuk update field non-key dan kompatibel dengan FK; retry deadlock terbatas tetap berlaku. Seluruh integration diulang lulus.
 - Snapshot exit_reason sebelum/sesudah diperiksa setelah dilengkapi; main build/browser diulang pada kode final. Capture promotion360 diperiksa dan viewport360/768/1024 tidak overflow. Anti-slop hard/purpose/liveliness/craftsmanship PASS pada scope ini: input/preview/hasil nyata, kontrol berfungsi, JSX handler bernama, desain Operate1/1/1, tanpa klaim lapangan.
+
+### S3-02: 7 Oktober 2026
+
+- Commit d731e9e di-merge --no-ff. Persiapan tahun ajaran menampilkan snapshot identitas/kelas/hari belajar/penempatan, tautan konfigurasi, batch dengan target year dan tanggal awal terpilih, serta konfirmasi pindah current. expectedCurrentYearId opsional memeriksa acuan current di bawah year lock; versi target tetap wajib. Peringatan tanggal di luar periode ditampilkan sebelum konfirmasi, tanpa mengganti kebijakan periode operator. Runbook alur tahun baru diperbarui.
+- Task/main: frozen install, format:check, lint, typecheck, domain8, integration91, build/start dan year-operations+lifecycle+school-master e2e3 lulus. Snapshot read-only tidak menulis; arsip kelas/tahun ditolak pada enrollment efektif/mendatang; sel/totals/records/versi dan row Excel laporan lama tetap sama setelah placement tahun baru, switch current dan archive tahun/kelas lama.
+- Browser menguji readiness belum lengkap, tautan ke batch dengan tujuan/tanggal terpilih, preview/save, Batal/Escape, konfirmasi, arsip dan unduhan laporan lama serta viewport360/768/1024. Assertion awal mengharapkan dua exact-text nama siswa padahal table rowheader juga berisi kode; diperbaiki memakai locator rowheader untuk tabel dan exact text untuk totals, lalu diulang lulus. Tahun current fixture dikembalikan sebelum test selesai.
+- Anti-slop empat gate PASS pada scope tahun: data/counts/snapshot nyata, kontrol/konfirmasi/ekspor berfungsi, arah Operate1/1/1, helper query terpisah dari UI dan tanpa inline. Checkpoint perangkat/produksi tetap pending.
