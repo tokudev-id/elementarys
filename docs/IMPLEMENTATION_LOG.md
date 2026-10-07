@@ -33,7 +33,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | done | f570906; roundtrip ExcelJS, integration 59, e2e rekap/download 5 lulus; H-06 pending |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | done | f4dda26; integration 60, reports+print e2e 7; PDF dua halaman lulus; H-06 pending |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | done | 01750ea; integration 64, settings+print e2e 7 lulus |
-| [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | in_progress | Tahun ajaran, kelas dan editor kalender versi terkunci |
+| [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | done | 681cf62; integration 68, e2e school-master+shell 2 lulus |
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | not_started | Menunggu S2-B2 |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | not_started | Menunggu S1-06 |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | not_started | Menunggu S1-06 |
@@ -277,3 +277,10 @@ Belum ada task yang dikerjakan. Format entri:
 - Helper mutasi/feedback menjadi bagian bersama: guard admin, versi, retry deadlock terbatas, pending/gagal/konflik/sesi habis/sukses. Identitas sekolah pada halaman setup/settings berasal dari config. Pesan setup yang kurang menunjuk bagian kosong.
 - Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 64, build/start dan e2e settings+print 7 lulus. Pengujian membuktikan penolakan timezone/guru/stale update, tanggal lama tetap date-only, submit berikutnya memakai timezone baru, dua initial settings hanya satu sukses, dan reload konflik menampilkan lokasi terbaru. CSS print memakai selector yang memastikan latar putih; regression PDF tetap dua halaman.
 - Anti-slop empat gate PASS: form/preview/validasi/save/reload dan role diuji pada360/768/1024, tidak ada inline style/handler, tidak membuat identitas sekolah nyata atau klaim produksi siap. H-01/H-05 tetap pending untuk nilai nyata.
+
+### S2-B2: 7 Oktober 2026
+
+- Commit 681cf62 di-merge --no-ff. API/page tahun ajaran, kelas dan kalender; create/edit/archive dengan versi, validasi rentang/grade/nama, current year tunggal, serta editor weekdays/override. Grade/year kelas yang sudah mempunyai penempatan tidak dapat diganti; rentang tahun yang telah dipakai absensi tetap. Arsip tidak menyembunyikan penempatan efektif yang belum ditutup.
+- Calendar PUT mengunci tahun FOR UPDATE sebelum memeriksa sesi submitted; pesan CALENDAR_HAS_ATTENDANCE memuat kelas/tanggal dan ID sesi yang perlu dibatalkan. Calendar GET, roster dan laporan memakai resolver yang sama. Pergantian current menaikkan versi periode sebelumnya agar form lama tidak menimpa perubahan.
+- Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 68, build/start dan e2e school-master+shell 2 lulus. Uji pg_stat_activity membuktikan update kalender benar-benar menunggu lock submit, lalu ditolak sesudah submit commit; kalender dan catatan tetap konsisten.
+- Browser membuat/mengedit tahun dan kelas, mengatur weekday, menambah/menghapus pengecualian, membaca dengan akun guru, dan menolak POST guru. Sapuan360/768/1024 tanpa overflow. Anti-slop empat gate PASS: grid merupakan kalender nyata, kontrol aktif diuji, tanpa field/identitas fiktif di luar fixture sintetis.
