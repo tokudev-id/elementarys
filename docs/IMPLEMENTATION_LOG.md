@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Login dan backup lokal selesai; shell mobile dan API absensi siap |
-| Task berikutnya | S1-04 dan S1-05 |
+| Status saat ini | Shell mobile dan API absensi selesai; alur pencatatan S1-06 siap |
+| Task berikutnya | S1-06 |
 
 ## 1. Aturan pencatatan
 
@@ -25,7 +25,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-01](IMPLEMENTATION_PLAN.md#s1-01-scaffold-git-dan-tooling) | Inti | - | done | 8875e7f; build/lint/typecheck, domain 1, smoke browser 4 lulus |
 | [S1-02](IMPLEMENTATION_PLAN.md#s1-02-database-inti-migrasi-dan-harness-uji) | Inti | S1-01 | done | 89d5110; domain 2, integration PostgreSQL 18: 10 lulus; migrasi ulang tanpa drift |
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | done | 6214b00; integration auth 10, e2e 8 lulus |
-| [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | in_progress | Worker shell mobile, slot 1 |
+| [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | done | bd237a7 + 18bb1b2; main e2e16/production404; review fresh capture ship |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | not_started | Menunggu S1-04, S1-05 |
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | not_started | Menunggu S1-06; bagian cloud butuh H-02 |
@@ -45,7 +45,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | not_started | Menunggu S3-04 |
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
 
-| FIX-01 | Tooling | S1-01 | in_progress | Temuan automation S1-04: bersihkan artefak build agar CSS cache usang tidak terpublikasi |
+| FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -209,3 +209,16 @@ Belum ada task yang dikerjakan. Format entri:
 - Worker browser16 + production404 lulus; tujuh test komponen diulang setelah CSS tap highlight.
 - Review independen menemukan empat keyboard-resize screenshot menunjukkan label Konfirmasi tertutup. State tetap in_progress sampai seluruh capture segar diperiksa dan review menyatakan bukti layak. Tidak ditemukan defect source pada review itu.
 - Keyboard pada screenshot disimulasikan dengan resize360×340; bukan bukti keyboard native/perangkat fisik H-03.
+
+### S1-04: 7 Oktober 2026, verifikasi selesai
+
+- Worker bd237a7 + follow-up18bb1b2 di-merge. Layout/config identity/date, registry semua halaman planned+ready flags, shared Button/Field/StatusChoices/StateBanner/Dialog, preview nonproduksi dan helpers viewport.
+- Main frozen install/lint/typecheck/domain7/integration52/build/e2e16 lulus; APP_ENV=production Playwright tests/production config → preview404 lulus (DB tetap uji lokal). Percobaan pertama tanpa APP_ENV ditolak testfixture; perintah diulang dengan env eksplisit.
+- Bukti screenshot diperbarui dari clean build, metadata hash/dimensi/time/source tersimpan di /private/tmp/elementary-school-S1-04-evidence/capture-metadata.json. Review independen ulang seluruh12 PNG → ship pada scopeS1-04; kontrasAA, teksstatus, 44/48px controls, native dialog focus/Escape/restore dan no overflow. Antislop hard/purpose/liveliness/craftsmanship PASS untuk scope komponen.
+- Enam keyboard capture semuanya360x340 setelah enam starting viewport/orientation berbeda; tidak membuktikan keyboardOS atau perangkat nyata. H-03 tetap pending.
+- Penyebab capturelama: CSS cache worker masih memakai tap highlight lama. Assertion computed style kini menolak stale build; tidak ada perubahan produksi pada follow-up test.
+
+### FIX-01: 7 Oktober 2026
+
+- ac60cbb di-merge --no-ff: scripts/clean-next.mjs membersihkan hanya artefak .next sebelum next build. Build lulus; CSS output memakai transparent highlight.
+- Main seluruhgate diulang lulus: frozeninstall/lint/typecheck/domain7/integration52/e2e16. Source dan database tidak disentuh script pembersihan.
