@@ -48,7 +48,9 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
   await page.getByRole("button", { name: "Cari siswa", exact: true }).click();
   await expect(page.locator(".resource-list li")).toHaveCount(10);
   await page.getByRole("link", { name: `Siswa Input ${tag} 1`, exact: true }).click();
-  await expect(page.getByRole("heading", { name: `Siswa Input ${tag} 1`, exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: `Siswa Input ${tag} 1`, exact: true }),
+  ).toBeVisible();
   await page.getByLabel("Nama lengkap siswa", { exact: true }).fill(`Siswa Koreksi ${tag}`);
   await page.getByRole("button", { name: "Simpan identitas siswa", exact: true }).click();
   await expect(
