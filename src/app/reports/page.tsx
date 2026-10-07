@@ -3,6 +3,7 @@ import { StateBanner } from "@/components/state-banner";
 import { Button } from "@/components/button";
 import { Field } from "@/components/field";
 import { ReportTable, ReportLegend, ReportChangeNotice } from "@/components/report-table";
+import { ReportDownload } from "@/components/report-download";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { reportFilters, buildMonthlyAttendanceReport } from "@/server/reports/monthly";
 import { DomainError } from "@/domain/errors";
@@ -104,6 +105,7 @@ export default async function Reports({
             {report.academicYearLabel} · {report.input.month}
           </p>
           <ReportLegend />
+          <ReportDownload input={report.input} />
           {!report.classes.length && (
             <StateBanner state="empty">Belum ada kelas pada tahun ajaran ini.</StateBanner>
           )}

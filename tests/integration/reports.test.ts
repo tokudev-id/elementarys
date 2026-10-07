@@ -7,6 +7,8 @@ import {
   projectMonthlyReport,
 } from "../../src/server/reports/monthly";
 import { transaction } from "../../src/server/db/pool";
+import ExcelJS from "exceljs";
+import { createReportWorkbook, exportAttendanceWorkbook } from "../../src/server/reports/workbook";
 
 let source: Pool;
 let yearId: string;
@@ -220,4 +222,65 @@ it("uses one repeatable-read snapshot while a correction commits between report 
   const updated = await read();
   expect(updated.classes[0].students[0].cells[0]).toBe("A");
   expect(updated.sessionVersions[id]).toBe(2);
+});
+
+it("writes six class sheets and summary, numeric totals and literal formula-looking strings with valid unique sheet names", async () => {
+  await source.query("UPDATE classes SET name=$2 WHERE id=$1", [
+    classes[0],
+    "Nama/kelas/yang/panjang/untuk/uji/collision-satu",
+  ]);
+  await source.query("UPDATE classes SET name=$2 WHERE id=$1", [
+    classes[1],
+    "Nama/kelas/yang/panjang/untuk/uji/collision-dua",
+  ]);
+  for (let index = 3; index <= 6; index++)
+    await source.query("INSERT INTO classes(academic_year_id,grade,name) VALUES($1,$2,$3)", [
+      yearId,
+      index,
+      `Kelas ${index}`,
+    ]);
+  await source.query("UPDATE students SET full_name='=1+1',student_code='00123' WHERE id=$1", [
+    studentId,
+  ]);
+  const enrollment = await enroll(classes[0], "2024-02-01", "2024-03-01");
+  await record(classes[0], enrollment, "2024-02-01");
+  const report = await read();
+  const encoded = await createReportWorkbook(report, { name: "Guru Laporan" }).xlsx.writeBuffer();
+  const decoded = new ExcelJS.Workbook();
+  await decoded.xlsx.load(encoded);
+  expect(decoded.worksheets).toHaveLength(7);
+  expect(new Set(decoded.worksheets.map((item) => item.name.toLowerCase())).size).toBe(7);
+  for (const sheet of decoded.worksheets) {
+    expect(sheet.name.length).toBeLessThanOrEqual(31);
+    expect(sheet.name).not.toMatch(/[\\/*?:\[\]]/);
+  }
+  const sheet = decoded.worksheets[1];
+  expect(sheet.getCell("A10").value).toBe("00123");
+  expect(sheet.getCell("B10").value).toBe("=1+1");
+  expect(sheet.getRow(10).getCell(32).value).toBe(1);
+  expect(decoded.worksheets[0].getCell("C4").value).toBe(report.classes[0].totals.H);
+  expect(sheet.getCell("A5").value).toBe("Belum lengkap");
+});
+
+it("records workbook export from the same projection and leaves its versions unchanged after later corrections", async () => {
+  const enrollment = await enroll(classes[0], "2024-02-01", "2024-03-01");
+  const id = await record(classes[0], enrollment, "2024-02-01");
+  const exported = await exportAttendanceWorkbook(
+    { yearId, month: "2024-02" },
+    {
+      id: "reporter",
+      name: "Guru Laporan",
+      role: "teacher",
+      teacherId: null,
+      mustChangePassword: false,
+    },
+    source,
+  );
+  const entry = (await source.query("SELECT session_versions FROM report_exports")).rows[0];
+  expect(entry.session_versions).toEqual(exported.report.sessionVersions);
+  const decoded = new ExcelJS.Workbook();
+  await decoded.xlsx.load(exported.content.buffer);
+  expect(decoded.worksheets[1].getCell("C10").value).toBe("H");
+  await source.query("UPDATE attendance_sessions SET version=2 WHERE id=$1", [id]);
+  expect((await read()).classes[0].exportReference?.changedDates).toEqual(["2024-02-01"]);
 });
