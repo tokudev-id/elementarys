@@ -5,6 +5,10 @@ import { createTestDatabase, resetDatabase } from "./harness";
 import { saveAttendance } from "../../src/server/services/attendance/save";
 import { getAttendance } from "../../src/server/queries/attendance";
 import { getDashboard } from "../../src/server/queries/dashboard";
+import { getAttendanceHistory } from "../../src/server/queries/attendance-history";
+import { voidAttendance } from "../../src/server/services/attendance/void";
+import { buildMonthlyAttendanceReport } from "../../src/server/reports/monthly";
+import { exportAttendanceWorkbook } from "../../src/server/reports/workbook";
 import type { Actor } from "../../src/server/auth/guards";
 import type { AttendanceInput } from "../../src/contracts/attendance";
 let source: Pool;
@@ -77,6 +81,163 @@ beforeEach(async () => {
   }
 });
 describe("attendance on PostgreSQL 18", () => {
+  it("keeps initial, late arrival correction, void and refill history with final totals and export changes", async () => {
+    const admin = { ...actor, role: "admin" as const };
+    const date = "2026-10-06";
+    expect((await getAttendanceHistory(classId, date, source, clock)).events).toEqual([]);
+    await save(input("A"));
+    await save(input("H", 1, "Siswa datang belakangan"));
+    const exported = await exportAttendanceWorkbook(
+      { yearId, month: "2026-10", classId },
+      actor,
+      source,
+    );
+    const id = Object.keys(exported.report.sessionVersions)[0];
+    const report = () =>
+      buildMonthlyAttendanceReport({ yearId, month: "2026-10", classId }, source, clock);
+    await voidAttendance(
+      classId,
+      date,
+      { expectedVersion: 2, reason: "Periksa ulang seluruh kelas" },
+      admin,
+      randomUUID(),
+      { source, clock },
+    );
+    expect(await counts()).toEqual({ sessions: 1, records: 0, audits: 3 });
+    expect((await report()).classes[0]).toMatchObject({
+      totals: { H: 0, S: 0, I: 0, A: 0 },
+      exportReference: { changedDates: [date] },
+    });
+    await expect(
+      voidAttendance(classId, date, { expectedVersion: 2, reason: "Retry" }, admin, randomUUID(), {
+        source,
+        clock,
+      }),
+    ).rejects.toMatchObject({ code: "VERSION_CONFLICT" });
+    await expect(save(input("S", 3))).rejects.toMatchObject({ code: "INVALID_INPUT" });
+    await save(input("S", 3, "Isi ulang sesudah verifikasi"));
+    expect((await report()).sessionVersions[id]).toBe(4);
+    expect((await report()).classes[0]).toMatchObject({
+      totals: { H: 0, S: 2, I: 0, A: 0 },
+      exportReference: { changedDates: [date] },
+    });
+    const history = await getAttendanceHistory(classId, date, source, clock);
+    expect(history.events.map((event) => event.after.version)).toEqual([1, 2, 3, 4]);
+    expect(history.events.map((event) => event.action)).toEqual([
+      "attendance.submit",
+      "attendance.correct",
+      "attendance.void",
+      "attendance.correct",
+    ]);
+    expect(history.events[1].before.entries.every((entry) => entry.status === "A")).toBe(true);
+    expect(history.events[1].after.entries.every((entry) => entry.status === "H")).toBe(true);
+    expect(history.events[2].before.entries).toHaveLength(2);
+    expect(history.events[2].after.entries).toEqual([]);
+    expect(history.events[3].before.state).toBe("voided");
+    expect(history.events[3].after.entries.every((entry) => entry.status === "S")).toBe(true);
+    expect(history.events.map((event) => event.reason)).toEqual([
+      null,
+      "Siswa datang belakangan",
+      "Periksa ulang seluruh kelas",
+      "Isi ulang sesudah verifikasi",
+    ]);
+    await source.query("UPDATE \"user\" SET name='Nama baru' WHERE id='actor'");
+    expect(
+      (await getAttendanceHistory(classId, date, source, clock)).events.every(
+        (event) => event.actor.name === actor.name,
+      ),
+    ).toBe(true);
+    expect(await counts()).toEqual({ sessions: 1, records: 2, audits: 4 });
+  });
+  it("denies teacher void and historical corrections, requires void reason and preserves a no-op audit", async () => {
+    await save();
+    const admin = { ...actor, role: "admin" as const };
+    await expect(
+      voidAttendance(
+        classId,
+        "2026-10-06",
+        { expectedVersion: 1, reason: "Batal" },
+        actor,
+        randomUUID(),
+        { source, clock },
+      ),
+    ).rejects.toMatchObject({ code: "ACCESS_DENIED" });
+    await expect(
+      voidAttendance(
+        classId,
+        "2026-10-06",
+        { expectedVersion: 1, reason: " " },
+        admin,
+        randomUUID(),
+        { source, clock },
+      ),
+    ).rejects.toMatchObject({ code: "INVALID_INPUT" });
+    expect(await save(input("H", 1, "Tidak ada perubahan"))).toMatchObject({
+      changed: false,
+      sessionVersion: 1,
+    });
+    expect(await counts()).toEqual({ sessions: 1, records: 2, audits: 1 });
+    await source.query("UPDATE academic_years SET is_current=false");
+    await expect(save(input("S", 1, "Tahun lama"))).rejects.toMatchObject({
+      code: "ACCESS_DENIED",
+    });
+    await save(input("S", 1, "Perbaikan admin tahun lama"), "2026-10-06", admin);
+    expect((await getAttendanceHistory(classId, "2026-10-06", source, clock)).events).toHaveLength(
+      2,
+    );
+    await voidAttendance(
+      classId,
+      "2026-10-06",
+      { expectedVersion: 2, reason: "Batal tahun lama" },
+      admin,
+      randomUUID(),
+      { source, clock },
+    );
+  });
+  it("serializes correction against void and rolls back deletion plus audit on SQL failure", async () => {
+    await save();
+    const admin = { ...actor, role: "admin" as const };
+    const attempts = await Promise.allSettled([
+      save(input("I", 1, "Koreksi bersamaan")),
+      voidAttendance(
+        classId,
+        "2026-10-06",
+        { expectedVersion: 1, reason: "Batal bersamaan" },
+        admin,
+        randomUUID(),
+        { source, clock },
+      ),
+    ]);
+    expect(attempts.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(attempts.find((result) => result.status === "rejected")).toMatchObject({
+      reason: { code: "VERSION_CONFLICT" },
+    });
+    const view = await getAttendance(classId, "2026-10-06", source, clock);
+    if (view.sessionState === "voided") await save(input("I", view.sessionVersion, "Isi ulang"));
+    const before = await getAttendance(classId, "2026-10-06", source, clock);
+    const beforeCounts = await counts();
+    await source.query(
+      "CREATE FUNCTION reject_void() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.state='voided' THEN RAISE EXCEPTION 'synthetic rollback'; END IF; RETURN NEW; END $$; CREATE TRIGGER reject_void BEFORE UPDATE ON attendance_sessions FOR EACH ROW EXECUTE FUNCTION reject_void()",
+    );
+    try {
+      await expect(
+        voidAttendance(
+          classId,
+          "2026-10-06",
+          { expectedVersion: before.sessionVersion, reason: "Uji rollback" },
+          admin,
+          randomUUID(),
+          { source, clock },
+        ),
+      ).rejects.toMatchObject({ code: "P0001" });
+      expect(await getAttendance(classId, "2026-10-06", source, clock)).toEqual(before);
+      expect(await counts()).toEqual(beforeCounts);
+    } finally {
+      await source.query(
+        "DROP TRIGGER reject_void ON attendance_sessions; DROP FUNCTION reject_void()",
+      );
+    }
+  });
   it("reads historical enrollments without writes or default H and reads saved metadata", async () => {
     await source.query("UPDATE students SET archived_at=now()");
     const initial = await getAttendance(classId, "2026-10-06", source, clock);

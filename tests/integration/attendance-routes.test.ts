@@ -7,6 +7,8 @@ import { getAuth } from "../../src/server/auth/runtime";
 import { dispatchAuth } from "../../src/server/auth/dispatch";
 import { GET as rosterRoute } from "../../src/app/api/classes/[classId]/attendance/route";
 import { PUT as saveRoute } from "../../src/app/api/classes/[classId]/attendance/[date]/route";
+import { POST as voidRoute } from "../../src/app/api/classes/[classId]/attendance/[date]/void/route";
+import { GET as historyRoute } from "../../src/app/api/classes/[classId]/attendance/[date]/history/route";
 import { GET as dashboardRoute } from "../../src/app/api/dashboard/route";
 let source: Pool, classId: string;
 let signedHeaders: Headers;
@@ -54,6 +56,29 @@ const put = (body: string, origin = baseURL, selectedDate = date) =>
     }),
   );
 it("denies unauthenticated data requests and foreign mutation origin", async () => {
+  expect((await historyRoute(new Request(url() + "/history"))).status).toBe(401);
+  expect(
+    (
+      await voidRoute(
+        new Request(url() + "/void", {
+          method: "POST",
+          headers: signedHeaders,
+          body: JSON.stringify({ expectedVersion: 1, reason: "Batal" }),
+        }),
+      )
+    ).status,
+  ).toBe(403);
+  expect(
+    (
+      await voidRoute(
+        new Request(url() + "/void", {
+          method: "POST",
+          headers: { ...Object.fromEntries(signedHeaders), origin: "https://foreign.example" },
+          body: "{}",
+        }),
+      )
+    ).status,
+  ).toBe(403);
   expect(
     (await rosterRoute(new Request(`${baseURL}/api/classes/${classId}/attendance?date=${date}`)))
       .status,
@@ -65,6 +90,7 @@ it("GET routes are private no-store with correlation ID and never write attendan
   for (const [route, path] of [
     [rosterRoute, `/api/classes/${classId}/attendance?date=${date}`],
     [dashboardRoute, `/api/dashboard?date=${date}`],
+    [historyRoute, `/api/classes/${classId}/attendance/${date}/history`],
   ] as const) {
     const response = await route(new Request(baseURL + path, { headers: signedHeaders }));
     expect(response.status).toBe(200);
@@ -140,5 +166,12 @@ it("saves through the runtime pool, returns metadata, and retries without audit 
     state: "submitted",
     presentCount: 0,
     totals: { H: 0, S: 0, I: 10, A: 0 },
+  });
+  const history = await historyRoute(new Request(url() + "/history", { headers: signedHeaders }));
+  expect(history.status).toBe(200);
+  expect((await history.json()).events[0]).toMatchObject({
+    action: "attendance.submit",
+    actor: { name: "Guru Contoh" },
+    after: { version: 1 },
   });
 });
