@@ -6,7 +6,9 @@ for (const width of [360, 768, 1024]) {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Masuk ke Absensi Sekolah" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Masuk", exact: true })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
     await page.screenshot({ path: `test-results/scaffold-${width}.png`, fullPage: true });
   });
 }
