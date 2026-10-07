@@ -36,5 +36,6 @@ export type StudentDetail = StudentView & {
     yearLabel: string;
     startsOn: string;
     endsOnExclusive: string;
+    cancelled: boolean;
   }[];
 };

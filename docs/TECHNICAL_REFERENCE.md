@@ -199,6 +199,10 @@ Jika perubahan tanggal efektif mengubah roster pada sesi submitted, tolak `HISTO
 
 Draft yang terbuka tidak membawa nomor revisi roster. Submit membandingkan himpunan enrollment yang dikirim dengan roster tanggal itu di bawah class lock (bagian 5.3). Perubahan penempatan yang memengaruhi tanggal draft otomatis menghasilkan ROSTER_CHANGED, sementara perubahan untuk tanggal lain tidak mengganggu draft. Koreksi penempatan lama yang sudah salah bukan fitur rutin MVP dan memerlukan runbook pemeliharaan dengan backup serta rekonsiliasi laporan.
 
+Penempatan memakai expectedVersion siswa; setiap transfer, penutupan, pembatalan rencana, arsip atau penempatan baru menaikkan version siswa. Transfer di dalam tahun yang sama menutup sumber pada tanggal efektif dan menambahkan tujuan sampai akhir tahun. Penempatan tahun berikutnya memakai mode placement dan tidak memotong interval lama. Preview batch memvalidasi tiap siswa dalam snapshot read-only; apply mengunci seluruh tahun/siswa/kelas terurut, memvalidasi ulang semua pilihan, lalu menyimpan seluruh batch dalam satu transaksi atau menolak seluruhnya. Respons sukses memuat hasil setiap siswa.
+
+Penempatan mendatang yang belum dimulai dapat dibatalkan melalui endpoint end dengan endsOnExclusive sama dengan startsOn. Layanan menolak bila rentang memiliki sesi submitted; rencana dihapus dari roster aktif dan snapshot lengkap tetap ada pada audit enrollment.cancel serta riwayat siswa bertanda dibatalkan. Arsip siswa ditolak selama masih ada enrollment berakhir setelah schoolToday. Lock siswa untuk lifecycle memakai FOR NO KEY UPDATE karena primary key tidak berubah; ini kompatibel dengan KEY SHARE dari foreign key attendance_records dan tetap menyerialkan perubahan version/interval.
+
 ### 4.2 Perubahan kalender
 
 Submit, void, dan perubahan penempatan mengunci row academic_year dengan `FOR SHARE`, lalu class dengan `FOR UPDATE`, diikuti session. Perubahan kalender dan tahun ajaran mengunci academic_year dengan `FOR UPDATE`, sehingga tidak berlomba dengan submit tetapi submit kelas berbeda tidak saling menunggu. Jika sebuah tanggal hendak diubah ke libur tetapi memiliki sessions submitted, server menolak dan menampilkan sesi yang harus di-void admin terlebih dahulu. Setelah void selesai, operator dapat mengubah kalender dengan alasan. Tidak otomatis mengganti absensi menjadi libur.
@@ -293,6 +297,8 @@ Prefix semua endpoint domain `/api`. Auth library dipasang pada namespace terpis
 | GET, PATCH /students/{id} | Detail dan ubah nama/kode/arsip | Baca semua; tulis admin |
 | POST /students/{id}/enrollments | Daftar baru/transfer/naik kelas bertanggal | Admin |
 | PATCH /enrollments/{id}/end | Menutup penempatan siswa keluar | Admin |
+| POST /enrollments/promote/preview | Preview hasil validasi per siswa tanpa menulis | Admin |
+| POST /enrollments/promote | Batch penempatan atomik dengan hasil per siswa | Admin |
 | GET, POST /teachers | Daftar/buat profil | Baca semua; tulis admin |
 | PATCH /teachers/{id} | Nama/status | Admin |
 | PUT /teachers/{id}/classes | Kelas utama | Admin |

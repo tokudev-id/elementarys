@@ -13,7 +13,7 @@ import { StudentForm } from "./form";
 export default async function Students({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; classId?: string }>;
+  searchParams: Promise<{ search?: string; classId?: string; includeArchived?: string }>;
 }) {
   const actor = await requirePageActor();
   const selected = await searchParams;
@@ -23,6 +23,7 @@ export default async function Students({
   const students = await listStudents({
     search: selected.search,
     classId: selected.classId || undefined,
+    includeArchived: selected.includeArchived === "true",
   });
   const school = schoolIdentity(settings);
   return (
@@ -44,7 +45,21 @@ export default async function Students({
           ))}
         </SelectField>
         <Button type="submit">Cari siswa</Button>
+        <label className="checkbox-field">
+          <input
+            type="checkbox"
+            name="includeArchived"
+            value="true"
+            defaultChecked={selected.includeArchived === "true"}
+          />
+          Tampilkan siswa diarsipkan
+        </label>
       </form>
+      {actor.role === "admin" && (
+        <p>
+          <Link href="/students/promote">Naik kelas atau penempatan tahun berikutnya</Link>
+        </p>
+      )}
       {actor.role === "admin" &&
         (classes.some((item) => !item.archivedAt) ? (
           <section>
@@ -62,6 +77,7 @@ export default async function Students({
           <li key={student.id}>
             <Link href={`/students/${student.id}`}>{student.fullName}</Link>
             <small>{student.studentCode}</small>
+            {student.archivedAt && <small>Diarsipkan</small>}
           </li>
         ))}
       </ul>

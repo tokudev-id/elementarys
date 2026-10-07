@@ -31,7 +31,7 @@ export async function lockRows(
   client: PoolClient,
   table: "academic_years" | "students" | "classes" | "attendance_sessions",
   ids: string[],
-  mode: "SHARE" | "UPDATE" = "UPDATE",
+  mode: "SHARE" | "UPDATE" | "NO KEY UPDATE" = "UPDATE",
 ) {
   const sorted = [...new Set(ids)].sort();
   for (const rowId of sorted)

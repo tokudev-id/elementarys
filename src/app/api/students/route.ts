@@ -9,6 +9,7 @@ export const GET = handler(async (request, requestId) => {
     await listStudents({
       classId: query.get("classId") ?? undefined,
       search: query.get("search") ?? undefined,
+      includeArchived: query.get("includeArchived") === "true",
     }),
     requestId,
   );
