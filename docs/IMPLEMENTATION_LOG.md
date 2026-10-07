@@ -30,7 +30,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | done | 6e83a4e → 39bd418; main domain7/integration52/e2e27 lulus |
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | needs_human | d622d11 → 0a8637a; runbook/benchmark lokal lulus; cloud pending H-02 |
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | done | 426bf92; domain 8/integration 57/e2e rekap+shell 5 lulus |
-| [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | in_progress | Workbook dari snapshot proyeksi dan pencatatan ekspor |
+| [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | done | f570906; roundtrip ExcelJS, integration 59, e2e rekap/download 5 lulus; H-06 pending |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | not_started | Menunggu S1-06 |
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | not_started | Menunggu S2-B1 |
@@ -255,3 +255,11 @@ Belum ada task yang dikerjakan. Format entri:
 - Checks task dan main: frozen install, lint, typecheck, format:check, domain 8, integration 57, build/start dan e2e rekap+shell 5 lulus. PostgreSQL membuktikan snapshot tetap konsisten saat koreksi commit di antara query dan jumlah query sama pada 1 maupun 61 siswa.
 - Fixture membuktikan Februari kabisat/bulan pendek, masuk/transfer/keluar, libur, masa depan, void, koreksi, batas midnight timezone, penanda ekspor null/tidak berubah/dua tanggal berubah, serta acuan baru per kelas. Akses tanpa sesi ditolak 401/no-store.
 - Browser 360/768/1024: filter berfungsi, totals sebelum tabel, area tabel dapat digulir lewat keyboard, tidak ada page overflow atau pageerror. Screenshot rekap360 diperiksa. Anti-slop hard/purpose/liveliness/craftsmanship PASS pada scope ini: DESIGN.md 1/1/1, palette dan type tetap, data dari proyeksi nyata, kontrol aktif teruji. Tidak ada bukti perangkat fisik atau klaim laporan resmi SIKL.
+
+### S2-A2: 7 Oktober 2026
+
+- Commit f570906 di-merge --no-ff. ExcelJS 4.4.0 ditambahkan sesuai stack TRD. Workbook berisi satu sheet per kelas dan Ringkasan untuk semua kelas, metadata/legenda/kelengkapan/penanda perubahan, totals numerik, serta nama/kode string. Normalisasi sheet menangani karakter terlarang, collision tanpa membedakan case, panjang31 dan batas karakter Unicode.
+- Proyeksi, pembuatan workbook dalam memori, serta insert report_exports memakai transaksi REPEATABLE READ yang sama. API unduhan ber-guard/no-store; tombol menunjukkan pending/gagal/sesi habis, mendukung retry dan memuat ulang acuan setelah unduhan berhasil.
+- Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 59, build/start, e2e rekap/download 5 lulus. Fixture enam kelas dibaca ulang ExcelJS; kode00123 dan nama=1+1 tetap string, totals sama dengan proyeksi. Peta versi catatan ekspor sama dengan snapshot dan perubahan sesudahnya terdeteksi.
+- Penyesuaian tipe buffer ExcelJS diperiksa dengan typecheck/build. Test retry unduhan sempat berpindah halaman sebelum login selesai; ditambah penantian heading Hari ini, lalu lulus serta seluruh suite diulang pada main.
+- LibreOffice tidak ditemukan di PATH/lokasi instalasi; pemeriksaan optional tersebut tidak diklaim. Pembukaan pada Excel sekolah tetap pending H-06. Anti-slop empat gate PASS untuk scope unduhan: kontrol berhasil pada360/768/1024 serta gagal/retry, tidak ada klaim file dikirim ke SIKL atau bukti perangkat fisik.
