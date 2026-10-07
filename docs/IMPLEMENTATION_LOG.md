@@ -29,7 +29,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | done | 6e83a4e → 39bd418; main domain7/integration52/e2e27 lulus |
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | needs_human | d622d11 → 0a8637a; runbook/benchmark lokal lulus; cloud pending H-02 |
-| [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | in_progress | Proyeksi bersama dan UI rekap mobile |
+| [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | done | 426bf92; domain 8/integration 57/e2e rekap+shell 5 lulus |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | not_started | Menunggu S1-06 |
@@ -248,3 +248,10 @@ Belum ada task yang dikerjakan. Format entri:
 - Laporan anti-slop per aturan tersedia pada [ANTI_SLOP_REPORT.md](ANTI_SLOP_REPORT.md): Hard Gate, Purpose Gate, Liveliness dan Craftsmanship PASS untuk scope S1-06/konvensi. H-03 tetap pending untuk perangkat dan keyboard OS nyata.
 - Runbook menyatakan CLI migrasi/seed saat ini hanya menerima database uji lokal. Adapter development, verifikasi metadata koneksi, Neon deployment serta Vercel preview masih memerlukan H-02; guard lokal tidak dilewati atau dilemahkan. Status needs_human tidak menghalangi S2-A1/B1/C1/D1 yang dependensinya telah selesai.
 - Gerbang M1 teknis done; M1 preview/guru dan gerbang M2 sampai M4 tetap pending. Pertanyaan ENV-01 sudah selesai; belum ada pertanyaan scope baru. Task berikutnya menurut urutan plan: S2-A1. Rilis belum selesai.
+
+### S2-A1: 7 Oktober 2026
+
+- Commit 426bf92 di-merge --no-ff. Proyeksi read-only REPEATABLE READ dengan sembilan query batch, helper penanda/totals, kontrak report, API ber-guard/no-store, filter tahun/bulan/kelas dan rekap mobile. Kalender memakai resolver yang sama dengan absensi; sesi voided tetap berada pada peta versi, tanpa menambah totals.
+- Checks task dan main: frozen install, lint, typecheck, format:check, domain 8, integration 57, build/start dan e2e rekap+shell 5 lulus. PostgreSQL membuktikan snapshot tetap konsisten saat koreksi commit di antara query dan jumlah query sama pada 1 maupun 61 siswa.
+- Fixture membuktikan Februari kabisat/bulan pendek, masuk/transfer/keluar, libur, masa depan, void, koreksi, batas midnight timezone, penanda ekspor null/tidak berubah/dua tanggal berubah, serta acuan baru per kelas. Akses tanpa sesi ditolak 401/no-store.
+- Browser 360/768/1024: filter berfungsi, totals sebelum tabel, area tabel dapat digulir lewat keyboard, tidak ada page overflow atau pageerror. Screenshot rekap360 diperiksa. Anti-slop hard/purpose/liveliness/craftsmanship PASS pada scope ini: DESIGN.md 1/1/1, palette dan type tetap, data dari proyeksi nyata, kontrol aktif teruji. Tidak ada bukti perangkat fisik atau klaim laporan resmi SIKL.
