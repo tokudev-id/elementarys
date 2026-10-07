@@ -37,6 +37,14 @@ Untuk penempatan historis yang memang salah, pemelihara bersama admin memverifik
 5. Periksa roster tepat sebelum, pada dan sesudah tanggal efektif di kedua kelas. Admin mengisi ulang tiap sesi voided dari roster yang telah diverifikasi dengan alasan pemeliharaan dan status yang disetujui guru. Ini pekerjaan rekonsiliasi manual; tidak ada salin otomatis dari kelas lama.
 6. Bandingkan totals H/S/I/A per siswa dan tanggal, pastikan tidak ada catatan ganda atau siswa wajib hadir setelah keluar. Tinjau history dan penanda Berubah setelah ekspor terakhir, lalu ekspor acuan baru bila telah disetujui. Jika pemeriksaan gagal, tetap hentikan write dan gunakan runbook restore; catat kehilangan data yang ditemukan serta penanggung jawab sebelum membuka kembali.
 
+## Pergantian tahun ajaran (S3-02)
+
+1. Pada menu Tahun ajaran, tambahkan periode baru sebagai tidak aktif. Rentang tidak boleh bertumpang tindih; akhir eksklusif adalah sehari setelah hari terakhir belajar. Buat kelas dan kalender untuk periode tersebut.
+2. Buka Persiapan tahun ajaran baru, pilih periode tujuan, periksa identitas, kelas dan hari belajar. Hitungan penempatan berasal dari riwayat, bukan perkiraan. Tombol aktivasi pada alur ini tersedia setelah identitas/kelas/kalender minimum lengkap.
+3. Pilih kelas asal pada langkah Penempatan siswa dan buka preview naik kelas. Kelas tujuan serta tanggal mulai difilter ke tahun yang disiapkan. Pilih siswa, isi alasan, periksa setiap hasil, lalu simpan seluruh batch. Satu masalah menolak seluruh batch; daftar hasil sukses mencantumkan setiap siswa.
+4. Kembali ke persiapan, periksa tanggal sekolah dan rentang periode, lalu Aktifkan tahun ini. Batal/Escape tidak mengubah data. Konfirmasi pindah tahun mengirim versi target serta ID tahun aktif yang dibaca; bila tahun aktif sudah berubah, muat data terbaru dahulu. Riwayat tahun lama tetap tersedia dan hanya admin yang dapat mengoreksinya.
+5. Periksa roster tahun baru serta sample laporan lama. Tutup penempatan berjalan dan batalkan rencana mendatang yang memang dibatalkan sebelum arsip siswa/kelas/tahun. Arsip tahun aktif ditolak; pilih tahun lain dahulu. Arsip kelas/tahun tidak menghapus enrollment, sesi, audit, kalender atau laporan lama. Simpan bukti sebelum/sesudah dan lakukan backup sesuai jadwal.
+
 ## Backup harian dan pemulihan (S2-E1)
 
 Status: drill lokal dengan data sintetis tersedia. H-07 masih membutuhkan repository/runner nyata, tujuan penyimpanan terpisah, pasangan kunci age, pemilik backup, notifikasi kegagalan dan drill production ke database terpisah. Target RPO satu hari belajar dan RTO satu hari kerja belum menjadi hasil pengukuran produksi.

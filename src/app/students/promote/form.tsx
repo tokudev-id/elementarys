@@ -22,10 +22,12 @@ export function PromotionForm({
   students,
   classes,
   years,
+  startsOn,
 }: {
   students: StudentView[];
   classes: ClassView[];
   years: AcademicYearView[];
+  startsOn?: string;
 }) {
   const router = useRouter();
   const busy = useRef(false);
@@ -166,7 +168,13 @@ export function PromotionForm({
                 </option>
               ))}
           </SelectField>
-          <Field label="Tanggal mulai tahun berikutnya" name="startsOn" type="date" required />
+          <Field
+            label="Tanggal mulai tahun berikutnya"
+            name="startsOn"
+            type="date"
+            defaultValue={startsOn}
+            required
+          />
           <Field label="Alasan batch penempatan" name="reason" required maxLength={1000} />
           <p>
             Pilih siswa yang akan ditempatkan. Satu masalah membatalkan seluruh batch; riwayat lama

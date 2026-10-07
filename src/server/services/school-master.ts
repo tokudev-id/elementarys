@@ -113,6 +113,17 @@ export async function updateAcademicYear(
     await client.query("SELECT id FROM academic_years ORDER BY id FOR UPDATE");
     const before = await yearRow(client, id);
     assertVersion(before.version, data.expectedVersion);
+    if (data.isCurrent && data.expectedCurrentYearId !== undefined) {
+      const active =
+        (await client.query<{ id: string }>("SELECT id FROM academic_years WHERE is_current"))
+          .rows[0]?.id ?? null;
+      if (active !== data.expectedCurrentYearId)
+        throw new DomainError(
+          "VERSION_CONFLICT",
+          "Tahun aktif sudah berubah. Muat data terbaru sebelum memindahkannya.",
+          409,
+        );
+    }
     const input = parseInput(yearInputSchema, {
       label: data.label ?? before.label,
       startsOn: data.startsOn ?? before.startsOn,
