@@ -24,6 +24,19 @@ Toku menyiapkan Neon CLI login/skills/MCP serta project Vercel untuk preview, se
 
 Bagian cloud tetap needs_human sampai H-02 selesai dan verifikasi target/adapter serta deployment preview benar-benar dijalankan. Tidak ada produksi otomatis atau push dari runbook ini.
 
+## Koreksi penempatan historis (S3-01)
+
+Mutasi rutin menolak perubahan roster sesi submitted dan menunjukkan tanggal aman berikutnya. Bila tanggal aman memenuhi kebutuhan, gunakan transfer/keluar pada tanggal tersebut. Pembatalan penempatan mendatang berlaku sebelum mulai; data rencana tetap disimpan di audit dan ditampilkan sebagai dibatalkan pada riwayat. Arsip siswa memerlukan semua penempatan berjalan ditutup dan rencana mendatang dibatalkan.
+
+Untuk penempatan historis yang memang salah, pemelihara bersama admin memverifikasi siswa berdasarkan kode internal, bukan nama. Langkah berikut dijalankan operator pada lingkungan yang disetujui; agent tidak menyentuh data nyata.
+
+1. Hentikan write terkait selama pemeliharaan. Buat backup terenkripsi dan buktikan dapat direstore ke DB terpisah sebelum perubahan. Simpan rincian semester, kelas asal/tujuan, enrollment, rentang efektif, versi sesi dan ekspor acuan.
+2. Tinjau seluruh sesi submitted pada rentang terdampak di kedua kelas. Simpan proyeksi/rekap serta isi dan aktor catatan sebelumnya untuk pembandingan; catatan absensi tidak dianggap milik kelas baru hanya karena siswa pindah.
+3. Admin membatalkan setiap sesi terdampak melalui UI dengan alasan koreksi penempatan. Audit menyimpan isi lama, current records dihapus, dan versi sesi meningkat. Verifikasi semua sesi terdampak sudah voided sebelum mengubah rentang; tidak menonaktifkan trigger, constraint atau audit append-only.
+4. Gunakan layanan transfer/penempatan/keluar dengan expectedVersion terbaru bila rentang valid dapat dinyatakan lewat UI. Jika kasus membutuhkan pembetulan di luar alur rutin, pemelihara menyiapkan SQL berparameter untuk ditinjau: transaksi dengan lock academic_year terurut → students → classes terurut → sessions, rentang [mulai,akhir), pemeriksaan overlap dan audit before/after lengkap. Jangan menjalankan SQL tak ditinjau atau mengganti riwayat audit.
+5. Periksa roster tepat sebelum, pada dan sesudah tanggal efektif di kedua kelas. Admin mengisi ulang tiap sesi voided dari roster yang telah diverifikasi dengan alasan pemeliharaan dan status yang disetujui guru. Ini pekerjaan rekonsiliasi manual; tidak ada salin otomatis dari kelas lama.
+6. Bandingkan totals H/S/I/A per siswa dan tanggal, pastikan tidak ada catatan ganda atau siswa wajib hadir setelah keluar. Tinjau history dan penanda Berubah setelah ekspor terakhir, lalu ekspor acuan baru bila telah disetujui. Jika pemeriksaan gagal, tetap hentikan write dan gunakan runbook restore; catat kehilangan data yang ditemukan serta penanggung jawab sebelum membuka kembali.
+
 ## Backup harian dan pemulihan (S2-E1)
 
 Status: drill lokal dengan data sintetis tersedia. H-07 masih membutuhkan repository/runner nyata, tujuan penyimpanan terpisah, pasangan kunci age, pemilik backup, notifikasi kegagalan dan drill production ke database terpisah. Target RPO satu hari belajar dan RTO satu hari kerja belum menjadi hasil pengukuran produksi.
