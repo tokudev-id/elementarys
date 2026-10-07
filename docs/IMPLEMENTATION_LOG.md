@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Slice 2 A1 sampai E1 teknis selesai dan pemeriksaan main lulus; S1-07 cloud menunggu H-02 |
-| Task berikutnya | Scope Slice 2 selesai; S3 belum dikerjakan; checkpoint lapangan tetap pending |
+| Status saat ini | S3-01 mulai; Slice 2 teknis selesai; S1-07 cloud menunggu H-02 |
+| Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
 
@@ -38,7 +38,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | done | b4130b6; integration78, e2e teachers+shell2 lulus |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | done | dd79ace; integration81, e2e corrections+attendance13 lulus |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
-| [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | not_started | Menunggu Slice 2 |
+| [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | in_progress | Transfer, keluar, naik kelas, arsip dan riwayat |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | not_started | Menunggu S3-01 |
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | not_started | Menunggu Slice 2 |
 | [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | not_started | Menunggu S3-02, S3-03 |
