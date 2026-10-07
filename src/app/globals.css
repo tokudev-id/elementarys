@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+.resource-list {
+  list-style: none;
+  padding: 0;
+}
+.resource-list li {
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.resource-list li > small {
+  display: block;
+}
+.resource-list li > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 .resource-section {
   padding-block: 1.5rem;
   border-bottom: 1px solid var(--border);

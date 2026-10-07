@@ -9,6 +9,7 @@ describe("navigation readiness and role", () => {
     expect(availableNavigation("teacher").map((item) => item.href)).toEqual([
       "/attendance",
       "/reports",
+      "/students",
       "/classes",
       "/calendar",
       "/academic-years",
