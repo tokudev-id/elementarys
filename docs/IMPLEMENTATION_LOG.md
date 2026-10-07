@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-01 mulai; Slice 2 teknis selesai; S1-07 cloud menunggu H-02 |
+| Status saat ini | S3-01 selesai; S3-02 mulai; S1-07 cloud menunggu H-02 |
 | Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
@@ -38,8 +38,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | done | b4130b6; integration78, e2e teachers+shell2 lulus |
 | [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | done | dd79ace; integration81, e2e corrections+attendance13 lulus |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
-| [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | in_progress | Transfer, keluar, naik kelas, arsip dan riwayat |
-| [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | not_started | Menunggu S3-01 |
+| [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | done | d20e60f; main integration88, lifecycle+students e2e2 lulus |
+| [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | in_progress | Persiapan tahun baru, pindah current dan arsip |
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | not_started | Menunggu Slice 2 |
 | [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | not_started | Menunggu S3-02, S3-03 |
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | not_started | Menunggu S3-04 |
@@ -321,3 +321,10 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Capture tambahan guru/kalender/siswa/settings/setup pada360/768/1024 sebanyak15 tidak overflow/pageerror; lima capture360 diperiksa langsung. History360, rekap, absensi dan print diperiksa saat task terkait. Anti-slop hard/purpose/liveliness/craftsmanship PASS untuk scope ini; tabel per aturan dan bukti diperbarui di ANTI_SLOP_REPORT.md. Palette/font/dials Operate1/1/1 tetap, form menggunakan kontrol native dan handler bernama; format serta larangan inline ditegakkan ESLint/Prettier.
 - S2-E1 efcd8b8 diverifikasi ulang melalui tiga test backup pada integration81: enkripsi tanpa identity runner, dekripsi/restore DB baru, evidence/hash, revoke/login, retensi30 dan kegagalan nonzero lulus. H-07 tetap memerlukan runner, storage terpisah, pasangan kunci offline, pemilik/notifikasi serta drill operasional nyata. H-06 memerlukan Excel perangkat sekolah dan cetak fisik; H-02 memerlukan Neon login/project Vercel untuk preview S1-07.
 - S2-A1/A2/A3/B1/B2/B3/C1/D1/E1 teknis done. Gerbang M1 teknis tetap done; M1 preview/guru, M2 fitur (termasuk S3-01 sampai S3-04), M2 backup/release/perangkat, M3 dan M4 tetap pending sesuai checkpoint. Pertanyaan ENV-01 sudah selesai; tidak ada pertanyaan scope baru. S3 tidak dikerjakan dalam permintaan A1 sampai E1 ini. Rilis belum selesai.
+
+### S3-01: 7 Oktober 2026
+
+- Permintaan sesi berikutnya memperluas scope ke S3-01 sampai S3-06. Commit d20e60f di-merge --no-ff. Transfer/placement/end, arsip/aktif kembali, daftar arsip dan batch preview/apply atomik; student.version melindungi seluruh mutasi. Penempatan mendatang dapat dibatalkan sebelum mulai; snapshot tetap di audit dan detail riwayat bertanda dibatalkan. Arsip menolak enrollment berjalan/mendatang. Runbook koreksi historis manual memakai backup, void, validasi rentang, rekonsiliasi dan ekspor baru.
+- Main: frozen install, format:check, lint, typecheck, domain8, integration88, build/start dan lifecycle+students e2e2 lulus. Transfer/exit tepat pada [mulai,akhir), old records tetap, report tidak memberi ?/Alpa sesudah keluar, overlap/stale/role ditolak, new year tidak diblokir old enrollment, batch seluruhnya rollback bila satu versi usang, SQL failure tidak meninggalkan interval terpotong/versi/audit parsial.
+- Uji pg_stat_activity membuktikan transfer menunggu class lock submit, lalu menolak HISTORICAL_ROSTER_CHANGE dengan tanggal aman. Fixture awal menunggu kelas tetapi tertahan oleh foreign-key KEY SHARE pada siswa, dan cleanup failure belum menunggu promise; diperbaiki dengan student FOR NO KEY UPDATE serta drain promises. Mode baru tetap eksklusif untuk update field non-key dan kompatibel dengan FK; retry deadlock terbatas tetap berlaku. Seluruh integration diulang lulus.
+- Snapshot exit_reason sebelum/sesudah diperiksa setelah dilengkapi; main build/browser diulang pada kode final. Capture promotion360 diperiksa dan viewport360/768/1024 tidak overflow. Anti-slop hard/purpose/liveliness/craftsmanship PASS pada scope ini: input/preview/hasil nyata, kontrol berfungsi, JSX handler bernama, desain Operate1/1/1, tanpa klaim lapangan.
