@@ -8,6 +8,7 @@ describe("navigation readiness and role", () => {
       ).toBe(true);
     expect(availableNavigation("teacher").map((item) => item.href)).toEqual([
       "/attendance",
+      "/reports",
       "/change-password",
     ]);
   });

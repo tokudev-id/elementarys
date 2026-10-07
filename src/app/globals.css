@@ -1,5 +1,79 @@
 @import "tailwindcss";
 
+select,
+textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem;
+  font: inherit;
+  color: inherit;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  margin-block: 1.5rem;
+}
+.filter-form .ui-field {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.report-class {
+  margin-block: 2rem;
+}
+.report-totals-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+.report-totals-list li {
+  border-bottom: 1px solid var(--border);
+  padding-block: 1rem;
+}
+.report-totals-list p {
+  margin-block: 0.375rem;
+}
+.report-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-block: 1.5rem;
+}
+.report-table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  background: var(--surface);
+}
+.report-table th,
+.report-table td {
+  border: 1px solid var(--border);
+  padding: 0.375rem;
+  min-width: 2.25rem;
+  text-align: center;
+}
+.report-table th:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  width: 11rem;
+  min-width: 11rem;
+  max-width: 11rem;
+  text-align: left;
+}
+.report-table th small {
+  display: block;
+}
+.report-table caption {
+  text-align: left;
+  padding-block: 0.75rem;
+}
+
 :root {
   color-scheme: light;
   --background: #f6f7f4;
