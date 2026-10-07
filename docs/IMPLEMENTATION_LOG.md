@@ -31,7 +31,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | needs_human | d622d11 → 0a8637a; runbook/benchmark lokal lulus; cloud pending H-02 |
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | done | 426bf92; domain 8/integration 57/e2e rekap+shell 5 lulus |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | done | f570906; roundtrip ExcelJS, integration 59, e2e rekap/download 5 lulus; H-06 pending |
-| [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | in_progress | Halaman A4 landscape dan pencatatan snapshot cetak |
+| [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | done | f4dda26; integration 60, reports+print e2e 7; PDF dua halaman lulus; H-06 pending |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | not_started | Menunggu S1-06 |
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | not_started | Menunggu S2-B1 |
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | not_started | Menunggu S2-B2 |
@@ -263,3 +263,10 @@ Belum ada task yang dikerjakan. Format entri:
 - Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 59, build/start, e2e rekap/download 5 lulus. Fixture enam kelas dibaca ulang ExcelJS; kode00123 dan nama=1+1 tetap string, totals sama dengan proyeksi. Peta versi catatan ekspor sama dengan snapshot dan perubahan sesudahnya terdeteksi.
 - Penyesuaian tipe buffer ExcelJS diperiksa dengan typecheck/build. Test retry unduhan sempat berpindah halaman sebelum login selesai; ditambah penantian heading Hari ini, lalu lulus serta seluruh suite diulang pada main.
 - LibreOffice tidak ditemukan di PATH/lokasi instalasi; pemeriksaan optional tersebut tidak diklaim. Pembukaan pada Excel sekolah tetap pending H-06. Anti-slop empat gate PASS untuk scope unduhan: kontrol berhasil pada360/768/1024 serta gagal/retry, tidak ada klaim file dikirim ke SIKL atau bukti perangkat fisik.
+
+### S2-A3: 7 Oktober 2026
+
+- Commit f4dda26 di-merge --no-ff. Halaman print memakai proyeksi S2-A1; membuka halaman tidak menulis. Tombol Cetak memvalidasi receipt server sebelum window.print. Snapshot ditandatangani HMAC dan terikat aktor/filter/versi; server juga memeriksa seluruh ID sesi berada pada scope bulan/kelas. Snapshot lama tetap dicatat sesuai halaman yang disiapkan walau koreksi lebih baru telah commit.
+- Task/main: frozen install, format:check, lint, typecheck, domain 8, integration 60, build/start serta e2e reports+print 7 lulus. Pengujian menolak token/map/aktor/scope yang berubah dan Origin tidak sesuai; tanpa sesi ditolak. PDF A4 landscape dengan dua kelas, masing-masing 10 siswa × 31 tanggal, memiliki dua halaman. Tabel memakai proyeksi yang sama dengan UI/Excel, header berulang, page break kelas dan ruang tanda tangan kosong.
+- PDF awal empat halaman karena line-height tabel terlalu besar; diperbaiki khusus print menjadi1.15, mempertahankan font8pt, lalu PDF ulang dua halaman. JSX dipisah dari blok try agar penanganan error hanya menangkap pembacaan data. Screenshot print diperiksa. Anti-slop empat gate PASS pada scope ini; warna/font mengikuti arah operasi sekolah, tidak ada nama/tanda tangan pejabat buatan.
+- window.print distub pada automation untuk membuktikan urutanan receipt→print, bukan bukti dialog OS/printer fisik. H-06 tetap pending. Tidak ada deployment, akses cloud atau data nyata.
