@@ -12,13 +12,15 @@ import { PromotionForm } from "./form";
 export default async function Promote({
   searchParams,
 }: {
-  searchParams: Promise<{ classId?: string }>;
+  searchParams: Promise<{ classId?: string; targetYearId?: string }>;
 }) {
   const actor = await requirePageActor();
   const settings = await getSchoolSettings();
   const classes = await listClasses();
   const years = await listAcademicYears();
-  const selected = (await searchParams).classId ?? classes[0]?.id;
+  const query = await searchParams;
+  const selected = query.classId ?? classes[0]?.id;
+  const targetYear = years.find((year) => year.id === query.targetYearId);
   const students = actor.role === "admin" && selected ? await promotionCandidates(selected) : [];
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/students">
@@ -29,6 +31,7 @@ export default async function Promote({
       ) : (
         <>
           <form className="filter-form" action="/students/promote">
+            {targetYear && <input type="hidden" name="targetYearId" value={targetYear.id} />}
             <SelectField label="Kelas asal batch" name="classId" defaultValue={selected} required>
               {classes.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -40,7 +43,15 @@ export default async function Promote({
           </form>
           <p>Daftar memuat siswa yang penempatannya mencapai akhir tahun kelas asal.</p>
           {students.length ? (
-            <PromotionForm key={selected} students={students} classes={classes} years={years} />
+            <PromotionForm
+              key={`${selected}:${targetYear?.id ?? "any"}`}
+              students={students}
+              classes={
+                targetYear ? classes.filter((item) => item.yearId === targetYear.id) : classes
+              }
+              years={years}
+              startsOn={targetYear?.startsOn}
+            />
           ) : (
             <StateBanner state="empty">
               Tidak ada siswa yang dapat dipilih dari kelas asal ini.

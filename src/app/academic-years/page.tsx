@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listAcademicYears } from "@/server/services/school-master";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -12,6 +13,11 @@ export default async function AcademicYears() {
   return (
     <AppShell school={schoolIdentity(settings)} actor={actor} currentPath="/academic-years">
       <h1>Tahun ajaran</h1>
+      {actor.role === "admin" && (
+        <p>
+          <Link href="/academic-years/rollover">Persiapan tahun ajaran baru</Link>
+        </p>
+      )}
       {actor.role === "admin" && (
         <section>
           <h2>Tambah periode</h2>

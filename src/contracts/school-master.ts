@@ -17,7 +17,11 @@ export const yearInputSchema = yearFields
   );
 export const yearPatchSchema = yearFields
   .partial()
-  .extend({ expectedVersion: z.number().int().positive(), archived: z.boolean().optional() })
+  .extend({
+    expectedVersion: z.number().int().positive(),
+    archived: z.boolean().optional(),
+    expectedCurrentYearId: z.uuid().nullable().optional(),
+  })
   .strict();
 export const classInputSchema = z
   .object({

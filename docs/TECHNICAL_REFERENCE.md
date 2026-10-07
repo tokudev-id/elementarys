@@ -289,7 +289,7 @@ Prefix semua endpoint domain `/api`. Auth library dipasang pada namespace terpis
 | GET /settings | Identitas sekolah, lokasi, zona waktu, versi config, kesiapan setup | Guru/admin |
 | PATCH /settings | Konfigurasi sekolah; preview/alasan untuk perubahan timezone sesudah ada absensi | Admin |
 | GET, POST /academic-years | Daftar/buat periode | Baca semua; tulis admin |
-| PATCH /academic-years/{id} | Label, periode current, arsip | Admin |
+| PATCH /academic-years/{id} | Label, periode current, arsip; expectedCurrentYearId opsional memeriksa acuan tahun aktif sebelum pindah | Admin |
 | GET, PUT /academic-years/{id}/calendar | Weekdays dan overrides | Baca semua; tulis admin |
 | GET, POST /classes | Daftar/buat kelas | Baca semua; tulis admin |
 | PATCH /classes/{id} | Nama/arsip; grade/year tidak diubah setelah enrollment | Admin |
