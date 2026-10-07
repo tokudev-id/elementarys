@@ -10,6 +10,7 @@ describe("navigation readiness and role", () => {
       "/attendance",
       "/reports",
       "/students",
+      "/teachers",
       "/classes",
       "/calendar",
       "/academic-years",

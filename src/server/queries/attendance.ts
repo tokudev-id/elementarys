@@ -41,7 +41,7 @@ export type Session = {
 export async function session(client: PoolClient, classId: string, date: string, lock = false) {
   return (
     await client.query<Session>(
-      `SELECT a.*,u.name submitted_name FROM attendance_sessions a JOIN "user" u ON u.id=a.submitted_by WHERE a.class_id=$1 AND a.date=$2 ${lock ? "FOR UPDATE OF a" : ""}`,
+      `SELECT a.*,COALESCE((SELECT h.changes_json->>'actorName' FROM audit_events h WHERE h.entity_type='attendance_session' AND h.entity_id=a.id::text AND h.actor_id=a.submitted_by AND h.action IN ('attendance.submit','attendance.correct') ORDER BY h.occurred_at DESC,h.id DESC LIMIT 1),u.name) submitted_name FROM attendance_sessions a JOIN "user" u ON u.id=a.submitted_by WHERE a.class_id=$1 AND a.date=$2 ${lock ? "FOR UPDATE OF a" : ""}`,
       [classId, date],
     )
   ).rows[0];

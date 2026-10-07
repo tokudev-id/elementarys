@@ -16,7 +16,7 @@ export const navigation: readonly NavigationItem[] = [
   },
   { id: "reports", label: "Rekap", href: "/reports", roles: ["admin", "teacher"], ready: true },
   { id: "students", label: "Siswa", href: "/students", roles: ["admin", "teacher"], ready: true },
-  { id: "teachers", label: "Guru", href: "/teachers", roles: ["admin", "teacher"], ready: false },
+  { id: "teachers", label: "Guru", href: "/teachers", roles: ["admin", "teacher"], ready: true },
   { id: "classes", label: "Kelas", href: "/classes", roles: ["admin", "teacher"], ready: true },
   {
     id: "calendar",
