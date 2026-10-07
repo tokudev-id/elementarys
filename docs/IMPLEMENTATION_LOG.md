@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Shell mobile dan API absensi selesai; alur pencatatan S1-06 siap |
-| Task berikutnya | S1-06 |
+| Status saat ini | S1-06 selesai; M1 teknis lulus; persiapan preview S1-07 |
+| Task berikutnya | S1-07, kemudian S2-A1 |
 
 ## 1. Aturan pencatatan
 
@@ -27,7 +27,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-03](IMPLEMENTATION_PLAN.md#s1-03-login-akun-dan-guard-akses) | Inti | S1-02 | done | 6214b00; integration auth 10, e2e 8 lulus |
 | [S1-04](IMPLEMENTATION_PLAN.md#s1-04-shell-mobile-dan-komponen-dasar) | Inti UI | S1-03 | done | bd237a7 + 18bb1b2; main e2e16/production404; review fresh capture ship |
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
-| [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | in_progress | Form absensi dan ringkasan end-to-end |
+| [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | done | 6e83a4e → 39bd418; main domain7/integration52/e2e27 lulus |
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | not_started | Menunggu S1-06; bagian cloud butuh H-02 |
 | [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | not_started | Menunggu S1-06 |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
@@ -68,7 +68,7 @@ Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah reg
 | Gerbang | Status | Bukti yang diperlukan |
 |---|---|---|
 | M0 lapangan | pending | H-01 |
-| M1 teknis | pending | S1-01 sampai S1-06 done |
+| M1 teknis | done | S1-01 sampai S1-06 done; pemeriksaan main domain7/integration52/e2e27 |
 | M1 preview | pending | S1-07 done dan H-02 |
 | M1 guru | pending | H-03 |
 | M2 fitur | pending | Slice 2, S3-01 sampai S3-04 done; F-01 sampai F-08 dan PRD 7.1 diterima |
@@ -222,3 +222,18 @@ Belum ada task yang dikerjakan. Format entri:
 
 - ac60cbb di-merge --no-ff: scripts/clean-next.mjs membersihkan hanya artefak .next sebelum next build. Build lulus; CSS output memakai transparent highlight.
 - Main seluruhgate diulang lulus: frozeninstall/lint/typecheck/domain7/integration52/e2e16. Source dan database tidak disentuh script pembersihan.
+
+### S1-06: 7 Oktober 2026, kelanjutan pada Windows
+
+- Pemulihan Git: repo datang pada task/S1-06 dengan commit e8ae157 dan tanpa main. Main dibuat dari commit log awal 0ed778f; semua riwayat termasuk e8ae157 dipertahankan melalui merge --no-ff. Tidak ada push atau rewrite history.
+- Lingkungan sesi ini: Windows/PowerShell, Node 24.21.0, pnpm12.4.2, Docker29.8.1. Docker Desktop diaktifkan; docker compose up -d menjalankan PostgreSQL18 pada loopback55433. Neon/psql/Vercel/gh tidak ada di PATH; H-02 tetap pending. Binary portable pg_dump/pg_restore18.6 dan age1.3.2 disiapkan dalam .local/tools yang di-ignore. Tidak ada instalasi database sistem atau SQL cloud.
+- Commit task6e83a4e → merge main39bd418. Form dipisah menjadi kontrak response Zod, client jaringan dengan interface kecil, hook state yang menerima client, helper draft dan komponen baris/feedback. Halaman memanggil query server dan guard halaman; identitas sekolah serta tanggal dibaca pada snapshot yang sama. Handler JSX bernama; tidak ada style inline atau mutasi DOM style pada source.
+- Format seluruh kode aplikasi/test/script dirapikan dengan Prettier; konfigurasi dua spasi/double quotes/semicolon/100kolom/LF, .gitattributes, format/check dan CI ditambahkan. Prettier adalah dev dependency kecil untuk konvensi yang dapat diperiksa, tanpa perubahan stack runtime. ESLint menolak style inline dan handler JSX inline. Komentar dekoratif config dihapus; komentar constraint/protokol dipertahankan.
+- Checks task: frozen install, format:check, lint, typecheck, domain7, integration52, build dan production-preview404 lulus. Main sesudah merge: pnpm install --frozen-lockfile/lint/typecheck/test:domain/test:integration/test:e2e → exit0; e2e27 lulus. Integration membaca env lokal yang di-ignore; secret acak tidak dicetak/di-commit. Tiga regression assertion sempat gagal karena mencocokkan announcer/style internal Next; selector dibatasi pada komponen/pesan aplikasi dan diulang, lalu semua27 lulus pada main.
+- Penerimaan: login → hari ini → kelas → satuS/satuI → konfirmasi8/1/1/0 → dashboard submitted lulus pada360/768/1024; membuka/keluar dan batal tidak menulis; gagal jaringan dan rotasi mempertahankan pilihan; konflik dua akun membaca pencatat terbaru; respons hilang retry tetap version1/audit1; sesi habis tidak menampilkan Tersimpan. Regresi tambahan membuktikan konflik roster11siswa dengan reload gagal mengunci simpan, reload berhasil membuka form; HTTP200 berisi response invalid tidak mengklaim tersimpan; pemilih tanggal menghormati batal/lanjut, Escape memulangkan fokus.
+- Waktu automation main dari pilihan sampai tersimpan:360px448ms,768px449ms,1024px462ms. Bukan waktu pengoperasian guru atau benchmark provider. H-03 tetap pending untuk perangkat dan keyboardOS nyata.
+- Antislop Hard Gate PASS: browser27 dan production404, no overflow pada360/768/1024 serta emulasi keyboard360x340; tidak ada kontrol mati atau klaim/aset buatan. Klik tercatat: login/logout, ganti password, navigasi/switch kelas, radios H/S/I/A, pemilih tanggal batal/lanjut, simpan, konfirmasi/Batal/Tutup/Escape, kembali ke hari ini, retry jaringan dan Muat data terbaru semuanya diuji. Tombol Masuk kembali menuju halaman login yang diuji; tidak menjanjikan penyimpanan draft.
+- Antislop Purpose Gate PASS: arah DESIGN.md, font sistem untuk label sekolah, daftar vertikal untuk pencatatan, aksen hijau untuk tindakan/fokus, shadow hanya dialog untuk elevasi, whitespace memisahkan siswa; tidak ada dekorasi template.
+- Antislop Liveliness PASS: ENERGY1/RHYTHM1/MOTION1; fokus kelas/tanggal dan tindakan simpan, pola nama/kode/status berulang sesuai tugas sekolah, motion hanya feedback pilihan.
+- Antislop Craftsmanship PASS: pemeriksaan screenshot konfirmasi dan hasil simpan360px; keyboard/fokus/rotasi/state/error melalui Playwright. Rasio WCAG dihitung dengan rumus: teks12.36:1, tombol7.46:1, muted5.87:1, pesan error9.36:1, border4.63:1. Tidak ada klaim review independen atau bukti perangkat fisik dari sesi ini.
+- M1 teknis done. M1preview/guru dan seluruh gerbang lapangan tetap pending; rilis belum selesai.
