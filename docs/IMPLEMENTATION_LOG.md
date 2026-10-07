@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S1-06 selesai; M1 teknis lulus; S1-07 lokal teruji, cloud menunggu H-02 |
-| Task berikutnya | Slice 2 A1 sampai E1 sesuai permintaan; S1-07 tidak menghalangi |
+| Status saat ini | Slice 2 A1 sampai E1 teknis selesai; pemeriksaan akhir berlangsung; S1-07 cloud menunggu H-02 |
+| Task berikutnya | Pemeriksaan akhir Slice 2 dan perbaikan nama sheet Excel |
 
 ## 1. Aturan pencatatan
 
@@ -36,7 +36,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-B2](IMPLEMENTATION_PLAN.md#s2-b2-tahun-ajaran-kelas-dan-kalender-akademik) | B setup | S2-B1 | done | 681cf62; integration 68, e2e school-master+shell 2 lulus |
 | [S2-B3](IMPLEMENTATION_PLAN.md#s2-b3-siswa-dan-penempatan-awal) | B setup | S2-B2 | done | 3ff50ef + FIX-02 08bcdb9; integration 71, students+shell e2e 2 lulus |
 | [S2-C1](IMPLEMENTATION_PLAN.md#s2-c1-guru-akun-dan-kelas-utama) | C akun | S1-06 | done | b4130b6; integration78, e2e teachers+shell2 lulus |
-| [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | in_progress | Koreksi, audit riwayat, pembatalan dan isi ulang |
+| [S2-D1](IMPLEMENTATION_PLAN.md#s2-d1-koreksi-riwayat-dan-pembatalan-sesi) | D koreksi | S1-06 | done | dd79ace; integration81, e2e corrections+attendance13 lulus |
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | not_started | Menunggu Slice 2 |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | not_started | Menunggu S3-01 |
@@ -47,6 +47,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
+| FIX-03 | Validasi S2 | S2-A2, S2-D1 | in_progress | Nama sheet History/apostrof; isolasi fixture browser untuk suite penuh |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -108,7 +109,7 @@ Selesai 7 Oktober 2026: izin filesystem dipulihkan; `git init -b main` dan basel
 
 ## 7. Bukti per task
 
-Belum ada task yang dikerjakan. Format entri:
+Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entri:
 
 ```text
 ### <ID>: <tanggal waktu>
@@ -299,3 +300,15 @@ Belum ada task yang dikerjakan. Format entri:
 - API server Better Auth memakai adapter Drizzle terikat PoolClient transaksi yang sama, tanpa HTTP. Trigger PostgreSQL menggagalkan penautan dan membuktikan rollback akun/credential tanpa akses parsial. TRD diperbarui dari asumsi dua transaksi ke implementasi atomik yang terbukti, tanpa mengubah scope atau kebijakan. Audit tidak memuat password. Nama pencatat diambil dari snapshot audit saat simpan.
 - Checks task dan main: frozen install, format:check, lint, typecheck, domain8, integration78, build/start, e2e teachers+shell2 lulus. Uji meliputi tautan ganda, reset/revoke/wajib ganti, archive race, akun non-utama mencatat dan nama historis setelah rename. Browser membuat profil/akun, kelas utama, reset, disable/enable, login password sementara, ganti password, dan archive; 360/768/1024 tanpa overflow.
 - Anti-slop empat gate PASS pada scope guru: data DB sintetis, kontrol aktif teruji, detail akun hanya admin, handler bernama dan stylesheet, desain Operate1/1/1. Tidak membuat akun nyata atau melakukan push/deploy.
+
+### S2-D1: 7 Oktober 2026
+
+- Commit dd79ace di-merge --no-ff. UI koreksi/isi ulang dari versi terbaru dan alasan wajib; history read-only menampilkan actor snapshot, waktu, alasan, sebelum/sesudah dan versi. Void admin-only memakai year SHARE → class UPDATE → session UPDATE; audit lengkap, hapus current records, state voided dan version+1 dalam transaksi yang sama. Tahun lama hanya admin; void tidak mensyaratkan hari belajar agar sesi historis tetap bisa dibatalkan.
+- Task/main: frozen install, format:check, lint, typecheck, domain8, integration81, build/start serta e2e corrections+attendance13 lulus. Lifecycle initial→late-arrival correction→void→refill mempertahankan audit, totals benar dan penanda ekspor berubah; no-op tidak menaikkan versi/audit. Race koreksi/void hanya satu sukses; trigger SQL menggagalkan update void dan membuktikan records/audit/version rollback bersama. Uji dua koreksi berbeda dari S1 tetap lulus.
+- Browser menguji alasan kosong, cancel/Escape, koreksi Alpa→Hadir, gagal jaringan/retry dengan draft/alasan tetap, no-op, dua akun berkonflik, reload, pembatalan, isi ulang, historical admin dan read-only guru. Race refresh setelah simpan diperbaiki dengan useTransition/pending sebelum koreksi baru; regresi ulang lulus. Banner pembatalan menerima fokus dan berada di viewport. Capture history360 diperiksa; 360/768/1024 tanpa overflow/pageerror.
+- Anti-slop empat gate PASS pada scope koreksi: snapshot nyata dari audit, form/aksi aktif dan feedback, stylesheet/handler bernama, desain Operate1/1/1. Pengujian memakai fixture sintetis dan tidak menutup H-03.
+
+### Pemeriksaan akhir Slice 2: dimulai 7 Oktober 2026
+
+- Semua task A1-A3/B1-B3/C1/D1/E1 teknis selesai. S3 tetap di luar permintaan sesi ini. Backup tiga test termasuk enkripsi/dekripsi/restore/retensi/login telah diulang dalam integration81; H-07 operasional tetap pending.
+- Pemeriksaan lokal ExcelJS mengonfirmasi nama History dan apostrof di awal/akhir menolak worksheet. FIX-03 menormalkan nama tersebut dan menambahkan fixture roundtrip. Suite browser penuh memiliki44 test yang memakai sekolah dan akun seed bersama; isolasi window login antar test dan eksekusi serial diperlukan agar test tidak saling mengubah konfigurasi atau menghabiskan kuota login satu akun.
