@@ -311,7 +311,7 @@ Prefix semua endpoint domain `/api`. Auth library dipasang pada namespace terpis
 | GET /audit dengan filter bounded | Audit administratif | Admin |
 | GET /health | Liveness tanpa data pribadi atau query DB | Publik, isi minimal |
 
-Form edit master memakai optimistic version (kolom version pada school_config, academic_years, classes, students, teachers) agar perubahan tidak menimpa edit operator lain. Mutasi compound penempatan, akses, kalender dan void memakai transaksi, urutan lock bagian 4.2, dan expectedVersion; tabel receipt ditunda (bagian 12). Pembuatan akun memakai API library di luar transaksi domain, lalu penautan profil teacher dilakukan dalam transaksi domain. Sampai penautan berhasil, akun role teacher tidak memperoleh akses domain; akun yatim dapat ditautkan ulang atau dihapus melalui wrapper admin.
+Form edit master memakai optimistic version (kolom version pada school_config, academic_years, classes, students, teachers) agar perubahan tidak menimpa edit operator lain. Mutasi compound penempatan, akses, kalender dan void memakai transaksi, urutan lock bagian 4.2, dan expectedVersion; tabel receipt ditunda (bagian 12). Wrapper akun memanggil API server Better Auth dengan adapter Drizzle yang terikat PoolClient transaksi domain yang sama, tanpa transaksi internal adapter atau panggilan HTTP. Pembuatan akun, credential, dan tautan profil commit bersama; kegagalan penautan membatalkan semuanya. Reset password juga memakai client transaksi tersebut. Akun role teacher tanpa profil aktif tetap ditolak guard domain. Integrasi S2-C1 memverifikasi rollback melalui trigger PostgreSQL yang menggagalkan penautan.
 
 ### 6.2 Respons kesalahan
 
