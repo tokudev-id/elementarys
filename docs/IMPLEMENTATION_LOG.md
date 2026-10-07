@@ -8,7 +8,7 @@
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
 | Status saat ini | S1-06 selesai; M1 teknis lulus; S1-07 lokal teruji, cloud menunggu H-02 |
-| Task berikutnya | S2-A1; bagian cloud S1-07 setelah H-02 |
+| Task berikutnya | Slice 2 A1 sampai E1 sesuai permintaan; S1-07 tidak menghalangi |
 
 ## 1. Aturan pencatatan
 
@@ -29,7 +29,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S1-05](IMPLEMENTATION_PLAN.md#s1-05-api-absensi-dan-ringkasan) | Inti absensi | S1-03 | done | 4e36ca8; domain 5/integration 52 lulus; no-op, race, rollback dan HTTP guard |
 | [S1-06](IMPLEMENTATION_PLAN.md#s1-06-ui-absensi-sentuh-dan-ringkasan-hari-ini) | Inti | S1-04, S1-05 | done | 6e83a4e → 39bd418; main domain7/integration52/e2e27 lulus |
 | [S1-07](IMPLEMENTATION_PLAN.md#s1-07-preview-development-dan-pengukuran-awal) | Inti ops | S1-06 | needs_human | d622d11 → 0a8637a; runbook/benchmark lokal lulus; cloud pending H-02 |
-| [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | not_started | Menunggu S1-06 |
+| [S2-A1](IMPLEMENTATION_PLAN.md#s2-a1-proyeksi-rekap-dan-tampilan-rekap) | A rekap | S1-06 | in_progress | Proyeksi bersama dan UI rekap mobile |
 | [S2-A2](IMPLEMENTATION_PLAN.md#s2-a2-workbook-excel) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-A3](IMPLEMENTATION_PLAN.md#s2-a3-halaman-cetak) | A rekap | S2-A1 | not_started | Menunggu S2-A1 |
 | [S2-B1](IMPLEMENTATION_PLAN.md#s2-b1-konfigurasi-sekolah-dan-kesiapan-setup) | B setup | S1-06 | not_started | Menunggu S1-06 |
