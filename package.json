@@ -13,6 +13,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:domain": "vitest run tests/domain",
     "test:e2e": "playwright test",
+    "measure:attendance": "tsx scripts/measure-attendance.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed:test": "tsx scripts/seed.ts",

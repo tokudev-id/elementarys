@@ -1,5 +1,29 @@
 # Runbook operasional
 
+## Preview development dan pengukuran (S1-07)
+
+Status: alur lokal S1-06 lulus. Preview cloud belum tersedia; H-02 memerlukan login Neon CLI dan project Vercel yang ditautkan Toku. URL dan hasil latensi provider belum ada. Tidak ada data nyata atau branch production yang dipakai pada persiapan ini.
+
+### Pemeriksaan lokal
+
+1. Siapkan Node minimal22.20.0, pnpm12.4.2, Docker dan PostgreSQL18 uji: `docker compose up -d`. Salin `.env.example` ke `.env.local`; isi secret/password uji secara lokal. Jangan commit `.env.local`.
+2. Jalankan `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test:domain`, `pnpm test:integration`, `pnpm build`, dan `pnpm test:e2e`. Drill backup memerlukan pg_dump/pg_restore dan age/age-keygen sesuai bagian backup di bawah.
+3. Jalankan `pnpm measure:attendance` setelah build. Script membuat database uji lokal tersendiri, seed10siswa dengan password acak, lalu menjalankan proses Next baru pada3103 dengan APP_ENV=production dan koneksi uji sintetis. MEASUREMENT_PORT opsional; pilih port yang kosong. Script tidak memanggil Neon/Vercel dan menolak APP_ENV sumber selain test.
+4. JSON hasil mencatat pembukaan login pertama, login, pembukaan absensi pertama, dan sepuluh simpan yang benar-benar mengubah status (bukan retry no-op). p95 memakai sampel terurut. Kondisi dingin hanya proses Next lokal baru; PostgreSQL tetap aktif. Angka ini bukan hasil cloud ataupun waktu guru. Proses dan database pengukuran dibersihkan setelah selesai/gagal; tidak menyentuh database uji aplikasi lain.
+5. Uji APP_ENV=production pada port terpisah dengan `tests/production/playwright.config.ts` membuktikan component-preview404. Database tetap URL uji lokal. Pemeriksaan ini tidak menggantikan H-03 pada HP guru.
+
+### Langkah cloud setelah H-02
+
+Toku menyiapkan Neon CLI login/skills/MCP serta project Vercel untuk preview, sesuai AGENT_PROMPT. Pastikan project rough-dawn-85427948 dan branch development sudah tersedia. Jangan membuat, mereset, menghapus, atau menautkan branch production.
+
+1. Verifikasi metadata penautan dan target development sebelum menarik environment. `neon link --project-id rough-dawn-85427948 --branch development -y`; `neon config init`; tinjau neon.ts minimal tanpa auth/buckets/functions/dataApi/aiGateway. Periksa dokumentasi CLI terpasang sebelum menjalankan deploy.
+2. `neon deploy` hanya pada development. Environment hasil tarik berada di berkas yang di-ignore. Cocokkan host koneksi dengan metadata branch development; runtime memakai credential aplikasi minimum, credential migrasi hanya pada pekerjaan migrasi.
+3. CLI migrasi/seed saat ini sengaja hanya menerima database uji lokal. Adapter cloud belum dikerjakan sebelum target development dapat diverifikasi dari akun H-02. Jangan menghapus atau melewati guard tersebut untuk membuat langkah cloud tampak berhasil. Tambahkan adapter development yang memverifikasi identitas branch, tinjau SQL, lalu migrasi sebagai pekerjaan terpisah dari build. Seed hanya sintetis dan harus menolak host production.
+4. Isi environment server-only pada Vercel preview: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL dan TRUSTED_ORIGINS sesuai origin preview. DATABASE_MIGRATION_URL hanya untuk runner migrasi, tanpa NEXT_PUBLIC_ secret. Node runtime/region/pool serverless diverifikasi terhadap project dan dokumentasi provider terpasang sebelum deploy. Jangan menambahkan migrasi ke build.
+5. Setelah project ditautkan oleh Toku, deploy preview saja. Catat URL nyata, branch, commit, region, pemilik dan hasil smoke: dua akun guru, simpan/konflik/retry, dashboard dan mobile. Catat latensi dingin provider setelah idle dan latensi hangat secara terpisah dari hasil lokal.
+
+Bagian cloud tetap needs_human sampai H-02 selesai dan verifikasi target/adapter serta deployment preview benar-benar dijalankan. Tidak ada produksi otomatis atau push dari runbook ini.
+
 ## Backup harian dan pemulihan (S2-E1)
 
 Status: drill lokal dengan data sintetis tersedia. H-07 masih membutuhkan repository/runner nyata, tujuan penyimpanan terpisah, pasangan kunci age, pemilik backup, notifikasi kegagalan dan drill production ke database terpisah. Target RPO satu hari belajar dan RTO satu hari kerja belum menjadi hasil pengukuran produksi.
