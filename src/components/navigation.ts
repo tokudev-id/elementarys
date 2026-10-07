@@ -32,9 +32,9 @@ export const navigation: readonly NavigationItem[] = [
     roles: ["admin", "teacher"],
     ready: false,
   },
-  { id: "settings", label: "Sekolah", href: "/settings", roles: ["admin"], ready: false },
+  { id: "settings", label: "Sekolah", href: "/settings", roles: ["admin"], ready: true },
   { id: "audit", label: "Audit", href: "/audit", roles: ["admin"], ready: false },
-  { id: "setup", label: "Persiapan sekolah", href: "/setup", roles: ["admin"], ready: false },
+  { id: "setup", label: "Persiapan sekolah", href: "/setup", roles: ["admin"], ready: true },
   {
     id: "account",
     label: "Ganti password",

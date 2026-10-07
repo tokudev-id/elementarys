@@ -1,6 +1,7 @@
 import "server-only";
 import type { PoolClient } from "pg";
 import { DomainError } from "@/domain/errors";
+import { setupState } from "@/server/services/settings";
 import {
   isTimezone,
   resolveSchoolDay,
@@ -10,12 +11,23 @@ import {
 } from "@/domain/calendar";
 export async function schoolContext(client: PoolClient, clock: Clock = systemClock) {
   const config = (
-    await client.query<{ name: string; timezone: string; configured_at: Date | null }>(
-      "SELECT name,timezone,configured_at FROM school_config WHERE id=1",
-    )
+    await client.query<{
+      name: string;
+      location: string | null;
+      timezone: string;
+      configured_at: Date | null;
+    }>("SELECT name,location,timezone,configured_at FROM school_config WHERE id=1")
   ).rows[0];
-  if (!config || !config.configured_at || !config.name.trim() || !isTimezone(config.timezone))
-    throw new DomainError("SETUP_INCOMPLETE", "Lengkapi identitas dan kalender sekolah.", 422);
+  if (!config || !config.configured_at || !config.name.trim() || !isTimezone(config.timezone)) {
+    const state = await setupState(client, config);
+    throw new DomainError(
+      "SETUP_INCOMPLETE",
+      state.missing.length
+        ? `Lengkapi: ${state.missing.join(", ")}. Hubungi admin.`
+        : "Konfirmasikan kesiapan melalui Konfigurasi sekolah. Hubungi admin.",
+      422,
+    );
+  }
   return {
     schoolName: config.name,
     timezone: config.timezone,

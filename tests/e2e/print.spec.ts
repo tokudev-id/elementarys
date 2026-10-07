@@ -77,6 +77,9 @@ test("print snapshot, receipt and A4 landscape PDF give one page per 10-student 
   });
   const content = pdf.toString("latin1");
   await page.emulateMedia({ media: "print" });
+  expect(
+    await page.locator("body").evaluate((element) => getComputedStyle(element).backgroundColor),
+  ).toBe("rgb(255, 255, 255)");
   await page.setViewportSize({ width: 1123, height: 794 });
   await page.screenshot({ path: "test-results/print-report.png", fullPage: true });
   expect(content.match(/\/Type\s*\/Page\b/g)).toHaveLength(2);
