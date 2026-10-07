@@ -7,6 +7,7 @@ for (const viewport of mobileViewports) {
     await page.goto("/component-preview");
     await expectNoPageOverflow(page);
     await expectTouchTarget(page, ".status-choices span, button");
+    expect(await page.getByRole("button", { name: "Buka dialog", exact: true }).evaluate(element => getComputedStyle(element).getPropertyValue("-webkit-tap-highlight-color"))).toBe("rgba(0, 0, 0, 0)");
     await page.screenshot({ path: `test-results/components-${viewport.name.replaceAll(" ", "-")}.png`, fullPage: true });
     await page.getByText("S Sakit", { exact: true }).tap();
     await expect(page.getByRole("radio", { name: "S Sakit" })).toBeChecked();
