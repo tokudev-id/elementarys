@@ -19,7 +19,7 @@
   margin: 10mm;
 }
 @media print {
-  body {
+  html body {
     background: white;
     color: black;
   }
@@ -93,6 +93,36 @@
     margin-top: 8mm;
     break-inside: avoid;
   }
+}
+
+.resource-form {
+  max-width: 36rem;
+  margin-block: 1.5rem;
+}
+.resource-form fieldset {
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.setup-checklist {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1.5rem;
+}
+.setup-checklist > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+.setup-checklist dt {
+  font-weight: 600;
+}
+.setup-checklist dd {
+  margin: 0;
 }
 
 select,
