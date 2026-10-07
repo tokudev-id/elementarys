@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Button } from "./button";
-export function Dialog({ open, onClose, title, children, actions, variant = "dialog" }: { open: boolean; onClose: () => void; title: string; children: ReactNode; actions?: ReactNode; variant?: "dialog" | "sheet" }) {
+export function Dialog({ open, onClose, title, children, actions, variant = "dialog", closeDisabled = false }: { open: boolean; onClose: () => void; title: string; children: ReactNode; actions?: ReactNode; variant?: "dialog" | "sheet"; closeDisabled?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   useEffect(() => {
@@ -38,7 +38,7 @@ export function Dialog({ open, onClose, title, children, actions, variant = "dia
     const last = focusable.at(-1);
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-  }} onCancel={event => { event.preventDefault(); onClose(); }}>
-    <div className="ui-dialog__layout"><header className="ui-dialog__header"><h2 id={titleId}>{title}</h2><Button variant="secondary" type="button" onClick={onClose} aria-label={`Tutup ${title}`}>Tutup</Button></header><div className="ui-dialog__body">{children}</div>{actions && <footer className="ui-dialog__actions">{actions}</footer>}</div>
+  }} onCancel={event => { event.preventDefault(); if(!closeDisabled)onClose(); }}>
+    <div className="ui-dialog__layout"><header className="ui-dialog__header"><h2 id={titleId}>{title}</h2><Button variant="secondary" type="button" disabled={closeDisabled} onClick={onClose} aria-label={`Tutup ${title}`}>Tutup</Button></header><div className="ui-dialog__body">{children}</div>{actions && <footer className="ui-dialog__actions">{actions}</footer>}</div>
   </dialog>;
 }

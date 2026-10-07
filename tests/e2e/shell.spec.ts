@@ -11,7 +11,7 @@ test("shell identitas config, tanggal sekolah, dan navigasi sentuh/keyboard", as
   await expect(page.locator("time")).toHaveAttribute("datetime", expectedDate);
   const nav = page.getByRole("navigation", { name: "Navigasi sekolah" });
   await expect(nav.getByRole("link")).toHaveCount(2);
-  await expect(nav.getByRole("link", { name: "Beranda" })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "Hari ini" })).toHaveAttribute("aria-current", "page");
   for (const viewport of mobileViewports) { await page.setViewportSize(viewport); await expectNoPageOverflow(page); await expectTouchTarget(page, ".app-nav a, .app-header button"); }
   await page.getByRole("link", { name: "Langsung ke isi halaman" }).focus();
   await page.keyboard.press("Enter"); await expect(page.getByRole("main")).toBeFocused();

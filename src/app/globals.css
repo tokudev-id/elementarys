@@ -63,6 +63,7 @@ h2 { font-size: 1.25rem; line-height: 1.4; }
 .ui-dialog__layout { display: flex; flex-direction: column; max-height: calc(var(--dialog-viewport-height, 100dvh) - 2rem); }
 .ui-dialog__header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem; flex-shrink: 0; border-bottom: 1px solid var(--border); }
 .ui-dialog__header h2 { margin: 0; }
+.ui-dialog__header .ui-button { flex-shrink: 0; white-space: nowrap; }
 .ui-dialog__body { padding: 1rem; overflow: auto; min-height: 0; overscroll-behavior: contain; scroll-padding-block: 1rem; }
 .ui-dialog__actions { flex-shrink: 0; padding: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: end; gap: .75rem; }
 .ui-dialog__body, .page-container { scrollbar-color: var(--border) var(--background); }
@@ -73,3 +74,17 @@ h2 { font-size: 1.25rem; line-height: 1.4; }
   .ui-dialog--sheet { top: auto; bottom: calc(100dvh - var(--dialog-viewport-top, 0px) - var(--dialog-viewport-height, 100dvh) + .5rem); width: calc(100% - 1rem); max-width: calc(100% - 1rem); }
 }
 @media (prefers-reduced-motion: no-preference) { .status-choices span { transition: background-color 120ms ease-out; } }
+.class-list { margin-top: 2rem; }
+.class-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+.class-row h2, .student-attendance-row h2 { margin: 0; }
+.class-row p { margin: .375rem 0; }
+.button-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .75rem 1rem; background: var(--accent); color: white; border-radius: 6px; text-decoration: none; flex-shrink: 0; }
+.attendance-form { padding-bottom: 7rem; }
+.attendance-toolbar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding: 1rem 0; background: var(--background); border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.attendance-toolbar h1, .attendance-toolbar p { margin: 0; }
+.attendance-toolbar .ui-field { max-width: 15rem; }
+.student-attendance-row { padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+.student-attendance-row p { margin: .5rem 0; }
+.attendance-actions { position: fixed; bottom: 0; left: 0; right: 0; z-index: 3; display: flex; justify-content: center; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom)); background: var(--background); border-top: 1px solid var(--border); }
+.attendance-totals { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; }
+@media (max-width: 480px) { .class-row { align-items: stretch; flex-direction: column; } .attendance-actions button { width: 100%; } }

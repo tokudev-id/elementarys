@@ -1,7 +1,7 @@
 export type NavigationItem = { id: string; label: string; href: string; roles: readonly ("admin" | "teacher")[]; ready: boolean };
 export const navigation: readonly NavigationItem[] = [
-  { id: "home", label: "Beranda", href: "/", roles: ["admin", "teacher"], ready: true },
-  { id: "attendance", label: "Absensi", href: "/attendance", roles: ["admin", "teacher"], ready: false },
+  { id: "home", label: "Beranda", href: "/", roles: ["admin", "teacher"], ready: false },
+  { id: "attendance", label: "Hari ini", href: "/attendance", roles: ["admin", "teacher"], ready: true },
   { id: "reports", label: "Rekap", href: "/reports", roles: ["admin", "teacher"], ready: false },
   { id: "students", label: "Siswa", href: "/students", roles: ["admin", "teacher"], ready: false },
   { id: "teachers", label: "Guru", href: "/teachers", roles: ["admin", "teacher"], ready: false },
