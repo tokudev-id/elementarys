@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { mobileViewports, expectNoPageOverflow, expectTouchTarget } from "./helpers/mobile";
 test("shell identitas config, tanggal sekolah, dan navigasi sentuh/keyboard", async ({ page }) => {
   await page.goto("/login");

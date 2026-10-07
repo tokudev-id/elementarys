@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { expectNoPageOverflow } from "./helpers/mobile";
 test("admin creates year/class and edits calendar on mobile; teacher reads without write controls", async ({
   page,
@@ -65,6 +65,9 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
     await expectNoPageOverflow(page);
   }
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
+  ).toBeVisible();
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();

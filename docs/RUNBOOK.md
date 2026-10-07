@@ -2,7 +2,7 @@
 
 ## Preview development dan pengukuran (S1-07)
 
-Status: alur lokal S1-06 lulus. Preview cloud belum tersedia; H-02 memerlukan login Neon CLI dan project Vercel yang ditautkan Toku. URL dan hasil latensi provider belum ada. Tidak ada data nyata atau branch production yang dipakai pada persiapan ini.
+Status: alur lokal S1-06 dan fitur Slice2 tersedia dengan data sintetis. Bukti command terbaru ada pada IMPLEMENTATION_LOG.md. Preview cloud belum tersedia; H-02 memerlukan login Neon CLI dan project Vercel yang ditautkan Toku. URL dan hasil latensi provider belum ada. Tidak ada data nyata atau branch production yang dipakai pada persiapan ini.
 
 ### Pemeriksaan lokal
 

@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./fixtures";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
 import { createAuth } from "../../src/server/auth/factory";

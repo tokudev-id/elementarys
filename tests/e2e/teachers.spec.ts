@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./fixtures";
 import { randomUUID } from "node:crypto";
 import { expectNoPageOverflow } from "./helpers/mobile";
 async function login(page: Page, email: string, password: string) {
@@ -60,6 +60,9 @@ test("profile account classes reset and temporary-password journey work on mobil
     await expectNoPageOverflow(page);
   }
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
+  ).toBeVisible();
   await login(page, email, resetPassword);
   await expect(page.getByRole("heading", { name: "Ganti password", exact: true })).toBeVisible();
   await page.getByLabel("Password saat ini", { exact: true }).fill(resetPassword);

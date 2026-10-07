@@ -225,7 +225,7 @@ it("uses one repeatable-read snapshot while a correction commits between report 
   expect(updated.sessionVersions[id]).toBe(2);
 });
 
-it("writes six class sheets and summary, numeric totals and literal formula-looking strings with valid unique sheet names", async () => {
+it("roundtrips class sheets with reserved, quoted, shortened and colliding names plus literal formula-looking strings", async () => {
   await source.query("UPDATE classes SET name=$2 WHERE id=$1", [
     classes[0],
     "Nama/kelas/yang/panjang/untuk/uji/collision-satu",
@@ -238,7 +238,16 @@ it("writes six class sheets and summary, numeric totals and literal formula-look
     await source.query("INSERT INTO classes(academic_year_id,grade,name) VALUES($1,$2,$3)", [
       yearId,
       index,
-      `Kelas ${index}`,
+      ["History", "history", "Ringkasan", "['Kelas']"][index - 3],
+    ]);
+  for (const name of [
+    `${"K".repeat(30)}' setelah pemotongan`,
+    " ' 'Kelas' ' ",
+    `History${" ".repeat(40)}kelas`,
+  ])
+    await source.query("INSERT INTO classes(academic_year_id,grade,name) VALUES($1,1,$2)", [
+      yearId,
+      name,
     ]);
   await source.query("UPDATE students SET full_name='=1+1',student_code='00123' WHERE id=$1", [
     studentId,
@@ -249,13 +258,15 @@ it("writes six class sheets and summary, numeric totals and literal formula-look
   const encoded = await createReportWorkbook(report, { name: "Guru Laporan" }).xlsx.writeBuffer();
   const decoded = new ExcelJS.Workbook();
   await decoded.xlsx.load(encoded);
-  expect(decoded.worksheets).toHaveLength(7);
-  expect(new Set(decoded.worksheets.map((item) => item.name.toLowerCase())).size).toBe(7);
+  expect(decoded.worksheets).toHaveLength(10);
+  expect(new Set(decoded.worksheets.map((item) => item.name.toLowerCase())).size).toBe(10);
   for (const sheet of decoded.worksheets) {
     expect(sheet.name.length).toBeLessThanOrEqual(31);
     expect(sheet.name).not.toMatch(/[\\/*?:\[\]]/);
+    expect(sheet.name).not.toMatch(/^'|'$/);
+    expect(sheet.name.toLowerCase()).not.toBe("history");
   }
-  const sheet = decoded.worksheets[1];
+  const sheet = decoded.worksheets.find((item) => item.getCell("A10").value === "00123")!;
   expect(sheet.getCell("A10").value).toBe("00123");
   expect(sheet.getCell("B10").value).toBe("=1+1");
   expect(sheet.getRow(10).getCell(32).value).toBe(1);
