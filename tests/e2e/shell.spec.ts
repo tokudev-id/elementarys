@@ -15,7 +15,7 @@ test("shell identitas config, tanggal sekolah, dan navigasi sentuh/keyboard", as
   }).format(new Date());
   await expect(page.locator("time")).toHaveAttribute("datetime", expectedDate);
   const nav = page.getByRole("navigation", { name: "Navigasi sekolah" });
-  await expect(nav.getByRole("link")).toHaveCount(2);
+  await expect(nav.getByRole("link")).toHaveCount(3);
   await expect(nav.getByRole("link", { name: "Hari ini" })).toHaveAttribute("aria-current", "page");
   for (const viewport of mobileViewports) {
     await page.setViewportSize(viewport);
