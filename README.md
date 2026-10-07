@@ -42,3 +42,5 @@ Percobaan login dibatasi lima kali per email per menit, memakai key HMAC tanpa e
 ## Pemeriksaan visual scaffold
 
 Halaman awal adalah placeholder pengembangan tanpa kontrol interaktif. Review independen pada 360/768/1024: ship pada scope S1-01; kontras teks 12.36:1, tanpa overflow. Detector menandai Arial sebagai overused-font; pengecualian Operate dan brief mengizinkan font sistem untuk UI tugas sekolah. Antislop: hard gate PASS (tidak ada aset/klaim/kontrol buatan); purpose PASS (font sistem dipilih untuk keterbacaan dan tanpa unduhan); liveliness PASS pada scope placeholder (fokus judul, ruang terstruktur, ENERGY/RHYTHM/MOTION 1); craftsmanship PASS berdasarkan screenshot dan smoke test, bukan penerimaan fitur guru.
+
+Build membersihkan folder hasil generate `.next` terlebih dahulu. Ini mencegah CSS lama dari cache build lokal terbawa ke artefak baru; kode sumber dan data database tidak disentuh. Assertion browser S1-04 turut memeriksa computed tap-highlight style, bukan source CSS saja.
