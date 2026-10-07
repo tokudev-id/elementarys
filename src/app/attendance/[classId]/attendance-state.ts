@@ -25,16 +25,27 @@ export function buildEntries(
   }));
 }
 
-export function canRecordAttendance(view: AttendanceView): boolean {
+function eligibleDate(view: AttendanceView, role: "teacher" | "admin"): boolean {
   return (
-    view.sessionState === "not_recorded" &&
-    view.isCurrentYear &&
+    (view.isCurrentYear || role === "admin") &&
     view.inAcademicYear &&
     view.isSchoolDay &&
     view.setupReady &&
     view.date <= view.schoolToday &&
     view.students.length > 0
   );
+}
+
+export function canEditAttendance(view: AttendanceView, role: "teacher" | "admin"): boolean {
+  return view.sessionState !== "not_recorded" && eligibleDate(view, role);
+}
+
+export function canRecordAttendance(
+  view: AttendanceView,
+  role: "teacher" | "admin" = "teacher",
+  editing = false,
+): boolean {
+  return (view.sessionState === "not_recorded" || editing) && eligibleDate(view, role);
 }
 
 export function formatAttendanceDate(date: string): string {

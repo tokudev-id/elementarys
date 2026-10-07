@@ -657,6 +657,32 @@ h2 {
 .attendance-form {
   padding-bottom: 7rem;
 }
+.attendance-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+.attendance-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.history-list h2 {
+  font-size: 1.125rem;
+}
+.history-statuses {
+  list-style: none;
+  padding: 0;
+}
+.history-statuses span {
+  display: block;
+}
+.history-statuses li {
+  padding-block: 0.75rem;
+  border-bottom: 0;
+}
 .attendance-toolbar {
   position: sticky;
   top: 0;

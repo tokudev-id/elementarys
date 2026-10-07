@@ -49,7 +49,9 @@ export function AttendanceAvailability({ view }: { view: AttendanceView }) {
       )}
       {!view.isCurrentYear && <p>Tahun ajaran lama ditampilkan sebagai arsip.</p>}
       {view.sessionState === "voided" && (
-        <StateBanner state="empty">Catatan pada tanggal ini dibatalkan. Hubungi admin.</StateBanner>
+        <StateBanner state="empty">
+          Catatan pada tanggal ini dibatalkan. Riwayat dan alasan pembatalan tetap tersedia.
+        </StateBanner>
       )}
     </>
   );

@@ -38,7 +38,11 @@ export default async function ClassAttendance({
       actor={actor}
       currentPath="/attendance"
     >
-      <AttendanceForm key={`${data.classId}:${data.date}:${data.timezone}`} initial={data} />
+      <AttendanceForm
+        key={`${data.classId}:${data.date}:${data.timezone}:${data.sessionVersion}`}
+        initial={data}
+        role={actor.role}
+      />
     </AppShell>
   );
 }

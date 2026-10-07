@@ -12,15 +12,22 @@ import { formatAttendanceDate } from "./attendance-state";
 import { AttendanceSummary, AttendanceAvailability } from "./attendance-feedback";
 import { StudentAttendanceRow } from "./student-attendance-row";
 import { useAttendanceForm } from "./use-attendance-form";
+import { VoidAttendanceForm } from "./void-form";
 
-export function AttendanceForm({ initial }: { initial: AttendanceView }) {
-  const form = useAttendanceForm(initial);
+export function AttendanceForm({
+  initial,
+  role,
+}: {
+  initial: AttendanceView;
+  role: "teacher" | "admin";
+}) {
+  const form = useAttendanceForm(initial, role);
   const feedbackRef = useRef<HTMLDivElement>(null);
   const { view, notice, pending, loading } = form;
   const totals = attendanceTotals(form.entries);
 
   useEffect(() => {
-    if (notice || view.sessionState === "submitted") {
+    if (notice || view.sessionState !== "not_recorded") {
       feedbackRef.current?.focus({ preventScroll: true });
       feedbackRef.current?.scrollIntoView({ block: "center" });
     }
@@ -47,6 +54,21 @@ export function AttendanceForm({ initial }: { initial: AttendanceView }) {
       <Link href="/attendance" prefetch={false}>
         Kembali ke hari ini
       </Link>
+      <div className="attendance-links">
+        <Link href={`/attendance/${view.classId}/history?date=${view.date}`} prefetch={false}>
+          Riwayat absensi
+        </Link>
+        {form.canEdit && !form.editing && (
+          <Button variant="secondary" disabled={form.blocked} onClick={form.startEditing}>
+            {view.sessionState === "voided" ? "Isi ulang catatan" : "Koreksi catatan"}
+          </Button>
+        )}
+        {form.editing && (
+          <Button variant="secondary" disabled={form.blocked} onClick={form.cancelEditing}>
+            Batal koreksi
+          </Button>
+        )}
+      </div>
       {notice && (
         <div ref={feedbackRef} tabIndex={-1}>
           <StateBanner
@@ -82,9 +104,28 @@ export function AttendanceForm({ initial }: { initial: AttendanceView }) {
               </StateBanner>
             </div>
           )}
-          <AttendanceAvailability view={view} />
+          <div
+            ref={!notice && view.sessionState === "voided" ? feedbackRef : undefined}
+            tabIndex={view.sessionState === "voided" ? -1 : undefined}
+          >
+            <AttendanceAvailability view={view} />
+          </div>
           {form.canRecord && (
-            <p>Periksa kehadiran siswa. Tandai yang tidak hadir, lalu simpan kehadiran kelas.</p>
+            <>
+              <p>Periksa kehadiran siswa. Tandai yang tidak hadir, lalu simpan kehadiran kelas.</p>
+              {form.requiresReason && (
+                <Field
+                  label="Alasan koreksi atau isi ulang"
+                  value={form.reason}
+                  onChange={form.changeReason}
+                  required
+                  maxLength={1000}
+                  disabled={form.blocked}
+                  error={form.reasonError}
+                  hint="Catatan sebelumnya tetap tersedia di riwayat."
+                />
+              )}
+            </>
           )}
           <div>
             {view.students.map((student) => (
@@ -98,6 +139,9 @@ export function AttendanceForm({ initial }: { initial: AttendanceView }) {
               />
             ))}
           </div>
+          {role === "admin" && view.sessionState === "submitted" && !form.editing && (
+            <VoidAttendanceForm key={`${view.date}:${view.sessionVersion}`} view={view} />
+          )}
         </>
       )}
       {form.canRecord && (
@@ -125,6 +169,7 @@ export function AttendanceForm({ initial }: { initial: AttendanceView }) {
         }
       >
         <p>{formatAttendanceDate(view.date)}</p>
+        {form.requiresReason && <p>Alasan: {form.reason.trim()}</p>}
         <div className="attendance-totals">
           <p>
             <strong>{totals.H}</strong> Hadir

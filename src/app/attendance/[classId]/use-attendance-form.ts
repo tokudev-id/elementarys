@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent } from "react";
+import { useRef, useState, useTransition, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { AttendanceView } from "@/contracts/attendance-view";
 import type { AttendanceStatus } from "@/domain/attendance";
@@ -10,7 +10,12 @@ import {
   AttendanceRequestError,
   type AttendanceClient,
 } from "@/lib/attendance-client";
-import { buildEntries, canRecordAttendance, createDraft } from "./attendance-state";
+import {
+  buildEntries,
+  canEditAttendance,
+  canRecordAttendance,
+  createDraft,
+} from "./attendance-state";
 
 export type AttendanceNotice = { state: BannerState; message: string };
 
@@ -29,6 +34,7 @@ function requestNotice(error: unknown, fallback: string): AttendanceNotice {
 
 export function useAttendanceForm(
   initial: AttendanceView,
+  role: "teacher" | "admin",
   client: AttendanceClient = attendanceClient,
 ) {
   const router = useRouter();
@@ -37,13 +43,20 @@ export function useAttendanceForm(
   const [draft, setDraft] = useState(() => createDraft(initial));
   const [date, setDate] = useState(initial.date);
   const [pending, setPending] = useState(false);
+  const [refreshing, startRefresh] = useTransition();
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [notice, setNotice] = useState<AttendanceNotice | null>(null);
   const [conflictNeedsReload, setConflictNeedsReload] = useState(false);
-  const canRecord = canRecordAttendance(view);
+  const [editing, setEditing] = useState(false);
+  const [reason, setReason] = useState("");
+  const [reasonError, setReasonError] = useState<string>();
+  const canRecord = canRecordAttendance(view, role, editing);
+  const canEdit = canEditAttendance(view, role);
+  const requiresReason = view.sessionState !== "not_recorded" || !view.isCurrentYear;
   const entries = buildEntries(view, draft);
-  const blocked = pending || loading || notice?.state === "session-expired" || conflictNeedsReload;
+  const blocked =
+    pending || refreshing || loading || notice?.state === "session-expired" || conflictNeedsReload;
 
   async function load(nextDate: string, conflict = false) {
     setLoading(true);
@@ -53,6 +66,9 @@ export function useAttendanceForm(
       setView(latest);
       setDraft(createDraft(latest));
       setDate(latest.date);
+      setEditing(false);
+      setReason("");
+      setReasonError(undefined);
       setConflictNeedsReload(false);
       window.history.replaceState(
         null,
@@ -90,7 +106,9 @@ export function useAttendanceForm(
   async function changeDate(event: ChangeEvent<HTMLInputElement>) {
     const nextDate = event.currentTarget.value;
     if (!nextDate || busyRef.current) return;
-    const dirty = view.students.some((student) => draft[student.enrollmentId] !== student.status);
+    const dirty =
+      reason.length > 0 ||
+      view.students.some((student) => draft[student.enrollmentId] !== student.status);
     if (dirty && !window.confirm("Pilihan belum tersimpan. Ganti tanggal dan mulai isian baru?"))
       return;
     busyRef.current = true;
@@ -109,7 +127,31 @@ export function useAttendanceForm(
   }
 
   function openConfirmation() {
+    if (requiresReason && !reason.trim()) {
+      setReasonError("Isi alasan koreksi atau pengisian ulang.");
+      return;
+    }
     if (canRecord && !blocked && !busyRef.current) setConfirm(true);
+  }
+
+  function startEditing() {
+    if (canEdit && !blocked && !busyRef.current) {
+      setEditing(true);
+      setNotice(null);
+    }
+  }
+
+  function cancelEditing() {
+    if (blocked || busyRef.current) return;
+    setDraft(createDraft(view));
+    setEditing(false);
+    setReason("");
+    setReasonError(undefined);
+  }
+
+  function changeReason(event: ChangeEvent<HTMLInputElement>) {
+    setReason(event.currentTarget.value);
+    setReasonError(undefined);
   }
 
   function closeConfirmation() {
@@ -134,7 +176,7 @@ export function useAttendanceForm(
       const saved = await client.save(view.classId, view.date, {
         expectedVersion: view.sessionVersion,
         entries,
-        reason: null,
+        reason: requiresReason ? reason.trim() : null,
       });
       const statuses = new Map(entries.map((entry) => [entry.enrollmentId, entry.status]));
       const updated: AttendanceView = {
@@ -147,8 +189,11 @@ export function useAttendanceForm(
       };
       setView(updated);
       setDraft(createDraft(updated));
+      setEditing(false);
+      setReason("");
+      setReasonError(undefined);
       setNotice(null);
-      router.refresh();
+      startRefresh(() => router.refresh());
     } catch (error) {
       if (error instanceof AttendanceRequestError && error.status === 409) {
         await load(view.date, true);
@@ -171,15 +216,23 @@ export function useAttendanceForm(
     view,
     draft,
     date,
-    pending,
+    pending: pending || refreshing,
     loading,
     confirm,
     notice,
     canRecord,
+    canEdit,
+    editing,
+    reason,
+    reasonError,
+    requiresReason,
     entries,
     blocked,
     changeDate,
     changeStatus,
+    changeReason,
+    startEditing,
+    cancelEditing,
     openConfirmation,
     closeConfirmation,
     reloadLatest,
