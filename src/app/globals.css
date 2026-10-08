@@ -672,6 +672,22 @@ h2 {
 .history-list h2 {
   font-size: 1.125rem;
 }
+.audit-list h2 {
+  font-size: 1.125rem;
+}
+.audit-json {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+details summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 0.5rem;
+}
 .history-statuses {
   list-style: none;
   padding: 0;

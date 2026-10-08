@@ -1,5 +1,6 @@
 import "server-only";
 import { Pool, type PoolClient } from "pg";
+import { recordRequestAction, writeTechnicalLog } from "@/server/technical-log";
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -8,6 +9,16 @@ export const pool = new Pool({
   idleTimeoutMillis: 10000,
   statement_timeout: 15000,
 });
+function handlePoolError() {
+  writeTechnicalLog({
+    requestId: null,
+    actorId: null,
+    action: "database.connection",
+    durationMs: null,
+    errorCode: "SERVICE_UNAVAILABLE",
+  });
+}
+pool.on("error", handlePoolError);
 
 export async function transaction<T>(
   fn: (client: PoolClient) => Promise<T>,
@@ -48,6 +59,7 @@ export async function audit(
   changes: unknown,
   reason: string | null = null,
 ) {
+  recordRequestAction(action);
   await client.query(
     "INSERT INTO audit_events(actor_id,action,entity_type,entity_id,request_id,changes_json,reason) VALUES($1,$2,$3,$4,$5,$6,$7)",
     [actorId, action, entityType, entityId, requestId, JSON.stringify(changes), reason],

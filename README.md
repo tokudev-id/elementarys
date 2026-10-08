@@ -58,6 +58,22 @@ Halaman Guru mendukung profil tanpa akun, buat/tautkan akun, kelas utama, status
 - Rekap: filter tahun/bulan/kelas, totals dan tabel tanggal, Excel serta cetak A4 landscape. Proyeksi memakai snapshot transaksi yang sama. Setiap ekspor mencatat versi yang dirender; perubahan berikutnya menampilkan tanggal yang berubah. Membuka halaman cetak tetap read-only, tombol Cetak mencatat ekspor sebelum dialog print.
 - Backup: enkripsi age, retensi 30 dan restore drill tersedia pada [runbook](docs/RUNBOOK.md). Tujuan/kunci/runner/pemilik operasional menunggu H-07; Excel/printer sekolah menunggu H-06.
 
+## Endpoint dan audit
+
+Semua endpoint data memakai guard sesi/no-store. GET mendukung guru/admin kecuali audit admin. Mutasi master, penempatan, akun, void dan audit hanya admin; PUT absensi untuk guru tahun current atau admin dengan alasan pada tahun lama. Namespace /api/auth hanya sign-in/email, sign-out dan get-session; operasi plugin publik lain ditolak.
+
+| Kelompok | Endpoint |
+|---|---|
+| Identitas/setup | GET/PATCH /api/settings |
+| Tahun/kelas/kalender | GET/POST /api/academic-years, PATCH /api/academic-years/{id}, GET/PUT /api/academic-years/{id}/calendar, GET/POST /api/classes, PATCH /api/classes/{id} |
+| Siswa/lifecycle | GET/POST /api/students, GET/PATCH /api/students/{id}, POST /api/students/{id}/enrollments, PATCH /api/enrollments/{id}/end, POST /api/enrollments/promote/preview dan /api/enrollments/promote |
+| Guru/akun | GET/POST /api/teachers, PATCH /api/teachers/{id}, PUT /api/teachers/{id}/classes, POST /api/teachers/{id}/account, PATCH /api/users/{id}/access, POST /api/users/{id}/reset-password, POST /api/account/change-password |
+| Absensi | GET /api/me, GET /api/dashboard, GET /api/classes/{id}/attendance, PUT /api/classes/{id}/attendance/{date}, POST /api/classes/{id}/attendance/{date}/void, GET /api/classes/{id}/attendance/{date}/history |
+| Laporan/audit | GET /api/reports/attendance, GET /api/reports/attendance.xlsx, POST /api/reports/exports, GET /api/audit |
+| Operasi | GET /api/health, pnpm auth:bootstrap-admin, pnpm db:migrate, pnpm db:seed:test, pnpm measure:attendance; CLI backup/restore pada runbook |
+
+[Cakupan audit](docs/AUDIT_COVERAGE.md) memetakan mutasi dan ekspor ke bukti uji. Log API memakai metadata yang dipilih eksplisit; payload, cookie, credential dan nama siswa tidak dicetak. APP_LOG_TEST=1 hanya untuk melihat metadata pada uji lokal. Guard seed/reset/migrasi/restore saat ini menerima database uji lokal; provisioning produksi mengikuti runbook dan checkpoint operator.
+
 ## Pemeriksaan visual
 
 Arah UI ada di [DESIGN.md](DESIGN.md): Operate untuk pekerjaan guru/admin, ENERGY 1 / RHYTHM 1 / MOTION 1, font sistem dan aksen hijau. [Laporan anti-slop](docs/ANTI_SLOP_REPORT.md) mencatat gate, kontras, viewport, keyboard dan interaksi yang diuji. Bukti emulator dan PDF lokal melengkapi pemeriksaan teknis; penerimaan perangkat nyata tetap pada checkpoint manusia di log.

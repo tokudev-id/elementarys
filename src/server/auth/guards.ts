@@ -1,9 +1,10 @@
 import "server-only";
-import type { Pool } from "pg";
+import type { Pool, PoolClient } from "pg";
 import { DomainError } from "@/domain/errors";
 import { pool } from "../db/pool";
 import { getAuth } from "./runtime";
 import type { createAuth } from "./factory";
+import { recordRequestActor } from "@/server/technical-log";
 
 export type Actor = {
   id: string;
@@ -15,7 +16,7 @@ export type Actor = {
 export async function requireActor(
   headers: Headers,
   options: { admin?: boolean; allowPasswordChange?: boolean } = {},
-  source: Pool = pool,
+  source: Pool | PoolClient = pool,
   auth: ReturnType<typeof createAuth> = getAuth(),
 ): Promise<Actor> {
   const session = await auth.api.getSession({ headers });
@@ -25,6 +26,7 @@ export async function requireActor(
     [session.user.id],
   );
   const u = result.rows[0];
+  if (u) recordRequestActor(u.id);
   if (
     !u ||
     u.banned ||

@@ -212,7 +212,12 @@ export async function updateTeacher(
     await audit(client, actor.id, "teacher.update", "teacher", id, requestId, {
       actorName: actor.name,
       before: { ...before, account: user },
-      after: { fullName: input.fullName, active: input.active, version: before.version + 1 },
+      after: {
+        fullName: input.fullName,
+        active: input.active,
+        version: before.version + 1,
+        account: before.userId ? await accountRow(client, before.userId) : null,
+      },
     });
     return { saved: true as const, id, version: before.version + 1 };
   }, source);
@@ -384,7 +389,7 @@ export async function resetAccountPassword(
   const input = parseInput(resetPasswordSchema, body);
   return mutationTransaction(async (client) => {
     await authorizeAdminMutation(client, actor);
-    await accountRow(client, userId);
+    const before = await accountRow(client, userId);
     const profile = (
       await client.query<{ id: string; version: number }>(
         "SELECT id,version FROM teachers WHERE user_id=$1 FOR UPDATE",
@@ -404,6 +409,7 @@ export async function resetAccountPassword(
       await client.query("UPDATE teachers SET version=version+1 WHERE id=$1", [profile.id]);
     await audit(client, actor.id, "user.password-reset", "user", userId, requestId, {
       actorName: actor.name,
+      before: { mustChangePassword: before.mustChangePassword },
       after: { mustChangePassword: true, revokedSessions: revoked.rowCount },
     });
     return { saved: true as const, id: userId, version: profile ? profile.version + 1 : undefined };

@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { DomainError } from "@/domain/errors";
+import { withRequestLog, type LogWriter } from "./technical-log";
 
 export function json(data: unknown, requestId: string = randomUUID(), status = 200) {
   return Response.json(data, {
@@ -25,13 +26,24 @@ export function errorResponse(error: unknown, requestId: string = randomUUID()) 
   );
 }
 
-export function handler(fn: (request: Request, requestId: string) => Promise<Response>) {
+export function handler(
+  fn: (request: Request, requestId: string) => Promise<Response>,
+  action?: string,
+  writer?: LogWriter,
+) {
   return async (request: Request) => {
     const requestId = randomUUID();
-    try {
-      return await fn(request, requestId);
-    } catch (error) {
-      return errorResponse(error, requestId);
-    }
+    return withRequestLog(
+      requestId,
+      action ?? `request.${request.method.toLowerCase()}`,
+      async () => {
+        try {
+          return await fn(request, requestId);
+        } catch (error) {
+          return errorResponse(error, requestId);
+        }
+      },
+      writer,
+    );
   };
 }

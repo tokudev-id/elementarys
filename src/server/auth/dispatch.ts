@@ -12,6 +12,7 @@ export async function dispatchAuth(
   source: Pool,
   secret: string,
   baseURL: string,
+  requestId: string = randomUUID(),
 ) {
   try {
     const path = new URL(request.url).pathname.replace(/^\/api\/auth/, "");
@@ -47,8 +48,9 @@ export async function dispatchAuth(
     }
     const response = await auth.handler(request);
     response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Request-Id", requestId);
     return response;
   } catch (error) {
-    return errorResponse(error);
+    return errorResponse(error, requestId);
   }
 }
