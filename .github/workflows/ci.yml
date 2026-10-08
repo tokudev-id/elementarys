@@ -1,19 +1,65 @@
 name: Checks
 on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: school_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 55433:5432
+        options: >-
+          --health-cmd "pg_isready -U school_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      APP_ENV: test
+      CI: true
+      DATABASE_URL: postgresql://school_test@127.0.0.1:55433/elementary_test_ci
+      DATABASE_MIGRATION_URL: postgresql://school_test@127.0.0.1:55433/elementary_test_ci
+      TEST_DATABASE_ADMIN_URL: postgresql://school_test@127.0.0.1:55433/postgres
+      TEST_DB_SUFFIX: ci
+      PORT: 3101
+      BETTER_AUTH_URL: http://localhost:3101
+      PG_TOOL_DIR: /usr/lib/postgresql/18/bin
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with:
           version: 12.4.2
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22.23.3
+          node-version: 24.21.0
           cache: pnpm
+      - name: Synthetic auth secret
+        run: echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+      - name: PostgreSQL 18 client and age
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common curl ca-certificates
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-18
+          curl -fsSL https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz -o "$RUNNER_TEMP/age.tar.gz"
+          echo "cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10  $RUNNER_TEMP/age.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/age.tar.gz" -C "$RUNNER_TEMP"
+          echo "AGE_BIN=$RUNNER_TEMP/age/age" >> "$GITHUB_ENV"
+          echo "AGE_KEYGEN_BIN=$RUNNER_TEMP/age/age-keygen" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm test:domain
+      - run: pnpm test:integration
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm test:e2e --workers=1
