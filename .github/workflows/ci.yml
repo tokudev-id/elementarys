@@ -63,3 +63,9 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
       - run: pnpm test:e2e --workers=1
+      - name: Production mode on synthetic local database
+        run: pnpm exec playwright test --config tests/production/playwright.config.ts
+        env:
+          APP_ENV: production
+          PORT: 3102
+          BETTER_AUTH_URL: http://localhost:3102
