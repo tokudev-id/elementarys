@@ -89,6 +89,11 @@ test("30 pupils and three absences take five taps with a complete named confirma
     ).toBeVisible();
     await confirmation.getByRole("button", { name: "Simpan", exact: true }).tap();
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+    const toast = page.locator("[data-sonner-toast]").first();
+    await expect(toast).toBeVisible();
+    const toastBox = await toast.boundingBox();
+    expect(toastBox!.x).toBeGreaterThanOrEqual(0);
+    expect(toastBox!.x + toastBox!.width).toBeLessThanOrEqual(390);
     expect(Number(await page.locator("html").getAttribute("data-tap-count"))).toBe(5);
     const totals = (
       await source.query(
@@ -142,7 +147,12 @@ test("30 pupils and three absences take five taps with a complete named confirma
       picker.getByRole("button", { name: "Bulan berikutnya", exact: true }),
     ).toBeDisabled();
     await picker.getByRole("button", { name: "Tutup Pilih tanggal absensi", exact: true }).click();
-    await page.screenshot({ path: "test-results/attendance-redesign-390.png", fullPage: true });
+    await expect(picker).toBeHidden();
+    await page.screenshot({
+      path: "test-results/attendance-redesign-390.png",
+      fullPage: true,
+      animations: "disabled",
+    });
   } finally {
     await source.end();
   }
