@@ -1,86 +1,138 @@
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listStudents } from "@/server/services/students";
-import { listAcademicYears, listClasses } from "@/server/services/school-master";
+import { listClassOptions } from "@/server/services/school-master";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
-import { StateBanner } from "@/components/state-banner";
-import { Field } from "@/components/field";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
+import { ListFilters } from "@/components/list-filters";
 import { SelectField } from "@/components/select-field";
-import { Button } from "@/components/button";
-import { StudentForm } from "./form";
+import { MasterList, type MasterRow } from "@/components/master-list";
+import { DataTablePagination } from "@/components/data-table-pagination";
+import { studentListSchema } from "@/contracts/lists";
+import { parseInput } from "@/contracts/attendance";
+
 export default async function Students({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; classId?: string; includeArchived?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const actor = await requirePageActor();
   const selected = await searchParams;
-  const settings = await getSchoolSettings();
-  const years = await listAcademicYears();
-  const classes = await listClasses();
-  const students = await listStudents({
-    search: selected.search,
+  const filter = parseInput(studentListSchema, {
+    page: selected.page,
+    pageSize: selected.pageSize,
+    q: selected.q ?? selected.search,
     classId: selected.classId || undefined,
-    includeArchived: selected.includeArchived === "true",
+    status: selected.status ?? (selected.includeArchived === "true" ? "all" : undefined),
+    sort: selected.sort,
   });
-  const school = schoolIdentity(settings);
+  const [settings, classes, students] = await Promise.all([
+    getSchoolSettings(),
+    listClassOptions(),
+    listStudents(filter),
+  ]);
+  const query = Object.fromEntries(
+    Object.entries(filter)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [key, String(value)]),
+  );
+  const rows: MasterRow[] = students.items.map((student) => ({
+    id: student.id,
+    title: student.fullName,
+    href: `/students/${student.id}`,
+    meta: `${student.studentCode} · ${student.activeClass?.name ?? "Belum ditempatkan"}`,
+    status: {
+      label: student.archivedAt ? "Diarsipkan" : "Aktif",
+      tone: student.archivedAt ? "neutral" : "success",
+    },
+    cells: {
+      code: student.studentCode,
+      nis: student.nis ?? "",
+      nisn: student.nisn ?? "",
+      class: student.activeClass?.name ?? "Belum ditempatkan",
+    },
+    actions: [
+      { label: "Lihat", href: `/students/${student.id}` },
+      ...(actor.role === "admin"
+        ? [
+            { label: "Ubah", href: `/students/${student.id}/edit` },
+            { label: "Pindah kelas", href: `/students/${student.id}?action=placement` },
+            {
+              label: student.archivedAt ? "Aktifkan kembali" : "Arsipkan",
+              href: `/students/${student.id}?action=archive`,
+              destructive: true,
+            },
+          ]
+        : []),
+    ],
+  }));
   return (
-    <AppShell school={school} actor={actor} currentPath="/students">
-      <h1>Siswa</h1>
-      <form className="filter-form" action="/students">
-        <Field
-          label="Cari nama atau kode siswa"
-          name="search"
-          defaultValue={selected.search}
-          maxLength={200}
-        />
-        <SelectField label="Filter kelas" name="classId" defaultValue={selected.classId ?? ""}>
+    <AppShell school={schoolIdentity(settings)} actor={actor} currentPath="/students">
+      <PageHeader
+        title="Siswa"
+        description={`${students.total} siswa sesuai filter`}
+        actions={
+          actor.role === "admin" ? (
+            <>
+              <Link className="button-link" href="/students/new">
+                Tambah siswa
+              </Link>
+              <Link className="button-link button-link--secondary" href="/students/promote">
+                Naik kelas / penempatan
+              </Link>
+            </>
+          ) : undefined
+        }
+      />
+      <ListFilters q={filter.q} query={query} searchLabel="Cari nama atau kode siswa">
+        <SelectField label="Filter kelas" name="classId" defaultValue={filter.classId ?? ""}>
           <option value="">Semua kelas</option>
           {classes.map((item) => (
-            <option key={item.id} value={item.id}>
+            <option value={item.id} key={item.id}>
               {item.name}
             </option>
           ))}
         </SelectField>
-        <Button type="submit">Cari siswa</Button>
-        <label className="checkbox-field">
-          <input
-            type="checkbox"
-            name="includeArchived"
-            value="true"
-            defaultChecked={selected.includeArchived === "true"}
-          />
-          Tampilkan siswa diarsipkan
-        </label>
-      </form>
-      {actor.role === "admin" && (
-        <p>
-          <Link href="/students/promote">Naik kelas atau penempatan tahun berikutnya</Link>
-        </p>
+        <SelectField label="Status siswa" name="status" defaultValue={filter.status}>
+          <option value="active">Aktif</option>
+          <option value="archived">Diarsipkan</option>
+          <option value="all">Semua</option>
+        </SelectField>
+        <SelectField label="Urutkan siswa" name="sort" defaultValue={filter.sort}>
+          <option value="name">Nama</option>
+          <option value="code">Kode</option>
+          <option value="class">Kelas</option>
+        </SelectField>
+        <SelectField label="Per halaman" name="pageSize" defaultValue={filter.pageSize}>
+          {[10, 25, 50].map((size) => (
+            <option value={size} key={size}>
+              {size}
+            </option>
+          ))}
+        </SelectField>
+      </ListFilters>
+      {rows.length ? (
+        <MasterList
+          items={rows}
+          label="Daftar siswa"
+          columns={[
+            { key: "code", label: "Kode" },
+            { key: "nis", label: "NIS", desktopOnly: true },
+            { key: "nisn", label: "NISN", desktopOnly: true },
+            { key: "class", label: "Kelas aktif" },
+          ]}
+        />
+      ) : (
+        <EmptyState
+          title={filter.q || filter.classId ? "Tidak ada siswa yang cocok" : "Belum ada siswa"}
+          description="Periksa filter atau tambahkan siswa yang sudah diverifikasi."
+          action={<Link href="/students">Reset filter</Link>}
+        />
       )}
-      {actor.role === "admin" &&
-        (classes.some((item) => !item.archivedAt) ? (
-          <section>
-            <h2>Tambah siswa</h2>
-            <StudentForm classes={classes} years={years} today={school?.date ?? ""} />
-          </section>
-        ) : (
-          <StateBanner state="empty">Tambahkan kelas sebelum memasukkan siswa.</StateBanner>
-        ))}
-      {!students.length && (
-        <StateBanner state="empty">Tidak ada siswa yang cocok dengan filter ini.</StateBanner>
-      )}
-      <ul className="resource-list">
-        {students.map((student) => (
-          <li key={student.id}>
-            <Link href={`/students/${student.id}`}>{student.fullName}</Link>
-            <small>{student.studentCode}</small>
-            {student.archivedAt && <small>Diarsipkan</small>}
-          </li>
-        ))}
-      </ul>
+      <DataTablePagination {...students} pathname="/students" query={query} />
     </AppShell>
   );
 }

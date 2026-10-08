@@ -6,7 +6,12 @@ import { HttpError, requestJson } from "@/lib/http-client";
 import type { BannerState } from "./state-banner";
 import { toast } from "sonner";
 
-export function useMutation(url: string, method: "POST" | "PATCH" | "PUT", onReload?: () => void) {
+export function useMutation(
+  url: string,
+  method: "POST" | "PATCH" | "PUT",
+  onReload?: () => void,
+  options: { refresh?: boolean; successMessage?: string } = {},
+) {
   const router = useRouter();
   const busy = useRef(false);
   const [pending, setPending] = useState(false);
@@ -20,21 +25,22 @@ export function useMutation(url: string, method: "POST" | "PATCH" | "PUT", onRel
     startRefresh(() => router.refresh());
   }
   async function mutate(input: unknown) {
-    if (busy.current) return false;
+    if (busy.current) return null;
     busy.current = true;
     setPending(true);
     setNotice(null);
     setErrors({});
     try {
-      await requestJson(
+      const result = await requestJson(
         url,
         { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) },
         mutationResultSchema,
       );
-      setNotice({ state: "saved", message: "Perubahan tersimpan." });
-      toast.success("Perubahan tersimpan.");
-      startRefresh(() => router.refresh());
-      return true;
+      const message = options.successMessage ?? "Perubahan tersimpan.";
+      setNotice({ state: "saved", message });
+      toast.success(message);
+      if (options.refresh !== false) startRefresh(() => router.refresh());
+      return result;
     } catch (error) {
       if (error instanceof HttpError) setErrors(error.fieldErrors);
       setNotice({
@@ -49,7 +55,7 @@ export function useMutation(url: string, method: "POST" | "PATCH" | "PUT", onRel
             ? error.message
             : "Belum mendapat konfirmasi perubahan. Periksa koneksi dan coba kembali; isian tetap di halaman ini.",
       });
-      return false;
+      return null;
     } finally {
       setPending(false);
       busy.current = false;

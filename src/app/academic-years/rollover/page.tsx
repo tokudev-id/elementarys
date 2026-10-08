@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
-import { listAcademicYears, listClasses } from "@/server/services/school-master";
+import { listAcademicYears, listClassOptions } from "@/server/services/school-master";
 import { getYearPreparation } from "@/server/queries/year-preparation";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
@@ -20,7 +20,7 @@ export default async function Rollover({
   const selected = (await searchParams).yearId ?? years.find((year) => !year.archivedAt)?.id;
   const preparation =
     actor.role === "admin" && selected ? await getYearPreparation(selected) : null;
-  const classes = preparation ? await listClasses() : [];
+  const classes = preparation ? await listClassOptions() : [];
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/academic-years">
       <Link href="/academic-years">Kembali ke tahun ajaran</Link>

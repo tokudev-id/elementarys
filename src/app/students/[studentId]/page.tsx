@@ -1,57 +1,79 @@
-import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getStudent } from "@/server/services/students";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
-import { StudentForm } from "../form";
-import { listAcademicYears, listClasses } from "@/server/services/school-master";
-import { PlacementForm, EndEnrollmentForm, StudentArchiveForm } from "../lifecycle-forms";
-export default async function Student({ params }: { params: Promise<{ studentId: string }> }) {
+import { listAcademicYears, listClassOptions } from "@/server/services/school-master";
+import { buildMonthlyAttendanceReport } from "@/server/reports/monthly";
+import { StudentDetailView } from "./detail";
+
+export default async function Student({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ studentId: string }>;
+  searchParams: Promise<{ action?: string }>;
+}) {
   const actor = await requirePageActor();
-  const student = await getStudent((await params).studentId);
-  const settings = await getSchoolSettings();
+  const [student, settings, years, selected] = await Promise.all([
+    getStudent((await params).studentId),
+    getSchoolSettings(),
+    listAcademicYears(),
+    searchParams,
+  ]);
   const school = schoolIdentity(settings);
-  const classes = actor.role === "admin" ? await listClasses() : [];
-  const years = actor.role === "admin" ? await listAcademicYears() : [];
+  const classes = actor.role === "admin" ? await listClassOptions() : [];
+  const current = student.enrollments.find(
+    (item) =>
+      !item.cancelled &&
+      item.startsOn <= (school?.date ?? "") &&
+      item.endsOnExclusive > (school?.date ?? ""),
+  );
+  const year = years.find((item) => item.isCurrent);
+  const month = school?.date.slice(0, 7);
+  const report =
+    year && month
+      ? await buildMonthlyAttendanceReport({
+          yearId: year.id,
+          month,
+        }).catch(() => undefined)
+      : undefined;
+  const summaries =
+    report?.classes.flatMap((item) =>
+      item.students.filter((entry) => entry.studentId === student.id),
+    ) ?? [];
+  const attendance =
+    report && summaries.length
+      ? {
+          totals: summaries.reduce(
+            (totals, item) => ({
+              H: totals.H + item.totals.H,
+              S: totals.S + item.totals.S,
+              I: totals.I + item.totals.I,
+              A: totals.A + item.totals.A,
+            }),
+            { H: 0, S: 0, I: 0, A: 0 },
+          ),
+          month: report.input.month,
+          href: `/reports?yearId=${report.input.yearId}&month=${report.input.month}${current ? "&classId=" + current.classId : ""}`,
+        }
+      : undefined;
   return (
-    <AppShell school={schoolIdentity(settings)} actor={actor} currentPath="/students">
-      <Link href="/students">Kembali ke siswa</Link>
-      <h1>{student.fullName}</h1>
-      {student.archivedAt && <p>Siswa diarsipkan. Riwayat tetap tersedia.</p>}
-      <p>
-        {student.studentCode} · NIS {student.nis ?? "belum diisi"} · NISN{" "}
-        {student.nisn ?? "belum diisi"}
-      </p>
-      {actor.role === "admin" && <StudentForm current={student} today="" />}
-      {actor.role === "admin" && !student.archivedAt && (
-        <PlacementForm
-          student={student}
-          classes={classes}
-          years={years}
-          today={school?.date ?? ""}
-        />
-      )}
-      <h2>Riwayat penempatan</h2>
-      <ul className="resource-list">
-        {student.enrollments.map((item) => (
-          <li key={item.id}>
-            <strong>
-              {item.className} · {item.yearLabel}
-            </strong>
-            <p>
-              {item.startsOn} sampai sebelum {item.endsOnExclusive}
-            </p>
-            {item.cancelled && <p>Dibatalkan sebelum penempatan dimulai.</p>}
-            {actor.role === "admin" &&
-              !item.cancelled &&
-              item.endsOnExclusive > (school?.date ?? "") && (
-                <EndEnrollmentForm student={student} enrollment={item} today={school?.date ?? ""} />
-              )}
-          </li>
-        ))}
-      </ul>
-      {actor.role === "admin" && <StudentArchiveForm student={student} />}
+    <AppShell
+      school={school}
+      actor={actor}
+      currentPath="/students"
+      breadcrumbs={[{ label: "Siswa", href: "/students" }, { label: student.fullName }]}
+    >
+      <StudentDetailView
+        student={student}
+        classes={classes}
+        years={years}
+        today={school?.date ?? ""}
+        admin={actor.role === "admin"}
+        requestedAction={selected.action}
+        attendance={attendance}
+      />
     </AppShell>
   );
 }

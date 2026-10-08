@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
-import { listAcademicYears, listClasses } from "@/server/services/school-master";
+import { listAcademicYears, listClassOptions } from "@/server/services/school-master";
 import { promotionCandidates } from "@/server/services/enrollments";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
@@ -16,7 +16,7 @@ export default async function Promote({
 }) {
   const actor = await requirePageActor();
   const settings = await getSchoolSettings();
-  const classes = await listClasses();
+  const classes = await listClassOptions();
   const years = await listAcademicYears();
   const query = await searchParams;
   const selected = query.classId ?? classes[0]?.id;

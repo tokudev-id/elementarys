@@ -1,4 +1,5 @@
 import "server-only";
+export { listClasses } from "../queries/master-lists";
 import { z } from "zod";
 import type { Pool, PoolClient } from "pg";
 import {
@@ -40,7 +41,7 @@ export async function listAcademicYears(source: Pool = pool) {
     )
   ).rows;
 }
-export async function listClasses(source: Pool = pool, yearId?: string): Promise<ClassView[]> {
+export async function listClassOptions(source: Pool = pool, yearId?: string): Promise<ClassView[]> {
   if (yearId) parseInput(z.uuid(), yearId);
   return (
     await source.query<ClassView>(
@@ -48,6 +49,12 @@ export async function listClasses(source: Pool = pool, yearId?: string): Promise
       [yearId ?? null],
     )
   ).rows;
+}
+export async function getClass(id: string, source: Pool = pool) {
+  parseInput(z.uuid(), id);
+  const value = (await listClassOptions(source)).find((item) => item.id === id);
+  if (!value) throw new DomainError("RESOURCE_NOT_FOUND", "Kelas tidak ditemukan.", 404);
+  return value;
 }
 async function deactivateOtherYears(
   client: PoolClient,

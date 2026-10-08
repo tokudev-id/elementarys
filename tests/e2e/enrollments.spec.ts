@@ -57,6 +57,11 @@ test("admin transfers, cancels a future placement, closes and archives a student
       created.push((await response.json()).id as string);
     }
     await page.goto(`/students/${created[0]}`);
+    async function openAction(name: string) {
+      await page.getByRole("button", { name: "Aksi siswa", exact: true }).click();
+      await page.getByRole("menuitem", { name, exact: true }).click();
+    }
+    await openAction("Pindah kelas");
     const placement = page.getByRole("form", { name: "Ubah penempatan siswa", exact: true });
     await placement.getByLabel("Kelas tujuan", { exact: true }).selectOption(classes[1]);
     await placement.getByLabel("Mulai di kelas tujuan", { exact: true }).fill(effective);
@@ -64,10 +69,13 @@ test("admin transfers, cancels a future placement, closes and archives a student
       .getByLabel("Alasan penempatan", { exact: true })
       .fill("Pindah kelas efektif kemarin");
     await placement.getByRole("button", { name: "Simpan penempatan", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await page.getByRole("tab", { name: "Riwayat penempatan", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Riwayat penempatan", exact: true }),
     ).toBeVisible();
-    await expect(page.locator(".resource-list > li")).toHaveCount(2);
+    await expect(page.locator(".placement-timeline > li")).toHaveCount(2);
+    await openAction("Pindah kelas");
     await placement.getByLabel("Jenis perubahan", { exact: true }).selectOption("placement");
     await placement.getByLabel("Kelas tujuan", { exact: true }).selectOption(classes[3]);
     await placement.getByLabel("Mulai di kelas tujuan", { exact: true }).fill("2027-01-01");
@@ -75,6 +83,8 @@ test("admin transfers, cancels a future placement, closes and archives a student
       .getByLabel("Alasan penempatan", { exact: true })
       .fill("Rencana tahun berikutnya");
     await placement.getByRole("button", { name: "Simpan penempatan", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await openAction("Tutup penempatan");
     const future = page.getByRole("form", { name: `Tutup penempatan Baru ${tag}`, exact: true });
     await future
       .getByLabel("Alasan pembatalan penempatan", { exact: true })
@@ -82,29 +92,33 @@ test("admin transfers, cancels a future placement, closes and archives a student
     await future
       .getByRole("button", { name: "Batalkan penempatan mendatang", exact: true })
       .click();
-    await expect(
-      page.getByText("Dibatalkan sebelum penempatan dimulai.", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(page.getByText("Dibatalkan sebelum mulai", { exact: true })).toBeVisible();
+    await openAction("Tutup penempatan");
     const current = page.getByRole("form", { name: `Tutup penempatan Tujuan ${tag}`, exact: true });
     await current.getByLabel("Tidak bersekolah mulai tanggal", { exact: true }).fill(today);
     await current.getByLabel("Alasan siswa keluar", { exact: true }).fill("Siswa keluar hari ini");
     await current.getByRole("button", { name: "Tutup penempatan", exact: true }).click();
     await expect(current).toHaveCount(0);
+    await openAction("Arsipkan siswa");
     const archive = page.getByRole("form", { name: "Status arsip siswa", exact: true });
     await archive.getByLabel("Alasan status siswa", { exact: true }).fill("Arsip setelah keluar");
     await archive.getByRole("button", { name: "Arsipkan siswa", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await page.getByRole("tab", { name: "Ringkasan", exact: true }).click();
     await expect(
       page.getByText("Siswa diarsipkan. Riwayat tetap tersedia.", { exact: true }),
     ).toBeVisible();
     await page.getByRole("link", { name: "Kembali ke siswa", exact: true }).click();
     await page.getByLabel("Cari nama atau kode siswa", { exact: true }).fill(`Lifecycle ${tag} 0`);
-    await page.getByRole("checkbox", { name: "Tampilkan siswa diarsipkan", exact: true }).check();
-    await page.getByRole("button", { name: "Cari siswa", exact: true }).click();
+    await page.getByLabel("Status siswa", { exact: true }).selectOption("all");
+    await page.getByRole("button", { name: "Tampilkan", exact: true }).click();
     await expect(page.getByRole("link", { name: `Lifecycle ${tag} 0`, exact: true })).toBeVisible();
     await page.goto(`/students/promote?classId=${classes[2]}`);
     await page.getByLabel("Kelas tujuan batch", { exact: true }).selectOption(classes[3]);
     await page.getByLabel("Tanggal mulai tahun berikutnya", { exact: true }).fill("2027-01-01");
     await page.getByLabel("Alasan batch penempatan", { exact: true }).fill("Naik kelas bersama");
+    await page.getByRole("button", { name: "Lanjut: pilih siswa", exact: true }).click();
     for (let index = 1; index <= 2; index++)
       await page.getByRole("checkbox", { name: new RegExp(`Lifecycle ${tag} ${index}`) }).check();
     await page.getByRole("button", { name: "Periksa preview", exact: true }).click();

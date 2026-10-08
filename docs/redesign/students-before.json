@@ -1,0 +1,9 @@
+{
+  "stage": "before",
+  "timestamp": "2026-10-08T07:59:29.039Z",
+  "students": 600,
+  "rendered": 600,
+  "samples": [179.31, 125.09, 128.07, 151.83, 97.9],
+  "medianMs": 128.07,
+  "environment": "local PostgreSQL18, Next production build in test mode, synthetic data"
+}

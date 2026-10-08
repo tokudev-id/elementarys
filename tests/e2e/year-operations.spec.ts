@@ -68,6 +68,7 @@ test("year preparation links into batch, confirms activation and preserves archi
       "2031-01-01",
     );
     await page.getByLabel("Alasan batch penempatan", { exact: true }).fill("Persiapan tahun baru");
+    await page.getByRole("button", { name: "Lanjut: pilih siswa", exact: true }).click();
     await page.getByRole("checkbox", { name: new RegExp(`Siswa Tahun ${tag}`) }).check();
     await page.getByRole("button", { name: "Periksa preview", exact: true }).click();
     await page.getByRole("button", { name: "Simpan seluruh batch", exact: true }).click();

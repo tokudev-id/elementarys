@@ -31,6 +31,7 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
   await page.goto("/students");
   const form = page.getByTestId("student-create");
   for (let index = 1; index <= 10; index++) {
+    await page.goto("/students/new");
     await form
       .getByLabel("Nama lengkap siswa", { exact: true })
       .fill(`Siswa Input ${tag} ${index}`);
@@ -42,16 +43,18 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
       .fill(schoolToday("Asia/Kuala_Lumpur"));
     await form.getByRole("button", { name: "Tambah siswa", exact: true }).click();
     await expect(
-      page.getByRole("link", { name: `Siswa Input ${tag} ${index}`, exact: true }),
+      page.getByRole("heading", { name: `Siswa Input ${tag} ${index}`, exact: true }),
     ).toBeVisible();
   }
+  await page.goto("/students");
   await page.getByLabel("Cari nama atau kode siswa", { exact: true }).fill(`Siswa Input ${tag}`);
-  await page.getByRole("button", { name: "Cari siswa", exact: true }).click();
-  await expect(page.locator(".resource-list li")).toHaveCount(10);
+  await page.getByRole("button", { name: "Tampilkan", exact: true }).click();
+  await expect(page.locator(".master-mobile .mobile-card-list > li")).toHaveCount(10);
   await page.getByRole("link", { name: `Siswa Input ${tag} 1`, exact: true }).click();
   await expect(
     page.getByRole("heading", { name: `Siswa Input ${tag} 1`, exact: true }),
   ).toBeVisible();
+  await page.getByRole("link", { name: "Ubah", exact: true }).click();
   await page.getByLabel("Nama lengkap siswa", { exact: true }).fill(`Siswa Koreksi ${tag}`);
   await page.getByRole("button", { name: "Simpan identitas siswa", exact: true }).click();
   await expect(

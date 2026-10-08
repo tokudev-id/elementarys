@@ -5,7 +5,15 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", ".local/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    ".local/**",
+    "out/**",
+    "build/**",
+    "test-results/**",
+    "playwright-report/**",
+    "next-env.d.ts",
+  ]),
   {
     files: ["src/components/data-table.tsx"],
     // TanStack v8 returns a mutable table; this component explicitly opts out of React Compiler.
