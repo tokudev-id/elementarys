@@ -1,5 +1,5 @@
 import "server-only";
-export { listClasses } from "../queries/master-lists";
+export { listClasses, listAcademicYearsPage } from "../queries/master-lists";
 import { z } from "zod";
 import type { Pool, PoolClient } from "pg";
 import {
@@ -33,6 +33,9 @@ async function yearRow(client: PoolClient, id: string, lock = false): Promise<Ac
   ).rows[0];
   if (!row) throw new DomainError("RESOURCE_NOT_FOUND", "Tahun ajaran tidak ditemukan.", 404);
   return row;
+}
+export async function getAcademicYear(id: string, source: Pool = pool): Promise<AcademicYearView> {
+  return transaction((client) => yearRow(client, id), source);
 }
 export async function listAcademicYears(source: Pool = pool) {
   return (

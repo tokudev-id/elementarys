@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
+import { EmptyState } from "@/components/empty-state";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+import { DataTablePagination } from "@/components/data-table-pagination";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getAttendanceHistory } from "@/server/queries/attendance-history";
 import { DomainError } from "@/domain/errors";
@@ -31,18 +40,17 @@ function HistoryEvent({
     after: after.get(id),
   }));
   return (
-    <li>
-      <h2>
-        {actionLabels[event.action]} · versi {event.after.version}
-      </h2>
-      <p>
-        {event.actor.name} ·{" "}
+    <li className="history-event-item">
+      <div className="history-event-header">
+        <strong>
+          {actionLabels[event.action]} · versi {event.after.version}
+        </strong>
         <time dateTime={event.occurredAt}>{formatSchoolTime(event.occurredAt, timezone)}</time>
+      </div>
+      <p className="history-event-meta">
+        {event.actor.name} · {stateLabels[event.before.state]} → {stateLabels[event.after.state]}
       </p>
-      <p>
-        {stateLabels[event.before.state]} → {stateLabels[event.after.state]}
-      </p>
-      <p>Alasan: {event.reason ?? "Pencatatan awal tanpa alasan koreksi."}</p>
+      {event.reason && <p className="history-event-reason">Alasan: {event.reason}</p>}
       <ul className="history-statuses">
         {entries.map((entry) => {
           const value = entry.after ?? entry.before;
@@ -68,11 +76,11 @@ export default async function AttendanceHistoryPage({
   searchParams,
 }: {
   params: Promise<{ classId: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; page?: string }>;
 }) {
   const actor = await requirePageActor();
   const { classId } = await params;
-  const { date } = await searchParams;
+  const { date, page: rawPage } = await searchParams;
   let history;
   let failure;
   try {
@@ -86,37 +94,78 @@ export default async function AttendanceHistoryPage({
   if (!history)
     return (
       <AppShell actor={actor} school={null} currentPath="/attendance">
-        <h1>Riwayat absensi</h1>
+        <PageHeader title="Riwayat absensi" />
         <StateBanner state="error">{failure}</StateBanner>
         <Link href="/attendance">Kembali ke hari ini</Link>
       </AppShell>
     );
+
   const students = new Map(history.students.map((student) => [student.id, student]));
+  const pageSize = 10;
+  const total = history.events.length;
+  const currentPage = Math.max(1, Math.min(Number(rawPage ?? 1) || 1, Math.ceil(total / pageSize) || 1));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedEvents = history.events.slice(startIndex, startIndex + pageSize);
+
+  const query: Record<string, string> = {};
+  if (history.date) query.date = history.date;
+
   return (
     <AppShell
       actor={actor}
       school={{ name: history.schoolName, date: history.schoolToday, timezone: history.timezone }}
       currentPath="/attendance"
+      breadcrumbs={[
+        { label: "Absensi", href: "/attendance" },
+        { label: history.className, href: `/attendance/${classId}?date=${history.date}` },
+        { label: "Riwayat" },
+      ]}
     >
-      <h1>Riwayat absensi</h1>
-      <p>
-        {history.className} · {formatAttendanceDate(history.date)}
-      </p>
-      <Link href={`/attendance/${classId}?date=${history.date}`}>Kembali ke catatan kelas</Link>
-      {!history.events.length ? (
-        <StateBanner state="empty">Belum ada perubahan tercatat pada tanggal ini.</StateBanner>
-      ) : (
-        <ol className="resource-list history-list">
-          {history.events.map((event) => (
-            <HistoryEvent
-              key={event.id}
-              event={event}
-              students={students}
-              timezone={history.timezone}
+      <PageHeader
+        title="Riwayat absensi"
+        description={`${history.className} · ${formatAttendanceDate(history.date)}`}
+        primaryAction={
+          <Link
+            className="button-link button-link--secondary"
+            href={`/attendance/${classId}?date=${history.date}`}
+          >
+            Kembali ke catatan
+          </Link>
+        }
+      />
+      <DataCard id="daftar">
+        <DataCardHeader title="Riwayat sesi" count={total} />
+        <DataCardContent>
+          {!total ? (
+            <EmptyState
+              title="Belum ada riwayat"
+              description="Belum ada perubahan tercatat pada tanggal ini."
             />
-          ))}
-        </ol>
-      )}
+          ) : (
+            <ol className="resource-list history-list">
+              {paginatedEvents.map((event) => (
+                <HistoryEvent
+                  key={event.id}
+                  event={event}
+                  students={students}
+                  timezone={history.timezone}
+                />
+              ))}
+            </ol>
+          )}
+        </DataCardContent>
+        {total > pageSize && (
+          <DataCardFooter>
+            <DataTablePagination
+              total={total}
+              page={currentPage}
+              pageSize={pageSize}
+              pathname={`/attendance/${classId}/history`}
+              query={query}
+            />
+          </DataCardFooter>
+        )}
+      </DataCard>
     </AppShell>
   );
 }

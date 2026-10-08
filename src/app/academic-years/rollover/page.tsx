@@ -8,11 +8,19 @@ import { schoolIdentity } from "@/components/school-identity";
 import { StateBanner } from "@/components/state-banner";
 import { SelectField } from "@/components/select-field";
 import { Button } from "@/components/button";
+import { StatusBadge } from "@/components/status-badge";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+import { DataTablePagination } from "@/components/data-table-pagination";
 import { ActivateYearForm } from "./activate-form";
 export default async function Rollover({
   searchParams,
 }: {
-  searchParams: Promise<{ yearId?: string }>;
+  searchParams: Promise<{ yearId?: string; page?: string }>;
 }) {
   const actor = await requirePageActor();
   const settings = await getSchoolSettings();
@@ -120,16 +128,60 @@ export default async function Rollover({
                   <Link href="/academic-years">Periksa arsip tahun</Link>
                 </li>
               </ol>
-              <h2>Penempatan pada tahun yang disiapkan</h2>
-              <ul className="resource-list">
-                {preparation.classes.map((item) => (
-                  <li key={item.id}>
-                    {item.name} · {item.assigned} siswa dalam riwayat · {item.openEnrollments}{" "}
-                    penempatan berakhir setelah {preparation.schoolToday}
-                    {item.archivedAt ? " · Kelas diarsipkan" : ""}
-                  </li>
-                ))}
-              </ul>
+              <DataCard id="daftar-kelas-persiapan">
+                <DataCardHeader
+                  title="Penempatan pada tahun yang disiapkan"
+                  count={preparation.classes.length}
+                />
+                <DataCardContent>
+                  <div className="data-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th scope="col">Nama kelas</th>
+                          <th scope="col">Siswa dalam riwayat</th>
+                          <th scope="col">
+                            Penempatan efektif (&gt; {preparation.schoolToday})
+                          </th>
+                          <th scope="col">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {preparation.classes
+                          .slice(
+                            (Math.max(1, Number((await searchParams).page ?? 1) || 1) - 1) * 25,
+                            Math.max(1, Number((await searchParams).page ?? 1) || 1) * 25,
+                          )
+                          .map((item) => (
+                            <tr key={item.id}>
+                              <td>
+                                <strong>{item.name}</strong>
+                              </td>
+                              <td>{item.assigned} siswa</td>
+                              <td>{item.openEnrollments} penempatan</td>
+                              <td>
+                                <StatusBadge tone={item.archivedAt ? "neutral" : "success"}>
+                                  {item.archivedAt ? "Diarsipkan" : "Aktif"}
+                                </StatusBadge>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </DataCardContent>
+                {preparation.classes.length > 25 && (
+                  <DataCardFooter>
+                    <DataTablePagination
+                      total={preparation.classes.length}
+                      page={Math.max(1, Number((await searchParams).page ?? 1) || 1)}
+                      pageSize={25}
+                      pathname="/academic-years/rollover"
+                      query={{ yearId: selected ?? "" }}
+                    />
+                  </DataCardFooter>
+                )}
+              </DataCard>
               <Link
                 href={`/reports?yearId=${selected}&month=${preparation.year.startsOn.slice(0, 7)}`}
               >

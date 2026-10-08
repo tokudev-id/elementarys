@@ -17,6 +17,46 @@ import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
 import { Button } from "@/components/button";
 import { StateBanner, type BannerState } from "@/components/state-banner";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+
+function CandidateRowItem({
+  student,
+  isChecked,
+  onToggle,
+}: {
+  student: StudentView;
+  isChecked: boolean;
+  onToggle: (id: string) => void;
+}) {
+  function handleChange() {
+    onToggle(student.id);
+  }
+  return (
+    <tr>
+      <td>
+        <label className="checkbox-field">
+          <input
+            type="checkbox"
+            name="studentId"
+            value={student.id}
+            checked={isChecked}
+            onChange={handleChange}
+          />
+          <span className="sr-only">
+            {student.fullName} · {student.studentCode}
+          </span>
+        </label>
+      </td>
+      <td>{student.fullName}</td>
+      <td>{student.studentCode}</td>
+    </tr>
+  );
+}
 
 export function PromotionForm({
   students,
@@ -39,6 +79,41 @@ export function PromotionForm({
   const [preview, setPreview] = useState<PromotionPreview | null>(null);
   const [results, setResults] = useState<PromotionResult | null>(null);
   const [notice, setNotice] = useState<{ state: BannerState; message: string } | null>(null);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(
+    () => new Set(students.map((s) => s.id)),
+  );
+  const [candidatePage, setCandidatePage] = useState(1);
+  const candidatePageSize = 25;
+  const paginatedCandidates = students.slice(
+    (candidatePage - 1) * candidatePageSize,
+    candidatePage * candidatePageSize,
+  );
+
+  function handlePrevCandidatePage() {
+    setCandidatePage((p) => Math.max(1, p - 1));
+  }
+
+  function handleNextCandidatePage() {
+    setCandidatePage((p) => p + 1);
+  }
+
+  function selectAllAcrossPages() {
+    setSelectedStudentIds(new Set(students.map((s) => s.id)));
+  }
+
+  function deselectAll() {
+    setSelectedStudentIds(new Set());
+  }
+
+  function toggleStudent(id: string) {
+    setSelectedStudentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   function invalidatePreview() {
     setInput(null);
     setPreview(null);
@@ -80,10 +155,9 @@ export function PromotionForm({
     event.preventDefault();
     if (busy.current) return;
     const data = new FormData(event.currentTarget);
-    const ids = new Set(data.getAll("studentId"));
     const parsed = promotionInputSchema.safeParse({
       entries: students
-        .filter((student) => ids.has(student.id))
+        .filter((student) => selectedStudentIds.has(student.id))
         .map((student) => ({
           studentId: student.id,
           expectedVersion: student.version,
@@ -225,38 +299,82 @@ export function PromotionForm({
               Pilih siswa yang akan ditempatkan. Satu masalah membatalkan seluruh batch; riwayat
               lama tetap tersedia.
             </p>
-            <div className="data-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Pilih</th>
-                    <th scope="col">Nama siswa</th>
-                    <th scope="col">Kode</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id}>
-                      <td>
-                        <label className="checkbox-field">
-                          <input
-                            type="checkbox"
-                            name="studentId"
-                            value={student.id}
-                            defaultChecked
-                          />
-                          <span className="sr-only">
-                            {student.fullName} · {student.studentCode}
-                          </span>
-                        </label>
-                      </td>
-                      <td>{student.fullName}</td>
-                      <td>{student.studentCode}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataCard id="pilih-siswa-promosi">
+              <DataCardHeader
+                title="Pilih siswa"
+                count={selectedStudentIds.size}
+                actions={
+                  <div className="button-row">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={selectAllAcrossPages}
+                    >
+                      Pilih semua di semua halaman
+                    </Button>
+                    <Button type="button" variant="ghost" onClick={deselectAll}>
+                      Batal pilih semua
+                    </Button>
+                  </div>
+                }
+              />
+              <DataCardContent>
+                <div className="data-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Pilih</th>
+                        <th scope="col">Nama siswa</th>
+                        <th scope="col">Kode</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedCandidates.map((student) => (
+                        <CandidateRowItem
+                          key={student.id}
+                          student={student}
+                          isChecked={selectedStudentIds.has(student.id)}
+                          onToggle={toggleStudent}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </DataCardContent>
+              {students.length > candidatePageSize && (
+                <DataCardFooter>
+                  <nav className="data-table-pagination" aria-label="Navigasi daftar siswa">
+                    <div className="data-table-pagination__info">
+                      <span>
+                        {(candidatePage - 1) * candidatePageSize + 1}–
+                        {Math.min(candidatePage * candidatePageSize, students.length)} dari{" "}
+                        {students.length}
+                      </span>
+                    </div>
+                    <div className="data-table-pagination__nav">
+                      <button
+                        type="button"
+                        className={`pagination-btn pagination-btn--prev${candidatePage <= 1 ? " pagination-btn--disabled" : ""}`}
+                        disabled={candidatePage <= 1}
+                        onClick={handlePrevCandidatePage}
+                        aria-label="Halaman sebelumnya"
+                      >
+                        ‹ Sebelumnya
+                      </button>
+                      <button
+                        type="button"
+                        className={`pagination-btn pagination-btn--next${candidatePage * candidatePageSize >= students.length ? " pagination-btn--disabled" : ""}`}
+                        disabled={candidatePage * candidatePageSize >= students.length}
+                        onClick={handleNextCandidatePage}
+                        aria-label="Halaman berikutnya"
+                      >
+                        Berikutnya ›
+                      </button>
+                    </div>
+                  </nav>
+                </DataCardFooter>
+              )}
+            </DataCard>
             <div className="button-row">
               <Button type="button" variant="secondary" onClick={previousStep}>
                 Kembali

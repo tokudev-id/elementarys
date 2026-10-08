@@ -23,12 +23,17 @@ export const auditFilterSchema = z
       .regex(/^[A-Za-z0-9_-]+$/)
       .max(512)
       .optional(),
+    before: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]+$/)
+      .max(512)
+      .optional(),
     limit: z.number().int().min(1).max(100).default(20),
   })
   .strict()
   .refine(
     (value) => !value.from || !value.to || value.from <= value.to,
-    "Tanggal akhir harus setelah atau sama dengan tanggal awal.",
+    "Tanggal awal harus sebelum tanggal akhir.",
   );
 export const auditCursorSchema = z.object({ at: z.iso.datetime(), id: z.uuid() }).strict();
 export type AuditFilter = z.input<typeof auditFilterSchema>;
@@ -44,4 +49,9 @@ export type AuditEvent = {
   before: unknown;
   after: unknown;
 };
-export type AuditPage = { events: AuditEvent[]; nextCursor: string | null; timezone: string };
+export type AuditPage = {
+  events: AuditEvent[];
+  nextCursor: string | null;
+  prevCursor: string | null;
+  timezone: string;
+};

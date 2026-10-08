@@ -37,6 +37,13 @@ export const classListSchema = z
     sort: z.enum(["grade", "name", "year"]).default("grade"),
   })
   .strict();
+export const academicYearListSchema = z
+  .object({
+    ...pageFields,
+    status: z.enum(["active", "archived", "all"]).default("all"),
+    sort: z.enum(["startsOn", "label"]).default("startsOn"),
+  })
+  .strict();
 export type PageResult<T> = { items: T[]; total: number; page: number; pageSize: number };
 export type StudentListItem = StudentView & { activeClass: { id: string; name: string } | null };
 export type TeacherListItem = TeacherView;

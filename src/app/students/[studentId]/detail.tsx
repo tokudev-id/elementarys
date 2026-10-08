@@ -17,6 +17,13 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+import { EmptyState } from "@/components/empty-state";
 import { PlacementForm, EndEnrollmentForm, StudentArchiveForm } from "../lifecycle-forms";
 
 function formatted(date: string) {
@@ -54,6 +61,7 @@ export function StudentDetailView({
     version: student.version,
     action: requestedAction ?? null,
   });
+  const [historyPage, setHistoryPage] = useState(1);
   if (dialog.version !== student.version) setDialog({ version: student.version, action: null });
   const current = student.enrollments.find(
     (item) => !item.cancelled && item.startsOn <= today && item.endsOnExclusive > today,
@@ -72,6 +80,12 @@ export function StudentDetailView({
   }
   function close() {
     setDialog({ version: student.version, action: null });
+  }
+  function handlePrevHistoryPage() {
+    setHistoryPage((p) => Math.max(1, p - 1));
+  }
+  function handleNextHistoryPage() {
+    setHistoryPage((p) => p + 1);
   }
   return (
     <>
@@ -151,43 +165,86 @@ export function StudentDetailView({
           {student.archivedAt && <p>Siswa diarsipkan. Riwayat tetap tersedia.</p>}
         </TabsContent>
         <TabsContent value="history">
-          <section className="form-section">
-            <h2>Riwayat penempatan</h2>
-            <ol className="placement-timeline">
-              {student.enrollments.map((item) => (
-                <li key={item.id}>
-                  <strong>
-                    {item.className} · {item.yearLabel}
-                  </strong>
-                  <p>
-                    {item.cancelled
-                      ? `Rencana mulai ${formatted(item.startsOn)}`
-                      : `${formatted(item.startsOn)} – ${lastDay(item.endsOnExclusive)}`}
-                  </p>
-                  <StatusBadge
-                    tone={
-                      item.cancelled
-                        ? "neutral"
-                        : item.startsOn > today
-                          ? "info"
-                          : item.endsOnExclusive <= today
-                            ? "neutral"
-                            : "success"
-                    }
-                  >
-                    {item.cancelled
-                      ? "Dibatalkan sebelum mulai"
-                      : item.startsOn > today
-                        ? "Mendatang"
-                        : item.endsOnExclusive <= today
-                          ? "Selesai"
-                          : "Berjalan"}
-                  </StatusBadge>
-                </li>
-              ))}
-            </ol>
-            {!student.enrollments.length && <p>Belum ada penempatan.</p>}
-          </section>
+          <DataCard id="riwayat-penempatan">
+            <DataCardHeader title="Riwayat penempatan" count={student.enrollments.length} />
+            <DataCardContent>
+              {student.enrollments.length ? (
+                <ol className="placement-timeline">
+                  {student.enrollments
+                    .slice((historyPage - 1) * 10, historyPage * 10)
+                    .map((item) => (
+                      <li key={item.id}>
+                        <strong>
+                          {item.className} · {item.yearLabel}
+                        </strong>
+                        <p>
+                          {item.cancelled
+                            ? `Rencana mulai ${formatted(item.startsOn)}`
+                            : `${formatted(item.startsOn)} – ${lastDay(item.endsOnExclusive)}`}
+                        </p>
+                        <StatusBadge
+                          tone={
+                            item.cancelled
+                              ? "neutral"
+                              : item.startsOn > today
+                                ? "info"
+                                : item.endsOnExclusive <= today
+                                  ? "neutral"
+                                  : "success"
+                          }
+                        >
+                          {item.cancelled
+                            ? "Dibatalkan sebelum mulai"
+                            : item.startsOn > today
+                              ? "Mendatang"
+                              : item.endsOnExclusive <= today
+                                ? "Selesai"
+                                : "Berjalan"}
+                        </StatusBadge>
+                      </li>
+                    ))}
+                </ol>
+              ) : (
+                <EmptyState
+                  title="Belum ada penempatan"
+                  description="Siswa belum memiliki riwayat penempatan kelas."
+                />
+              )}
+            </DataCardContent>
+            {student.enrollments.length > 10 && (
+              <DataCardFooter>
+                <nav className="data-table-pagination" aria-label="Navigasi riwayat penempatan">
+                  <div className="data-table-pagination__info">
+                    <span>
+                      {(historyPage - 1) * 10 + 1}–
+                      {Math.min(historyPage * 10, student.enrollments.length)} dari{" "}
+                      {student.enrollments.length}
+                    </span>
+                  </div>
+                  <div className="data-table-pagination__nav">
+                    <button
+                      type="button"
+                      className={`pagination-btn pagination-btn--prev${historyPage <= 1 ? " pagination-btn--disabled" : ""}`}
+                      disabled={historyPage <= 1}
+                      onClick={handlePrevHistoryPage}
+                      aria-label="Halaman sebelumnya"
+                    >
+                      ‹ Sebelumnya
+                    </button>
+                    <button
+                      type="button"
+                      className={`pagination-btn pagination-btn--next${historyPage * 10 >= student.enrollments.length ? " pagination-btn--disabled" : ""}`}
+                      disabled={historyPage * 10 >= student.enrollments.length}
+                      onClick={handleNextHistoryPage}
+                      aria-label="Halaman berikutnya"
+                    >
+                      Berikutnya ›
+                    </button>
+                  </div>
+                </nav>
+              </DataCardFooter>
+            )}
+          </DataCard>
         </TabsContent>
         {attendance && (
           <TabsContent value="attendance">
