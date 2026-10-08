@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-01/02/03/04/06 done; S3-05 teknis lokal siap, needs_human H-02; FIX-04 done |
-| Task berikutnya | Tidak ada task implementasi siap; S1-07/S3-05 menunggu H-02, checkpoint operasional/lapangan pending |
+| Status saat ini | Redesign UI-R0 in_progress sesuai REDESIGN_BRIEF.md dan DESIGN.md baru |
+| Task berikutnya | UI-R0 → UI-R1 → UI-R2 → UI-R3 → UI-R4; checkpoint cloud/lapangan tetap pending |
 
 ## 1. Aturan pencatatan
 
@@ -49,6 +49,11 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
 | FIX-03 | Validasi S2 | S2-A2, S2-D1 | done | ca07a54 → a4676c3; roundtrip9kelas, integration81, seluruh e2e44 lulus |
 | FIX-04 | Validasi S3 | S3-04 | done | e4af234 → 19fab45; proxy scoped sebelum streaming, main e2e51 + production404/no-store lulus |
+| UI-R0 | Redesign fondasi | Brief redesign | in_progress | Dependensi, token/Inter, primitif shadcn/Radix, shell, dialog dan regresi |
+| UI-R1 | Redesign absensi | UI-R0 | not_started | Daftar kelas/input compact, konfirmasi nama, lima ketukan; HP nyata H-03 |
+| UI-R2 | Redesign master | UI-R1 teknis | not_started | Pagination server, daftar tanpa form, new/detail/edit, lifecycle dialog |
+| UI-R3 | Redesign rekap/beranda | UI-R2 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin |
+| UI-R4 | Redesign lainnya | UI-R3 | not_started | Tahun/kalender/audit/settings/auth, Lighthouse dan seluruh penerimaan |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
