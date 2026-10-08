@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-04 selesai; persiapan lokal S3-05 berjalan; S1-07 cloud menunggu H-02 |
+| Status saat ini | S3-05 teknis lokal siap, needs_human H-02; S3-06 mulai |
 | Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
@@ -42,8 +42,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | done | d731e9e; integration91, year+lifecycle+school-master e2e3 lulus |
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | done | e2478c7; main domain9/integration95/e2e audit+auth+teachers6 lulus |
 | [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | done | ea5ec57; main domain9/integration100/e2e49 lulus; dataset6kelas60 dan p95lokal80.18ms |
-| [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | in_progress | Persiapan CI/runbook lokal sesuai permintaan; dependency preview S1-07 tetap pending H-02 |
-| [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
+| [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | needs_human | 7360b49 + 360156d; clone bersih domain18/integration105/e2e50; dependency S1-07/H-02 dan hosted/produksi menunggu akun/checkpoint |
+| [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | in_progress | Panduan per role, pemelihara, pilot/handover dan verifikasi UI |
 
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
@@ -351,3 +351,11 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Sweep17halaman ×6viewport/orientasi, target44, viewportkeyboard360×340, states/error boundary/retry/kembali, serta dialog/tab/escape/rotasi/draft/retry lulus. Suite penuh pertama kehabisan180detik karena ukuran ribuan elemen dibaca RPC satu per satu setelah fixture bertambah; helper dibatch evaluateAll tanpa mengurangi assertion. Task ulang49lulus2.8menit, main49lulus3.7menit; sweep28.5/42.7detik. Lima capture360 tambahan diperiksa langsung; field/tombol tidak terpotong dan halaman tidak overflow.
 - pnpm measure:attendance: fixture6kelas60,10siswa per simpan,10status-changing samples; login page682.22ms, login354.62ms, first attendance359.14ms, warm p95 80.18ms. VALIDATION.md memuat seluruh sampel/kondisi. Ini proses Next baru dengan PostgreSQL tetap aktif, bukan provider cold start, waktu guru atau bukti jaringan/perangkat sekolah.
 - Anti-slop empat gate PASS untuk scope hardening; M2 otomasi teknis terpenuhi, penerimaan lapangan H-03/H-06 tetap pending. Pemeriksaan alat S3-05: Neon/Vercel/gh CLI tidak ditemukan, .vercel/project.json tidak ada, tidak ada MCP Neon/Vercel; remote origin ada tetapi tidak ada izin push. Dokumen resmi provider dibaca untuk menyiapkan runbook, tanpa mengakses akun/data produksi. S3-05 dipersiapkan lokal sesuai permintaan eksplisit, sementara dependency preview S1-07 tetap needs_human.
+
+### S3-05: 8 Oktober 2026 — persiapan teknis lulus, needs_human
+
+- Commit7360b49 + receipt360156d di-merge --no-ff menjadi bbaf7c0. CI penuh dengan Postgres18 uji, client18, age1.3.2 dan digest, secret auth sintetis, read-only repository permission, format/lint/type/domain/integration/build/browser. Runtime script rilis terpisah: manifestproject rough-dawn, branch/host/database/role/direct/TLS/major/operation confirmation; tidak mengganti guard local seed/test. CLI migrate/bootstrap disiapkan bagi operator, bootstrap memakai helper transaksi/audit bersama. Smoke hanya GET health/login/guard dan akun sendiri opsional, tanpa credential/respons data dicetak.
+- Clone lokal bersih commit7360b49 pada C:/Personal/elementarys-validation/s3-05-7360b49, DB suffix s3_05_clone/port3103: frozen install, format/lint/type, domain18, integration105, build dan seluruh e2e50 lulus3.9menit; git status bersih sebelum/sesudah. Binary client/age lokal reused, installer Linux dan job GitHub hosted belum dijalankan; tidak diklaim sebagai hosted CI. Main frozen install, format/lint/type, domain18/integration105 dan auth+permissions+smoke e2e6 lulus.
+- Lima CLI (seed/migrate/bootstrap lokal dan release migrate/bootstrap) dengan APP_ENV production tanpa metadata/konfirmasi menolak sebelum write; database uji tetap user/student0 dan password tidak muncul pada output. Unit metadata guard tidak membuka koneksi cloud dan memeriksa branch/env/operation/direct/TLS/role/database mismatch. Smoke e2e mempertahankan counts siswa/sesi/audit.
+- RELEASE_RUNBOOK.md memuat provisioning development/produksi, role minimum, environment/pemilik, schema/migrasi/bootstrap di luar build, smoke, H-05, rollback/kuota serta tautan dokumentasi resmi Neon/Vercel/PostgreSQL/GitHub/age yang dibaca8Oktober2026. Manifest hanya check konsistensi; verifikasi dashboard dan persetujuan H-04 tetap wajib, tidak dianggap dibuktikan oleh file.
+- Status needs_human karena dependency S1-07 belum done: H-02 membutuhkan login Neon CLI/skills/MCP, project Vercel tertaut serta metadata/URL preview aktual. Hosted CI dan produksi tidak dijalankan; H-04/H-05/H-07 memerlukan operator/credential/data/runner/keys nyata. Tidak ada push, SQL/data produksi, branch cloud baru atau deploy. Artefak teknis selesai; gerbang rilis tetap pending. S3-06 independen dari S1-07 dan dilanjutkan.
