@@ -17,6 +17,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed:test": "tsx scripts/seed.ts",
+    "db:seed:demo": "node --conditions=react-server --import tsx scripts/seed-demo.ts",
     "auth:bootstrap-admin": "node --conditions=react-server --import tsx scripts/bootstrap-admin.ts",
     "release:migrate": "node --import tsx scripts/release/migrate.ts",
     "release:bootstrap": "node --conditions=react-server --import tsx scripts/release/bootstrap.ts",

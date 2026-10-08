@@ -12,6 +12,14 @@ Harness membuat `elementary_test_<TEST_DB_SUFFIX>`, menjalankan kedua migrasi, l
 
 Schema auth dihasilkan oleh `pnpm dlx auth@1.7.7 generate --config ./auth.generate.ts --output ./src/server/db/auth-schema.ts --yes`. Schema domain mengikuti TRD 3.1, migrasi 0001 menambahkan btree_gist, exclusion ranges, sequence kode siswa, trigger relasi records dan append-only history. Urutan lock: academic_years → students → classes terurut → attendance_sessions. Jangan menjalankan network call dalam transaksi.
 
+### Data simulasi untuk uji manual
+
+Gunakan database kosong terpisah, misalnya `elementary_test_manual_preview`, pada Docker lokal. Isi DATABASE_URL dan DATABASE_MIGRATION_URL untuk database tersebut, APP_ENV=test, serta DEMO_ACCOUNT_PASSWORD minimal 12 karakter pada `.env.local`. Jalankan `pnpm db:migrate`, `pnpm db:seed:demo`, lalu `pnpm start --hostname 127.0.0.1 --port 3101` sesudah build tersedia. Seed menolak produksi/nonlokal dan database yang sudah memiliki akun; tidak mereset data.
+
+Seed demo membuat SD Harapan Bangsa dengan label data sintetis, enam kelas/60 siswa bernama Indonesia, NIS simulasi, timezone Asia/Jakarta, tahun ajaran Juli–Juni, admin Dewi Lestari (`dewi.lestari@sdharapan.example`) dan guru Budi Santoso (`budi.santoso@sdharapan.example`). Kedua akun memakai DEMO_ACCOUNT_PASSWORD lokal. Sepuluh hari belajar sebelumnya memiliki H/S/I/A beserta audit melalui service aplikasi; hari ini belum dicatat agar bisa dicoba. Jumlah hari menyesuaikan bila tahun baru belum memiliki sepuluh hari sebelumnya. Nama/data dibuat untuk simulasi, bukan daftar siswa sekolah nyata.
+
+Database ini terpisah dari harness browser/integration. Pada sesi persiapan lokal, akun disimpan dalam `.local/demo-accounts.txt` dan proses server dalam `.local/app.pid`; keduanya diabaikan Git. Gunakan `http://localhost:3101` sesuai origin auth. Jangan gunakan credential demo untuk produksi.
+
 ## Struktur dan konvensi
 
 - `src/app`: halaman dan route API; handler memvalidasi input dan memanggil guard/service.
