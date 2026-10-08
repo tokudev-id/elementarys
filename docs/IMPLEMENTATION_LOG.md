@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-02 selesai; S3-03 mulai; S1-07 cloud menunggu H-02 |
+| Status saat ini | S3-03 selesai; S3-04 mulai; S1-07 cloud menunggu H-02 |
 | Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
@@ -40,8 +40,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S2-E1](IMPLEMENTATION_PLAN.md#s2-e1-backup-otomatis-dan-restore-drill) | E ops | S1-02 | done | efcd8b8; drill terenkripsi lokal lulus; operasional nyata pending H-07 |
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | done | d20e60f; main integration88, lifecycle+students e2e2 lulus |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | done | d731e9e; integration91, year+lifecycle+school-master e2e3 lulus |
-| [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | in_progress | Audit admin, pagination/filter dan log teknis aman |
-| [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | not_started | Menunggu S3-02, S3-03 |
+| [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | done | e2478c7; main domain9/integration95/e2e audit+auth+teachers6 lulus |
+| [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | in_progress | Matriks izin, states, semua viewport dan dataset60 |
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | not_started | Menunggu S3-04 |
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
 
@@ -335,3 +335,11 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Task/main: frozen install, format:check, lint, typecheck, domain8, integration91, build/start dan year-operations+lifecycle+school-master e2e3 lulus. Snapshot read-only tidak menulis; arsip kelas/tahun ditolak pada enrollment efektif/mendatang; sel/totals/records/versi dan row Excel laporan lama tetap sama setelah placement tahun baru, switch current dan archive tahun/kelas lama.
 - Browser menguji readiness belum lengkap, tautan ke batch dengan tujuan/tanggal terpilih, preview/save, Batal/Escape, konfirmasi, arsip dan unduhan laporan lama serta viewport360/768/1024. Assertion awal mengharapkan dua exact-text nama siswa padahal table rowheader juga berisi kode; diperbaiki memakai locator rowheader untuk tabel dan exact text untuk totals, lalu diulang lulus. Tahun current fixture dikembalikan sebelum test selesai.
 - Anti-slop empat gate PASS pada scope tahun: data/counts/snapshot nyata, kontrol/konfirmasi/ekspor berfungsi, arah Operate1/1/1, helper query terpisah dari UI dan tanpa inline. Checkpoint perangkat/produksi tetap pending.
+
+### S3-03: 8 Oktober 2026
+
+- Commit e2478c7 di-merge --no-ff. Audit admin GET/page dengan filter jenis/ID/pelaku/rentang tanggal sekolah, cursor(timestamp mikrodetik,id), batas100/default20, snapshot sebelum/sesudah dan ledger ekspor. Nama aktor mutasi tetap snapshot; ekspor memakai identitas pengekspor saat dibaca. Guru ditolak API403 dan halaman diarahkan kembali tanpa membaca audit. AUDIT_COVERAGE.md serta daftar endpoint/perintah README ditambahkan.
+- Log API memakai allowlist metadata requestId/actorId/action/durationMs/errorCode, AsyncLocalStorage per request, tanpa payload/URL/cookie/nama/password/token/stack. Logger auth bawaan dimatikan. Kegagalan collector tidak mengubah respons; idle pool error memakai metadata generik. Snapshot status akun guru dan flag sebelum reset dilengkapi dari data aktual.
+- Ganti password pribadi kini memakai adapter Better Auth terikat client transaksi, revalidasi actor, flag/revoke/audit commit bersama. SQL trigger menggagalkan audit membuktikan credential/session/flag rollback. Bootstrap lokal diserialkan, akun/tautan/audit satu transaksi dan output kegagalan generik; kondisi react-server diteruskan langsung via node --import tsx, karena CLI tsx subprocess menghilangkan flag pada percobaan awal.
+- Task/main: frozen install, format:check, lint, typecheck, domain9, integration95, build/start serta audit+auth+teachers e2e6 lulus. Test43 audit dengan timestamp mikrodetik sama tidak hilang/duplikat saat pagination; range mengikuti timezone dan before/after/actor/export nyata. Dua request paralel mempunyai metadata terisolasi, payload sensitif sintetis tidak tercetak. Browser filter, next/first page, details, empty, role dan360/768/1024 lulus.
+- Setelah jeda sesi Docker daemon belum aktif (ECONNREFUSED seluruh suite, tidak ada test yang dijalankan). Docker Desktop diaktifkan hidden dan Compose PostgreSQL18 healthy; seluruh checks diulang lulus. Anti-slop empat gate PASS pada scope audit: JSON diagnostik untuk keputusan admin, data actual, kontrol aktif, log bukan klaim keamanan produksi. H-02/H-03/H-06/H-07 tetap pending.
