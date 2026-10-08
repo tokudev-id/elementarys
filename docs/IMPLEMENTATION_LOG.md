@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done (dilanjutkan oleh UI-F1–F4); UI-F1 mulai |
-| Task berikutnya | UI-F1 → UI-F2 → UI-F3/F4 → UI-R3 → UI-R4 |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done (dilanjutkan oleh UI-F1–F4); UI-F1 done; UI-F2 mulai |
+| Task berikutnya | UI-F2 → UI-F3/F4 → UI-R3 → UI-R4 |
 
 ## 1. Aturan pencatatan
 
@@ -51,8 +51,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-R0 | Redesign fondasi | Brief redesign | done | 58baf15 + 5b15661 → main11f3f5b; domain18/integration105/e2e51, kontras19 dan bounds keyboard lulus |
 | UI-R1 | Redesign absensi | UI-R0 | needs_human | c947c06 + a38906d → be8fb09; domain18/integration105/e2e52; 30siswa/3tidak hadir5tap, HP guru pending H-03 |
 | UI-R2 | Redesign master | UI-R1 teknis | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600rows128.07ms |
-| UI-F1 | Shell, card, kit tabel | UI-R2 | in_progress | Topbar sticky, DataCard, mobile filter sheet, pagination card, tabs detail |
-| UI-F2 | Fondasi validasi form | UI-F1 | not_started | useZodForm, noValidate, inline error ID, zod contracts, form terpisah/dialog |
+| UI-F1 | Shell, card, kit tabel | UI-R2 | done | a147c1a; DataCard master/detail, sticky topbar 1440/768/390 (y===0), pagination card, mobile filter sheet; domain 18/integration 109/e2e redesign-f1+enrollments+students+mobile-sweep+shell lulus |
+| UI-F2 | Fondasi validasi form | UI-F1 | in_progress | useZodForm, noValidate, inline error ID, zod contracts, form terpisah/dialog |
 | UI-F3 | Daftar & pagination | UI-F2 | not_started | Tahun ajaran, audit, history absensi, unlinked accounts, grid kelas |
 | UI-F4 | Dialog/page form & absensi | UI-F2 | not_started | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi) |
 | UI-R3 | Redesign rekap/beranda | UI-F3, UI-F4 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin (/) |
@@ -393,3 +393,12 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Aplikasi berjalan background hidden pada http://localhost:3101, PID12344; health HTTP200 dan listener loopback terverifikasi. Memakai build aplikasi final FIX-04 yang sudah lulus; perubahan baru hanya CLI seed/data dan dokumentasi. Login kedua role, enam kelas, nama Ahmad Fauzan, rekap Kelas1A berisi10siswa, Excel, logout dan overflow360px diuji lewat browser nyata. Screenshot rekap diperiksa langsung; nama/totals/penanda tanggal terlihat. Credential kedua akun ada pada .local/demo-accounts.txt, tidak dicatat di Git/log ini.
 - Checks task/main: frozen install, format:check, lint, typecheck, domain18 dan integration PostgreSQL105 lulus. CLI demo pada APP_ENV production ditolak sebelum write, seed ulang database berisi ditolak, counts siswa/sesi tetap60/60. git check-ignore memverifikasi env/credential/backupenv/workbook tidak terlacak. Tidak ada SQL/deploy/cloud/data produksi.
 - Anti-slop empat gate PASS pada scope data manual dengan bukti di laporan; checkpoint produksi/lapangan S3 tetap pending. Branch task/local-demo dihapus sesudah merge dan checks. Server sengaja tetap berjalan untuk pengguna.
+
+### UI-F1: 8 Oktober 2026
+
+- Commit `a147c1a` di-merge `--no-ff` ke `main`. Topbar dijadikan sticky `top: 0; z-index: 15` di semua breakpoint (1440, 768, 390), diverifikasi secara E2E dengan `boundingBox().y === 0` setelah scroll. Tombol "Ciutkan sidebar" dipindahkan ke bawah menu navigasi sidebar. Navigasi balik HP (`‹` ke halaman induk) ditambahkan pada topbar halaman detail siswa, guru, dan kelas; tautan teks duplikat di body halaman dibersihkan.
+- Komponen `DataCard` (`DataCardHeader`, `DataCardToolbar`, `DataCardContent`, `DataCardFooter`) diimplementasikan dan diterapkan pada halaman Siswa, Guru (kedua tab: Profil & Akun tanpa profil), Kelas, detail Kelas (`/classes/[id]`), dan `/component-preview`.
+- Toolbar list & filter: Pencarian didebounce 300ms tersinkronisasi ke URL `?q=`. Filter select langsung diperbarui tanpa tombol "Tampilkan". Pada breakpoint mobile (< 640px), filter select disatukan ke dalam bottom sheet modal tunggal tanpa duplikasi input di DOM, menghindari inkonsistensi state dan konflik portal dialog. Header kolom tabel dilengkapi pengurutan dengan `aria-sort`.
+- Komponen pagination kartu: pilihan baris per halaman (10/25/50) dipindahkan ke footer, tombol nomor halaman 36×36 terpusat, di HP dirampingkan menjadi "1–25 dari total" dan tombol ‹ › 44px. Kolom aksi tabel distandarkan 56px dengan `sr-only` header, tinggi baris 48–52px, dan sel data kosong menampilkan "—" (`.empty-dash`).
+- Pengujian: E2E baru `tests/e2e/redesign-f1.spec.ts` lulus di port 3104; `enrollments.spec.ts`, `students.spec.ts`, `mobile-sweep.spec.ts`, dan `shell.spec.ts` lulus. Seluruh 109 integrasi dan domain tests lulus tanpa regresi. Screenshot bukti disimpan di `docs/redesign/after/UI-F1/`.
+

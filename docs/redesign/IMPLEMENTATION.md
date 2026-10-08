@@ -7,8 +7,8 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 | UI-R0 | done | 58baf15 + 5b15661, main11f3f5b; domain18/integration105/e2e51, build dan kontras19 pasangan lulus |
 | UI-R1 | teknis done, needs_human | c947c06/a38906d, mainbe8fb09; domain18/integration105/e2e52; lima ketukan, H-03 pending |
 | UI-R2 | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600siswa128.07ms |
-| UI-F1 | in_progress | Shell sticky, DataCard, kit tabel & pagination |
-| UI-F2 | not_started | Fondasi validasi form (useZodForm, error inline, zod contracts) |
+| UI-F1 | done | a147c1a; DataCard master/detail, sticky topbar (y===0), mobile filter sheet, pagination footer |
+| UI-F2 | in_progress | Fondasi validasi form (useZodForm, error inline, zod contracts) |
 | UI-F3 | not_started | Daftar dan pagination halaman tersisa |
 | UI-F4 | not_started | Form inline → dialog/page dan perbaikan absensi |
 | UI-R3 | not_started | Beranda dan rekap |
@@ -51,3 +51,12 @@ Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh ber
 - Wizard promosi tiga langkah mempertahankan versi tiap siswa, pratinjau authoritative dan transaksi seluruh batch. Siswa dipilih secara default; pengecualian dapat dilepas sebelum konfirmasi. Form menjaga perubahan sebelum meninggalkan halaman melalui link atau penutupan tab.
 - Uji browser 600 siswa membuktikan25baris, halaman berikutnya tanpa pengulangan, filter/NIS, navigasi kembali dan pembatalan keluar dari draft. Empat tes PostgreSQL tambahan mencakup pagination600, penempatan efektif, arsip/filter invalid dan pembatasan rincian akun.
 - Pengukuran pertama sesudah redesign berlangsung bersamaan dengan regresi browser:25baris, median133.12ms; belum memenuhi pembanding128.07ms. Pengukuran ulang saat regresi menunggu locator wizard lama:25baris, median118.39ms. Pengukuran final setelah build main harus berjalan tanpa build atau test lain. Cleanup backup Windows sempat melewati timeout10detik dan meninggalkan DB restore fixture; hook cleanup diberi30detik tanpa mengubah perilaku restore yang menolak target yang sudah ada.
+
+## Shell, Card, dan Kit Tabel UI-F1
+
+- Topbar sticky (`top: 0; z-index: 15`) di semua breakpoint (1440, 768, 390); diverifikasi via E2E `boundingBox().y === 0` setelah scroll. Tombol "Ciutkan sidebar" dipindahkan ke bawah daftar menu navigasi. Navigasi balik HP (`‹` ke induk) ditambahkan di topbar pada halaman detail siswa, guru, dan kelas; link teks duplikat di body dihapus.
+- Komponen `DataCard` (`DataCardHeader`, `DataCardToolbar`, `DataCardContent`, `DataCardFooter`) diterapkan pada Siswa, Guru (kedua tab), Kelas, detail Kelas, dan `/component-preview`.
+- Toolbar list & filter: Debounce pencarian 300ms tersinkron ke URL (`?q=`). Filter select langsung menerapkan filter tanpa tombol "Tampilkan". Pada HP (< 640px), filter masuk ke modal sheet bottom drawer tunggal (tanpa duplikasi DOM/input). Pengurutan kolom via header tabel (`aria-sort`).
+- Pagination standar di footer card: pilihan baris per halaman (10/25/50) dipindah ke footer, tombol halaman 36×36, di HP hanya "1–25 dari total" dan tombol ‹ › 44px. Kolom aksi 56px tanpa header visual (`sr-only`), baris 48–52px, nilai kosong "—" (`.empty-dash`).
+- Pengujian: E2E baru `redesign-f1.spec.ts` lulus di port 3104, `enrollments.spec.ts`, `students.spec.ts`, `mobile-sweep.spec.ts`, dan `shell.spec.ts` lulus. Seluruh 109 integrasi dan domain test lulus. Screenshot perbandingan disimpan di `docs/redesign/after/UI-F1/`.
+
