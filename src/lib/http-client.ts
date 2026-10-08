@@ -32,7 +32,11 @@ export async function requestJson<T>(
   options: RequestInit,
   schema: z.ZodType<T>,
 ): Promise<T> {
-  const response = await fetch(url, { ...options, cache: "no-store" });
+  const response = await fetch(url, {
+    ...options,
+    cache: "no-store",
+    signal: options.signal ?? AbortSignal.timeout(20000),
+  });
   if (!response.ok) throw await responseError(response);
   return schema.parse(await response.json());
 }

@@ -13,10 +13,26 @@ export async function expectNoPageOverflow(page: Page) {
   );
 }
 export async function expectTouchTarget(page: Page, selector: string) {
-  for (const locator of await page.locator(selector).all()) {
-    if (!(await locator.isVisible())) continue;
-    const box = await locator.boundingBox();
-    expect(box?.width).toBeGreaterThanOrEqual(44);
-    expect(box?.height).toBeGreaterThanOrEqual(44);
+  const boxes = await page.locator(selector).evaluateAll((elements) =>
+    elements
+      .filter(
+        (element) =>
+          element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden",
+      )
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          width: rect.width,
+          height: rect.height,
+          label:
+            element.getAttribute("aria-label") ??
+            element.textContent?.trim().slice(0, 80) ??
+            element.tagName,
+        };
+      }),
+  );
+  for (const box of boxes) {
+    expect(box.width, box.label).toBeGreaterThanOrEqual(44);
+    expect(box.height, box.label).toBeGreaterThanOrEqual(44);
   }
 }

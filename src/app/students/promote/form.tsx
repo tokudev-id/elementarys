@@ -98,6 +98,12 @@ export function PromotionForm({
         },
         promotionPreviewSchema,
       );
+      const returned = new Set(value.items.map((item) => item.studentId));
+      if (
+        returned.size !== parsed.data.entries.length ||
+        parsed.data.entries.some((item) => !returned.has(item.studentId))
+      )
+        throw new Error("Incomplete preview receipt");
       setInput(parsed.data);
       setPreview(value);
     } catch (error) {

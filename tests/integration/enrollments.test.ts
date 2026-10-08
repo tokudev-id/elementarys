@@ -14,6 +14,9 @@ import { getStudent, listStudents } from "../../src/server/services/students";
 import { getAttendance } from "../../src/server/queries/attendance";
 import { saveAttendance } from "../../src/server/services/attendance/save";
 import { buildMonthlyAttendanceReport } from "../../src/server/reports/monthly";
+import { updateCalendar } from "../../src/server/services/school-master";
+import { mutationTransaction } from "../../src/server/mutations";
+import { Pool as DatabasePool } from "pg";
 import type { Actor } from "../../src/server/auth/guards";
 
 let source: Pool;
@@ -380,3 +383,200 @@ it("teacher cannot transfer, end, archive, preview or apply promotion", async ()
   ])
     await expect(operation()).rejects.toMatchObject({ code: "ACCESS_DENIED" });
 });
+
+it("transfer commits before waiting submit and the old draft receives ROSTER_CHANGED", async () => {
+  let entered!: () => void;
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const view = await getAttendance(classId, "2026-10-07", source, clock);
+  const moving = placeStudent(
+    studentId,
+    {
+      mode: "transfer",
+      fromEnrollmentId: enrollmentId,
+      classId: target,
+      startsOn: "2026-10-07",
+      expectedVersion: 1,
+      reason: "Transfer lebih dahulu",
+    },
+    actor,
+    randomUUID(),
+    {
+      source,
+      clock,
+      afterValidation: async () => {
+        entered();
+        await gate;
+      },
+    },
+  );
+  await ready;
+  const saving = saveAttendance(
+    classId,
+    "2026-10-07",
+    {
+      expectedVersion: null,
+      entries: view.students.map((student) => ({
+        enrollmentId: student.enrollmentId,
+        status: "H",
+      })),
+      reason: null,
+    },
+    actor,
+    randomUUID(),
+    options(),
+  ).then(
+    () => "unexpected",
+    (error: unknown) => error,
+  );
+  try {
+    let waiting = false;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      waiting = (
+        await source.query(
+          "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query ILIKE '%classes%FOR UPDATE%') waiting",
+        )
+      ).rows[0].waiting;
+      if (waiting) break;
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    expect(waiting).toBe(true);
+  } finally {
+    release();
+    await Promise.allSettled([moving, saving]);
+  }
+  expect(await saving).toMatchObject({ code: "ROSTER_CHANGED" });
+  expect((await source.query("SELECT count(*)::int n FROM attendance_records")).rows[0].n).toBe(0);
+});
+
+it("queued calendar and transfer serialize with submit; the old draft never commits", async () => {
+  let entered!: () => void;
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const observer = new DatabasePool({
+    connectionString: String(source.options.connectionString),
+    max: 1,
+  });
+  const moving = placeStudent(
+    studentId,
+    {
+      mode: "transfer",
+      fromEnrollmentId: enrollmentId,
+      classId: target,
+      startsOn: "2026-10-06",
+      expectedVersion: 1,
+      reason: "Transfer sebelum kalender",
+    },
+    actor,
+    randomUUID(),
+    {
+      source,
+      clock,
+      afterValidation: async () => {
+        entered();
+        await gate;
+      },
+    },
+  );
+  await ready;
+  const calendar = updateCalendar(
+    yearId,
+    { expectedVersion: 1, weekdays: [1, 3, 5], overrides: [] },
+    actor,
+    randomUUID(),
+    source,
+  );
+  let saving: Promise<unknown> | undefined;
+  try {
+    let waiting = false;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      waiting = (
+        await observer.query(
+          "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query ILIKE '%academic_years%FOR UPDATE%') waiting",
+        )
+      ).rows[0].waiting;
+      if (waiting) break;
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    expect(waiting).toBe(true);
+    const view = await getAttendance(classId, "2026-10-06", observer, clock);
+    saving = saveAttendance(
+      classId,
+      "2026-10-06",
+      {
+        expectedVersion: null,
+        entries: view.students.map((student) => ({
+          enrollmentId: student.enrollmentId,
+          status: "H",
+        })),
+        reason: null,
+      },
+      actor,
+      randomUUID(),
+      options(),
+    ).then(
+      () => "unexpected",
+      (error: unknown) => error,
+    );
+  } finally {
+    release();
+    await Promise.allSettled([moving, calendar, ...(saving ? [saving] : [])]);
+    await observer.end();
+  }
+  expect(["HOLIDAY", "ROSTER_CHANGED"]).toContain(((await saving) as { code: string }).code);
+  expect(
+    (
+      await source.query(
+        "SELECT weekday FROM school_weekdays WHERE academic_year_id=$1 ORDER BY weekday",
+        [yearId],
+      )
+    ).rows.map((row) => row.weekday),
+  ).toEqual([1, 3, 5]);
+  expect((await source.query("SELECT count(*)::int n FROM attendance_records")).rows[0].n).toBe(0);
+});
+
+it.each([false, true])(
+  "real PostgreSQL deadlocks retry at most twice (persistent=%s)",
+  async (persistent) => {
+    let attempts = 0;
+    const competitors: Promise<unknown>[] = [];
+    const execute = mutationTransaction(async (client) => {
+      attempts++;
+      await client.query("SET LOCAL deadlock_timeout='20ms'");
+      await client.query("SELECT id FROM classes WHERE id=$1 FOR UPDATE", [classId]);
+      if (persistent || attempts === 1) {
+        const other = await source.connect();
+        await other.query("BEGIN");
+        await other.query("SET LOCAL deadlock_timeout='5s'");
+        await other.query("SELECT id FROM classes WHERE id=$1 FOR UPDATE", [target]);
+        competitors.push(
+          other
+            .query("SELECT id FROM classes WHERE id=$1 FOR UPDATE", [classId])
+            .then(async () => {
+              await other.query("COMMIT");
+            })
+            .finally(() => other.release()),
+        );
+      }
+      await client.query("SELECT id FROM classes WHERE id=$1 FOR UPDATE", [target]);
+      return "saved";
+    }, source);
+    try {
+      if (persistent) await expect(execute).rejects.toMatchObject({ code: "40P01" });
+      else expect(await execute).toBe("saved");
+      expect(attempts).toBe(persistent ? 3 : 2);
+    } finally {
+      await Promise.allSettled(competitors);
+    }
+  },
+);
