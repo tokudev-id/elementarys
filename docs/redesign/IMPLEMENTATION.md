@@ -5,8 +5,8 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 | Fase | Status | Bukti |
 |---|---|---|
 | UI-R0 | done | 58baf15 + 5b15661, main11f3f5b; domain18/integration105/e2e51, build dan kontras19 pasangan lulus |
-| UI-R1 | in_progress | Absensi compact, roster internal dan lima ketukan; perangkat nyata H-03 tetap pending |
-| UI-R2 | not_started | Pagination dan halaman master |
+| UI-R1 | teknis done, needs_human | c947c06/a38906d, mainbe8fb09; domain18/integration105/e2e52; lima ketukan, H-03 pending |
+| UI-R2 | in_progress | Pagination dan halaman master; baseline600siswa128.07ms |
 | UI-R3 | not_started | Beranda dan rekap |
 | UI-R4 | not_started | Kalender/audit/auth/settings dan penerimaan akhir |
 
@@ -26,3 +26,16 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 ## Klarifikasi dan batas bukti
 
 Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh bergulir di area sendiri. Langkah/tap automation akan diukur pada UI-R1. Uji guru di HP nyata, printer/Excel sekolah, provider, pilot dan handover tetap checkpoint manusia. Lighthouse dan screenshot setelah seluruh fase belum dijalankan pada UI-R0.
+
+## Absensi UI-R1
+
+- Card kelas, progress, tanggal bertahap/kalender libur, default H yang belum tersimpan, search kelas besar, filter tidak hadir/semua hadir, badge mode baca, shortcut panah/H/S/I/A/Ctrl+Enter, toolbar sticky dan konfirmasi nama S/I/A. Pembatalan admin dipindahkan ke Aksi catatan → dialog; reason/version/Origin/auth/audit tetap.
+- Skenario nyata Playwright touch390×844: 30 siswa dengan status awal null di DB; H terpilih pada UI, tiga pilihan S/I/A + buka konfirmasi + Simpan = lima pointerup. DB sesudahnya27H/1S/1I/1A. Bounds halaman≤1688px, baris≤96px, roster bergulir sendiri. Keyboard/filter/reset/date picker dan future disabled diuji. Ini bukan waktu guru atau bukti HP nyata.
+- Receipt simpan sudah authoritative. Refresh setelah simpan dihapus agar respons RSC tidak me-remount halaman dan menutup menu yang baru dibuka. Void/master tetap refresh. Konflik/reload/no-op/unknown ACK/sesi habis/rotasi/date dirty/history/print lulus; main52e2e3.6menit.
+- Toast memakai posisi responsif Sonner, bukan transform CSS tambahan; teks/tombol notifikasi Indonesia dan bounds HP diuji. Source private runtime disimpan di .local agar build/test tidak mengganti artefak preview manual. Alias eksternal pnpm dipertahankan sebagai junction menuju package aslinya. .local diabaikan lint/typecheck selain Git.
+- Baseline sebelum pagination: 600 siswa sintetis pada DB ukur tersendiri, render600baris; sampel respons SSR179.31/125.09/128.07/151.83/97.90ms, median128.07ms pada2026-10-08T07:59:29.039Z. Pengukuran Node/Playwright lokal, tanpa klaim provider/perangkat guru. Data demo manual60siswa tidak direset.
+
+- Hard Gate PASS: batas halaman/roster,5tap,nama konfirmasi,52regresi dan API guard lulus.
+- Purpose Gate PASS: compact roster untuk pencatatan, warna hanya status, tombol secondary/risiko dibedakan.
+- Liveliness PASS: dials1/1/1, nama/kode/status sebagai motif, aksi simpan dan ringkasan sebagai fokus.
+- Craftsmanship PASS: receipt/protokol tetap, tests105PostgreSQL dan52browser lulus; H-03 tetap pending.

@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | Redesign UI-R0 done, UI-R1 mulai; brief/design baru dan klarifikasi scroll diterapkan |
-| Task berikutnya | UI-R1 → UI-R2 → UI-R3 → UI-R4; checkpoint cloud/lapangan tetap pending |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 mulai |
+| Task berikutnya | UI-R2 → UI-R3 → UI-R4; checkpoint cloud/lapangan tetap pending |
 
 ## 1. Aturan pencatatan
 
@@ -50,8 +50,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | FIX-03 | Validasi S2 | S2-A2, S2-D1 | done | ca07a54 → a4676c3; roundtrip9kelas, integration81, seluruh e2e44 lulus |
 | FIX-04 | Validasi S3 | S3-04 | done | e4af234 → 19fab45; proxy scoped sebelum streaming, main e2e51 + production404/no-store lulus |
 | UI-R0 | Redesign fondasi | Brief redesign | done | 58baf15 + 5b15661 → main11f3f5b; domain18/integration105/e2e51, kontras19 dan bounds keyboard lulus |
-| UI-R1 | Redesign absensi | UI-R0 | in_progress | Daftar kelas/input compact, roster internal, konfirmasi nama, lima ketukan; HP nyata H-03 |
-| UI-R2 | Redesign master | UI-R1 teknis | not_started | Pagination server, daftar tanpa form, new/detail/edit, lifecycle dialog |
+| UI-R1 | Redesign absensi | UI-R0 | needs_human | c947c06 + a38906d → be8fb09; domain18/integration105/e2e52; 30siswa/3tidak hadir5tap, HP guru pending H-03 |
+| UI-R2 | Redesign master | UI-R1 teknis | in_progress | Pagination server, daftar tanpa form, new/detail/edit, lifecycle dialog; baseline600rows128.07ms |
 | UI-R3 | Redesign rekap/beranda | UI-R2 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin |
 | UI-R4 | Redesign lainnya | UI-R3 | not_started | Tahun/kalender/audit/settings/auth, Lighthouse dan seluruh penerimaan |
 
