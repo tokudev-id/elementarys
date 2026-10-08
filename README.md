@@ -74,6 +74,10 @@ Semua endpoint data memakai guard sesi/no-store. GET mendukung guru/admin kecual
 
 [Cakupan audit](docs/AUDIT_COVERAGE.md) memetakan mutasi dan ekspor ke bukti uji. Log API memakai metadata yang dipilih eksplisit; payload, cookie, credential dan nama siswa tidak dicetak. APP_LOG_TEST=1 hanya untuk melihat metadata pada uji lokal. Guard seed/reset/migrasi/restore saat ini menerima database uji lokal; provisioning produksi mengikuti runbook dan checkpoint operator.
 
+## Kesiapan rilis dan handover
+
+[Runbook rilis](docs/RELEASE_RUNBOOK.md) memuat CI clone bersih, manifest/koneksi/konfirmasi terpisah untuk release:migrate dan release:bootstrap, environment/pemilik, smoke read-only dan H-05. Guard seed/test/CLI lokal tetap menolak produksi. Script rilis hanya disiapkan untuk operator setelah pemeriksaan dashboard dan checkpoint H-04; manifest bukan bukti identitas host tanpa pemeriksaan akun. Release tidak memasukkan migrasi/seed ke build dan tidak menjalankan deploy/push otomatis.
+
 ## Pemeriksaan visual
 
 Arah UI ada di [DESIGN.md](DESIGN.md): Operate untuk pekerjaan guru/admin, ENERGY 1 / RHYTHM 1 / MOTION 1, font sistem dan aksen hijau. [Laporan anti-slop](docs/ANTI_SLOP_REPORT.md) mencatat gate, kontras, viewport, keyboard dan interaksi yang diuji. Bukti emulator dan PDF lokal melengkapi pemeriksaan teknis; penerimaan perangkat nyata tetap pada checkpoint manusia di log.
