@@ -33,7 +33,7 @@ export const navigation: readonly NavigationItem[] = [
     ready: true,
   },
   { id: "settings", label: "Sekolah", href: "/settings", roles: ["admin"], ready: true },
-  { id: "audit", label: "Audit", href: "/audit", roles: ["admin"], ready: false },
+  { id: "audit", label: "Audit", href: "/audit", roles: ["admin"], ready: true },
   { id: "setup", label: "Persiapan sekolah", href: "/setup", roles: ["admin"], ready: true },
   {
     id: "account",

@@ -10,6 +10,7 @@ export function createAuth(source: Pool | PoolClient, secret: string, baseURL: s
   return betterAuth({
     secret,
     baseURL,
+    logger: { disabled: true },
     database: drizzleAdapter(drizzle(source), { provider: "pg", schema, transaction: false }),
     trustedOrigins: [baseURL],
     session: { cookieCache: { enabled: false } },

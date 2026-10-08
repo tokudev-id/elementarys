@@ -210,7 +210,7 @@ it("bootstrap memakai environment tanpa mencetak password dan menolak bootstrap 
   try {
     const result = await run(
       process.execPath,
-      ["node_modules/tsx/dist/cli.mjs", "scripts/bootstrap-admin.ts"],
+      ["--conditions=react-server", "--import", "tsx", "scripts/bootstrap-admin.ts"],
       { env },
     );
     expect(result.stdout + result.stderr).not.toContain(password);
@@ -218,12 +218,54 @@ it("bootstrap memakai environment tanpa mencetak password dan menolak bootstrap 
       role: "admin",
       must_change_password: true,
     });
+    const bootstrapAudit = (
+      await db.pool.query("SELECT changes_json FROM audit_events WHERE action='user.bootstrap'")
+    ).rows[0].changes_json;
+    expect(bootstrapAudit).toMatchObject({
+      before: null,
+      after: { role: "admin", mustChangePassword: true },
+    });
+    expect(JSON.stringify(bootstrapAudit)).not.toContain(password);
     await expect(
-      run(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/bootstrap-admin.ts"], {
-        env,
-      }),
+      run(
+        process.execPath,
+        ["--conditions=react-server", "--import", "tsx", "scripts/bootstrap-admin.ts"],
+        {
+          env,
+        },
+      ),
     ).rejects.toThrow();
   } finally {
     await db.pool.end();
   }
 }, 30000);
+
+it("password change rolls back credential, session revocation and flag if audit SQL fails", async () => {
+  const signed = await login();
+  await source.query('UPDATE "user" SET must_change_password=true WHERE id=$1', [
+    fixture.teacherId,
+  ]);
+  await source.query(
+    "CREATE FUNCTION reject_password_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.action='user.password-change' THEN RAISE EXCEPTION 'synthetic audit failure'; END IF; RETURN NEW; END $$; CREATE TRIGGER reject_password_audit BEFORE INSERT ON audit_events FOR EACH ROW EXECUTE FUNCTION reject_password_audit()",
+  );
+  try {
+    await expect(
+      changeAccountPassword(
+        signed.headers,
+        { currentPassword: "SyntheticTest123!", newPassword: "NeverCommitted123!" },
+        source,
+        auth,
+      ),
+    ).rejects.toMatchObject({ code: "P0001" });
+    expect(
+      (await requireActor(signed.headers, { allowPasswordChange: true }, source, auth))
+        .mustChangePassword,
+    ).toBe(true);
+    expect((await login()).response.status).toBe(200);
+    expect((await login("guru@example.test", "NeverCommitted123!")).response.status).toBe(401);
+  } finally {
+    await source.query(
+      "DROP TRIGGER reject_password_audit ON audit_events; DROP FUNCTION reject_password_audit()",
+    );
+  }
+});
