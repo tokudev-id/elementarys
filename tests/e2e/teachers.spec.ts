@@ -1,3 +1,4 @@
+import { logout } from "./helpers/shell";
 import { test, expect, type Page } from "./fixtures";
 import { randomUUID } from "node:crypto";
 import { expectNoPageOverflow } from "./helpers/mobile";
@@ -59,7 +60,7 @@ test("profile account classes reset and temporary-password journey work on mobil
     await page.setViewportSize({ width, height: 800 });
     await expectNoPageOverflow(page);
   }
-  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await logout(page);
   await expect(
     page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
   ).toBeVisible();

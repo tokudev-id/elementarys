@@ -1,3 +1,4 @@
+import { logout } from "./helpers/shell";
 import { test, expect } from "./fixtures";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
@@ -60,7 +61,7 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
     await page.setViewportSize({ width, height: 800 });
     await expectNoPageOverflow(page);
   }
-  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await logout(page);
   await expect(
     page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
   ).toBeVisible();

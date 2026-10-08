@@ -1,3 +1,4 @@
+import { logout, navigate } from "./helpers/shell";
 import { test, expect } from "./fixtures";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
@@ -32,7 +33,7 @@ test("admin filters, pages and opens audit snapshots while teacher is denied", a
     await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
     await page.getByRole("button", { name: "Masuk", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Audit", exact: true }).click();
+    await navigate(page, "Audit");
     await page.getByLabel("Jenis entitas", { exact: true }).selectOption("student");
     await page.getByLabel("ID entitas (opsional)", { exact: true }).fill(entityId);
     await page.getByLabel("Pelaku perubahan", { exact: true }).selectOption(actor.id);
@@ -55,7 +56,7 @@ test("admin filters, pages and opens audit snapshots while teacher is denied", a
       await page.setViewportSize({ width, height: 800 });
       await expectNoPageOverflow(page);
     }
-    await page.getByRole("button", { name: "Keluar", exact: true }).click();
+    await logout(page);
     await expect(
       page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
     ).toBeVisible();

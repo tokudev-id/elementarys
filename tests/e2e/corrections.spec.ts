@@ -1,3 +1,4 @@
+import { logout } from "./helpers/shell";
 import { test, expect, type Page } from "./fixtures";
 import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
@@ -236,7 +237,7 @@ test("admin records and corrects a historical year while teacher can only read i
     page.getByText("2 Hadir · 0 Sakit · 0 Izin · 0 Alpa", { exact: true }),
   ).toBeVisible();
   await expectNoPageOverflow(page);
-  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await logout(page);
   await expect(
     page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
   ).toBeVisible();
