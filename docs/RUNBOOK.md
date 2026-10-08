@@ -1,5 +1,7 @@
 # Runbook operasional
 
+Panduan peran tersedia untuk [guru](PANDUAN_GURU.md), [admin](PANDUAN_ADMIN.md) dan [pemelihara](PANDUAN_PEMELIHARA.md). Persiapan lingkungan, migrasi dan deploy oleh operator mengikuti [runbook rilis](RELEASE_RUNBOOK.md).
+
 ## Preview development dan pengukuran (S1-07)
 
 Status: alur lokal S1-06 dan fitur Slice2 tersedia dengan data sintetis. Bukti command terbaru ada pada IMPLEMENTATION_LOG.md. Preview cloud belum tersedia; H-02 memerlukan login Neon CLI dan project Vercel yang ditautkan Toku. URL dan hasil latensi provider belum ada. Tidak ada data nyata atau branch production yang dipakai pada persiapan ini.
@@ -8,7 +10,7 @@ Status: alur lokal S1-06 dan fitur Slice2 tersedia dengan data sintetis. Bukti c
 
 1. Siapkan Node minimal22.20.0, pnpm12.4.2, Docker dan PostgreSQL18 uji: `docker compose up -d`. Salin `.env.example` ke `.env.local`; isi secret/password uji secara lokal. Jangan commit `.env.local`.
 2. Jalankan `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test:domain`, `pnpm test:integration`, `pnpm build`, dan `pnpm test:e2e`. Drill backup memerlukan pg_dump/pg_restore dan age/age-keygen sesuai bagian backup di bawah.
-3. Jalankan `pnpm measure:attendance` setelah build. Script membuat database uji lokal tersendiri, seed10siswa dengan password acak, lalu menjalankan proses Next baru pada3103 dengan APP_ENV=production dan koneksi uji sintetis. MEASUREMENT_PORT opsional; pilih port yang kosong. Script tidak memanggil Neon/Vercel dan menolak APP_ENV sumber selain test.
+3. Jalankan `pnpm measure:attendance` setelah build. Script membuat database uji lokal tersendiri, seed enam kelas dengan 60 siswa dan password acak, lalu menjalankan proses Next baru pada3103 dengan APP_ENV=production dan koneksi uji sintetis. Sepuluh siswa disimpan per permintaan. MEASUREMENT_PORT opsional; pilih port yang kosong. Script tidak memanggil Neon/Vercel dan menolak APP_ENV sumber selain test.
 4. JSON hasil mencatat pembukaan login pertama, login, pembukaan absensi pertama, dan sepuluh simpan yang benar-benar mengubah status (bukan retry no-op). p95 memakai sampel terurut. Kondisi dingin hanya proses Next lokal baru; PostgreSQL tetap aktif. Angka ini bukan hasil cloud ataupun waktu guru. Proses dan database pengukuran dibersihkan setelah selesai/gagal; tidak menyentuh database uji aplikasi lain.
 5. Uji APP_ENV=production pada port terpisah dengan `tests/production/playwright.config.ts` membuktikan component-preview404. Database tetap URL uji lokal. Pemeriksaan ini tidak menggantikan H-03 pada HP guru.
 

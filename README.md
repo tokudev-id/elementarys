@@ -53,7 +53,7 @@ Halaman Guru mendukung profil tanpa akun, buat/tautkan akun, kelas utama, status
 
 - Sekolah/Persiapan sekolah: identitas, lokasi, timezone, preview waktu dan checklist minimum. Konfigurasi sintetis diberi penanda dan belum dianggap siap produksi.
 - Tahun ajaran/Kelas/Kalender: periode current, versi master, hari belajar dan pengecualian tanggal. Perubahan kalender yang bertentangan dengan sesi submitted menunjuk catatan yang perlu dibatalkan dahulu.
-- Siswa: daftar/filter/detail, input identitas dan penempatan awal bertanggal dalam satu transaksi. Transfer, keluar, naik kelas dan arsip siswa termasuk Slice 3.
+- Siswa: daftar/filter/detail, identitas dan penempatan bertanggal dalam satu transaksi; transfer, keluar, naik kelas, arsip dan riwayat penempatan tersedia.
 - Absensi: Koreksi catatan atau Isi ulang catatan membuka status dari versi terbaru dengan alasan wajib. Konflik memuat ulang data sebelum koreksi berikutnya. Riwayat menampilkan pencatat, waktu, alasan dan status sebelum/sesudah. Pembatalan satu sesi hanya admin; guru mencatat tahun current dan admin juga dapat melengkapi tahun lama dengan alasan.
 - Rekap: filter tahun/bulan/kelas, totals dan tabel tanggal, Excel serta cetak A4 landscape. Proyeksi memakai snapshot transaksi yang sama. Setiap ekspor mencatat versi yang dirender; perubahan berikutnya menampilkan tanggal yang berubah. Membuka halaman cetak tetap read-only, tombol Cetak mencatat ekspor sebelum dialog print.
 - Backup: enkripsi age, retensi 30 dan restore drill tersedia pada [runbook](docs/RUNBOOK.md). Tujuan/kunci/runner/pemilik operasional menunggu H-07; Excel/printer sekolah menunggu H-06.
@@ -62,21 +62,23 @@ Halaman Guru mendukung profil tanpa akun, buat/tautkan akun, kelas utama, status
 
 Semua endpoint data memakai guard sesi/no-store. GET mendukung guru/admin kecuali audit admin. Mutasi master, penempatan, akun, void dan audit hanya admin; PUT absensi untuk guru tahun current atau admin dengan alasan pada tahun lama. Namespace /api/auth hanya sign-in/email, sign-out dan get-session; operasi plugin publik lain ditolak.
 
-| Kelompok | Endpoint |
-|---|---|
-| Identitas/setup | GET/PATCH /api/settings |
-| Tahun/kelas/kalender | GET/POST /api/academic-years, PATCH /api/academic-years/{id}, GET/PUT /api/academic-years/{id}/calendar, GET/POST /api/classes, PATCH /api/classes/{id} |
-| Siswa/lifecycle | GET/POST /api/students, GET/PATCH /api/students/{id}, POST /api/students/{id}/enrollments, PATCH /api/enrollments/{id}/end, POST /api/enrollments/promote/preview dan /api/enrollments/promote |
-| Guru/akun | GET/POST /api/teachers, PATCH /api/teachers/{id}, PUT /api/teachers/{id}/classes, POST /api/teachers/{id}/account, PATCH /api/users/{id}/access, POST /api/users/{id}/reset-password, POST /api/account/change-password |
-| Absensi | GET /api/me, GET /api/dashboard, GET /api/classes/{id}/attendance, PUT /api/classes/{id}/attendance/{date}, POST /api/classes/{id}/attendance/{date}/void, GET /api/classes/{id}/attendance/{date}/history |
-| Laporan/audit | GET /api/reports/attendance, GET /api/reports/attendance.xlsx, POST /api/reports/exports, GET /api/audit |
-| Operasi | GET /api/health, pnpm auth:bootstrap-admin, pnpm db:migrate, pnpm db:seed:test, pnpm measure:attendance; CLI backup/restore pada runbook |
+| Kelompok             | Endpoint                                                                                                                                                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Identitas/setup      | GET/PATCH /api/settings                                                                                                                                                                                                 |
+| Tahun/kelas/kalender | GET/POST /api/academic-years, PATCH /api/academic-years/{id}, GET/PUT /api/academic-years/{id}/calendar, GET/POST /api/classes, PATCH /api/classes/{id}                                                                 |
+| Siswa/lifecycle      | GET/POST /api/students, GET/PATCH /api/students/{id}, POST /api/students/{id}/enrollments, PATCH /api/enrollments/{id}/end, POST /api/enrollments/promote/preview dan /api/enrollments/promote                          |
+| Guru/akun            | GET/POST /api/teachers, PATCH /api/teachers/{id}, PUT /api/teachers/{id}/classes, POST /api/teachers/{id}/account, PATCH /api/users/{id}/access, POST /api/users/{id}/reset-password, POST /api/account/change-password |
+| Absensi              | GET /api/me, GET /api/dashboard, GET /api/classes/{id}/attendance, PUT /api/classes/{id}/attendance/{date}, POST /api/classes/{id}/attendance/{date}/void, GET /api/classes/{id}/attendance/{date}/history              |
+| Laporan/audit        | GET /api/reports/attendance, GET /api/reports/attendance.xlsx, POST /api/reports/exports, GET /api/audit                                                                                                                |
+| Operasi              | GET /api/health, pnpm auth:bootstrap-admin, pnpm db:migrate, pnpm db:seed:test, pnpm measure:attendance; CLI backup/restore pada runbook                                                                                |
 
 [Cakupan audit](docs/AUDIT_COVERAGE.md) memetakan mutasi dan ekspor ke bukti uji. Log API memakai metadata yang dipilih eksplisit; payload, cookie, credential dan nama siswa tidak dicetak. APP_LOG_TEST=1 hanya untuk melihat metadata pada uji lokal. Guard seed/reset/migrasi/restore saat ini menerima database uji lokal; provisioning produksi mengikuti runbook dan checkpoint operator.
 
 ## Kesiapan rilis dan handover
 
 [Runbook rilis](docs/RELEASE_RUNBOOK.md) memuat CI clone bersih, manifest/koneksi/konfirmasi terpisah untuk release:migrate dan release:bootstrap, environment/pemilik, smoke read-only dan H-05. Guard seed/test/CLI lokal tetap menolak produksi. Script rilis hanya disiapkan untuk operator setelah pemeriksaan dashboard dan checkpoint H-04; manifest bukan bukti identitas host tanpa pemeriksaan akun. Release tidak memasukkan migrasi/seed ke build dan tidak menjalankan deploy/push otomatis.
+
+[Panduan guru](docs/PANDUAN_GURU.md), [admin](docs/PANDUAN_ADMIN.md), [pemelihara/handover](docs/PANDUAN_PEMELIHARA.md), [evaluasi pilot](docs/PILOT_EVALUATION.md) dan [verifikasi panduan](docs/GUIDE_VERIFICATION.md) mengikuti alur UI terbaru. [Validasi](docs/VALIDATION.md) memuat matriks izin, uji perangkat emulasi dan pengukuran lokal6kelas60; bukti nyata tetap pada checkpoint log.
 
 ## Pemeriksaan visual
 
