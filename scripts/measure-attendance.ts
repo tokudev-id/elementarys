@@ -24,6 +24,7 @@ function startServer(port: number, databaseUrl: string): Promise<ChildProcess> {
         String(port),
       ],
       {
+        windowsHide: true,
         env: {
           ...process.env,
           APP_ENV: "production",
@@ -75,7 +76,7 @@ export async function measureAttendance() {
   const password = randomBytes(24).toString("base64url");
   let server: ChildProcess | undefined;
   try {
-    await seedTestDatabase(database.url, password, "test");
+    await seedTestDatabase(database.url, password, "test", { pilot: true });
     const classId: string = (await database.pool.query("SELECT id FROM classes LIMIT 1")).rows[0]
       .id;
     const date = schoolToday("Asia/Kuala_Lumpur");
@@ -131,7 +132,9 @@ export async function measureAttendance() {
       coldCondition:
         "fresh Next.js process; PostgreSQL remains running; no provider cold-start measurement",
       measuredAt: new Date().toISOString(),
-      students: entries.length,
+      classes: (await database.pool.query("SELECT count(*)::int n FROM classes")).rows[0].n,
+      students: (await database.pool.query("SELECT count(*)::int n FROM students")).rows[0].n,
+      studentsPerSave: entries.length,
       firstLoginPageMs: opening.durationMs,
       loginMs: login.durationMs,
       firstAttendancePageMs: page.durationMs,

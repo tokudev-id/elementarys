@@ -19,7 +19,11 @@ import { pool, transaction, lockRows, audit } from "@/server/db/pool";
 import { assertAdmin, assertVersion, mutationTransaction } from "@/server/mutations";
 import { schoolContext } from "@/server/services/attendance/context";
 
-export type EnrollmentOptions = { source?: Pool; clock?: Clock };
+export type EnrollmentOptions = {
+  source?: Pool;
+  clock?: Clock;
+  afterValidation?: (client: PoolClient) => Promise<void>;
+};
 type ClassPlacement = {
   id: string;
   name: string;
@@ -246,6 +250,7 @@ export async function placeStudent(
     const student = await studentRow(client, id);
     const target = classes.get(input.classId)!;
     const before = await validatePlacement(client, student, target, input);
+    await options.afterValidation?.(client);
     return writePlacement(client, student, target, input, before, actor, requestId);
   }, options.source ?? pool);
 }

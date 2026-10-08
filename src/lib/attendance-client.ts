@@ -44,13 +44,14 @@ export const attendanceClient: AttendanceClient = {
   async load(classId, date) {
     const response = await fetch(
       `/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`,
-      { cache: "no-store" },
+      { cache: "no-store", signal: AbortSignal.timeout(20000) },
     );
     return readResponse(response, attendanceViewSchema);
   },
   async save(classId, date, input) {
     const response = await fetch(`/api/classes/${classId}/attendance/${date}`, {
       method: "PUT",
+      signal: AbortSignal.timeout(20000),
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
