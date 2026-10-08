@@ -31,9 +31,12 @@ export function Dialog({
         focused.scrollIntoView({ block: "nearest" });
     }
     const viewport = window.visualViewport;
+    const observer = new ResizeObserver(resize);
+    if (bodyRef.current) observer.observe(bodyRef.current);
     viewport?.addEventListener("resize", resize);
     window.addEventListener("resize", resize);
     return () => {
+      observer.disconnect();
       viewport?.removeEventListener("resize", resize);
       window.removeEventListener("resize", resize);
     };

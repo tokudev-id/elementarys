@@ -43,12 +43,23 @@ for (const viewport of mobileViewports) {
     await expect
       .poll(async () => {
         const dialog = await page.getByRole("dialog").boundingBox();
-        return dialog!.y + dialog!.height;
+        return (
+          dialog!.x >= 0 &&
+          dialog!.y >= 0 &&
+          dialog!.x + dialog!.width <= 360 &&
+          dialog!.y + dialog!.height <= 340
+        );
       })
-      .toBeLessThanOrEqual(340);
+      .toBe(true);
     await expect(page.getByRole("button", { name: "Konfirmasi", exact: true })).toBeInViewport();
     await page.getByLabel("Catatan contoh", { exact: true }).focus();
     await expect(page.getByLabel("Catatan contoh", { exact: true })).toBeInViewport();
+    await expect
+      .poll(async () => {
+        const box = await page.getByLabel("Catatan contoh", { exact: true }).boundingBox();
+        return box!.y >= 0 && box!.y + box!.height <= 340;
+      })
+      .toBe(true);
     await page.screenshot({
       path: `test-results/keyboard-resize-${viewport.name.replaceAll(" ", "-")}.png`,
     });
