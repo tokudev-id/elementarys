@@ -8,8 +8,8 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 | UI-R1 | teknis done, needs_human | c947c06/a38906d, mainbe8fb09; domain18/integration105/e2e52; lima ketukan, H-03 pending |
 | UI-R2 | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600siswa128.07ms |
 | UI-F1 | done | a147c1a; DataCard master/detail, sticky topbar (y===0), mobile filter sheet, pagination footer |
-| UI-F2 | in_progress | Fondasi validasi form (useZodForm, error inline, zod contracts) |
-| UI-F3 | not_started | Daftar dan pagination halaman tersisa |
+| UI-F2 | done | useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary (>=3), skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
+| UI-F3 | in_progress | Daftar dan pagination halaman tersisa |
 | UI-F4 | not_started | Form inline → dialog/page dan perbaikan absensi |
 | UI-R3 | not_started | Beranda dan rekap |
 | UI-R4 | not_started | Polish redesign, audit CSS, penerimaan akhir |
@@ -59,4 +59,33 @@ Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh ber
 - Toolbar list & filter: Debounce pencarian 300ms tersinkron ke URL (`?q=`). Filter select langsung menerapkan filter tanpa tombol "Tampilkan". Pada HP (< 640px), filter masuk ke modal sheet bottom drawer tunggal (tanpa duplikasi DOM/input). Pengurutan kolom via header tabel (`aria-sort`).
 - Pagination standar di footer card: pilihan baris per halaman (10/25/50) dipindah ke footer, tombol halaman 36×36, di HP hanya "1–25 dari total" dan tombol ‹ › 44px. Kolom aksi 56px tanpa header visual (`sr-only`), baris 48–52px, nilai kosong "—" (`.empty-dash`).
 - Pengujian: E2E baru `redesign-f1.spec.ts` lulus di port 3104, `enrollments.spec.ts`, `students.spec.ts`, `mobile-sweep.spec.ts`, dan `shell.spec.ts` lulus. Seluruh 109 integrasi dan domain test lulus. Screenshot perbandingan disimpan di `docs/redesign/after/UI-F1/`.
+
+## Fondasi Validasi Form UI-F2
+
+- Hook form Zod mandiri `useZodForm` dibuat di `src/components/use-zod-form.ts` dengan pola `blur-then-live`:
+  - `noValidate: true` disematkan ke form props sehingga browser native validation popup dinonaktifkan.
+  - Nilai form disinkronkan secara real-time via `valuesRef` untuk mencegah bug stale closure saat submit.
+  - Submit memvalidasi seluruh skema secara komprehensif, memetakan error ke masing-masing field, memfokuskan dan men-scroll elemen field error pertama (`focus()` + `scrollIntoView({ block: "nearest" })`).
+  - Menampilkan ringkasan error (`FormErrorSummary`) bila ditemukan ≥ 3 error, lengkap dengan tautan anchor interaktif ke masing-masing field.
+  - Server errors (`options.serverErrors`) dipetakan otomatis ke field terkait saat respons mutasi kembali.
+- Komponen input terstandarisasi:
+  - `Field`: penanda `*` (`aria-hidden="true"`) + teks screen reader `.sr-only "wajib"`, `aria-label` eksplisit agar accessible name Playwright dan AT tetap bersih, `aria-invalid`, serta pesan inline error (`role="alert"`).
+  - `SelectField`: menerima `error` dan `required`, render opsi bersih dan accessible.
+  - `TextareaField`: dilengkapi counter karakter saat fokus (`0/1000`, `aria-live="polite"`), auto-expand/resize, dan pesan error inline.
+  - `CheckboxField` & `SwitchField`: mendukung state checked, required, dan inline error.
+- Pembaruan skema kontrak Zod bahasa Indonesia:
+  - `src/contracts/auth.ts`: login (email wajib & format email, password wajib), change password (min 12, beda dari lama, ulangi password sama).
+  - `src/contracts/students.ts`: nama mengandung huruf & min 2 huruf, NIS regex angka/titik/strip/slash max 30, NISN tepat 10 digit, kode siswa alphanumeric+strip max 64.
+  - `src/contracts/teachers.ts`: nama guru mengandung huruf & min 2, email max 254, password min 12, konfirmasi password sama.
+  - `src/contracts/school-master.ts`: label tahun ajaran format `YYYY/YYYY` tahun berurutan, batas durasi tahun ajaran ≤ 400 hari, nama kelas 1–100, tingkat 1–6.
+  - `src/contracts/enrollments.ts`: alasan penempatan/transfer/tutup/arsip wajib 1–1000 karakter.
+  - `src/contracts/settings.ts`: nama sekolah 1–200, lokasi max 300, validasi timezone IANA, alasan ubah timezone wajib bila zona berubah.
+- Form di-refactor: `StudentForm`, `ClassForm`, `TeacherProfileForm`, `TeacherAccountForm`, `PasswordResetForm`, `PlacementForm`, `EndEnrollmentForm`, `StudentArchiveForm`, dan `AccountForm` (login & ganti password).
+- Pengujian & Bukti:
+  - Integration: 111 tests lulus 100% (`vitest.config.ts` dikonfigurasi `fileParallelism: false` untuk mencegah PostgreSQL lock timeouts).
+  - Domain: 18 tests lulus 100%.
+  - E2E: `tests/e2e/redesign-f2.spec.ts` memverifikasi submit form kosong, pesan error inline Bahasa Indonesia, fokus ke error pertama, summary saat ≥ 3 error, form dialog tetap terbuka saat error, dan `noValidate` aktif.
+  - Seluruh rangkaian regresi E2E (`auth.spec.ts`, `school-master.spec.ts`, `students.spec.ts`, `redesign-f1.spec.ts`) lulus 100%.
+  - Screenshot bukti tersimpan di `docs/redesign/after/UI-F2/`: `login-error.png`, `siswa-form-error.png`, dan `kelas-form-error.png`.
+
 

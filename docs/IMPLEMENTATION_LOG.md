@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done (dilanjutkan oleh UI-F1–F4); UI-F1 done; UI-F2 mulai |
-| Task berikutnya | UI-F2 → UI-F3/F4 → UI-R3 → UI-R4 |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 mulai |
+| Task berikutnya | UI-F3 → UI-F4 → UI-R3 → UI-R4 |
 
 ## 1. Aturan pencatatan
 
@@ -52,8 +52,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-R1 | Redesign absensi | UI-R0 | needs_human | c947c06 + a38906d → be8fb09; domain18/integration105/e2e52; 30siswa/3tidak hadir5tap, HP guru pending H-03 |
 | UI-R2 | Redesign master | UI-R1 teknis | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600rows128.07ms |
 | UI-F1 | Shell, card, kit tabel | UI-R2 | done | a147c1a; DataCard master/detail, sticky topbar 1440/768/390 (y===0), pagination card, mobile filter sheet; domain 18/integration 109/e2e redesign-f1+enrollments+students+mobile-sweep+shell lulus |
-| UI-F2 | Fondasi validasi form | UI-F1 | in_progress | useZodForm, noValidate, inline error ID, zod contracts, form terpisah/dialog |
-| UI-F3 | Daftar & pagination | UI-F2 | not_started | Tahun ajaran, audit, history absensi, unlinked accounts, grid kelas |
+| UI-F2 | Fondasi validasi form | UI-F1 | done | 0dc5e84; useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary, skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
+| UI-F3 | Daftar & pagination | UI-F2 | in_progress | Tahun ajaran, audit, history absensi, unlinked accounts, grid kelas |
 | UI-F4 | Dialog/page form & absensi | UI-F2 | not_started | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi) |
 | UI-R3 | Redesign rekap/beranda | UI-F3, UI-F4 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin (/) |
 | UI-R4 | Polish & verifikasi akhir | UI-R3 | not_started | Lighthouse, audit CSS lama, kriteria penerimaan brief bagian 8 |
@@ -401,4 +401,18 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Toolbar list & filter: Pencarian didebounce 300ms tersinkronisasi ke URL `?q=`. Filter select langsung diperbarui tanpa tombol "Tampilkan". Pada breakpoint mobile (< 640px), filter select disatukan ke dalam bottom sheet modal tunggal tanpa duplikasi input di DOM, menghindari inkonsistensi state dan konflik portal dialog. Header kolom tabel dilengkapi pengurutan dengan `aria-sort`.
 - Komponen pagination kartu: pilihan baris per halaman (10/25/50) dipindahkan ke footer, tombol nomor halaman 36×36 terpusat, di HP dirampingkan menjadi "1–25 dari total" dan tombol ‹ › 44px. Kolom aksi tabel distandarkan 56px dengan `sr-only` header, tinggi baris 48–52px, dan sel data kosong menampilkan "—" (`.empty-dash`).
 - Pengujian: E2E baru `tests/e2e/redesign-f1.spec.ts` lulus di port 3104; `enrollments.spec.ts`, `students.spec.ts`, `mobile-sweep.spec.ts`, dan `shell.spec.ts` lulus. Seluruh 109 integrasi dan domain tests lulus tanpa regresi. Screenshot bukti disimpan di `docs/redesign/after/UI-F1/`.
+
+### UI-F2: 8 Oktober 2026
+
+- Commit `0dc5e84` di-merge `--no-ff` ke `main`. Seluruh aturan validasi form ditangani dengan arsitektur mandiri:
+  - Dibuat hook `useZodForm` di `src/components/use-zod-form.ts` dengan pola `blur-then-live`: input memvalidasi saat blur lalu live saat perubahan berikutnya, submit memvalidasi seluruh skema Zod secara komprehensif, `valuesRef` sinkron langsung mencegah stale closure, `noValidate: true` menyematkan properti ke form untuk meniadakan browser native validation bubble, fokus dan scroll instan ke error pertama (`scrollIntoView({ block: "nearest" })`), serta ringkasan error (`FormErrorSummary`) ditampilkan bila terdapat ≥ 3 error dengan anchor interaktif langsung ke field.
+  - Komponen input terintegrasi dengan validasi: `Field`, `SelectField`, `TextareaField` (dengan counter karakter `0/1000` saat fokus), `CheckboxField`, dan `SwitchField`. Penanda wajib `*` (`aria-hidden="true"`) disertai teks screen reader `.sr-only "wajib"` dan `aria-label` eksplisit pada elemen input agar accessible name Playwright dan pembaca layar tetap konsisten.
+  - Skema kontrak Zod diperbarui di `src/contracts/` dengan pesan Bahasa Indonesia persis sesuai tabel acuan: `auth.ts` (login & ganti password), `students.ts` (nama min 2 mengandung huruf, NIS format numerik/strip/titik/slash max 30, NISN tepat 10 digit angka, kode siswa alphanumeric+strip max 64), `teachers.ts` (nama guru min 2 huruf, email, password min 12, konfirmasi sama), `school-master.ts` (format tahun ajaran `YYYY/YYYY` tahun berturutan, durasi tahun ajaran ≤ 400 hari, kelas nama 1–100 & tingkat 1–6), `enrollments.ts` (alasan penempatan/transfer/tutup/arsip wajib 1–1000 karakter), dan `settings.ts` (nama sekolah, zona waktu IANA, alasan ubah zona).
+  - Form ter-refactor: `StudentForm`, `ClassForm`, `TeacherProfileForm`, `TeacherAccountForm`, `PasswordResetForm`, `PlacementForm`, `EndEnrollmentForm`, `StudentArchiveForm`, dan `AccountForm`.
+- Pengujian:
+  - E2E baru `tests/e2e/redesign-f2.spec.ts` menguji submit kosong, pesan inline Bahasa Indonesia, fokus ke error pertama, noValidate tanpa popup browser, error summary ≥ 3, dan form dialog tetap terbuka saat submit tidak valid.
+  - Seluruh rangkaian E2E terkait (`auth.spec.ts`, `school-master.spec.ts`, `students.spec.ts`, `redesign-f1.spec.ts`) lulus 100%.
+  - 18 domain tests dan 111 integration tests (`vitest.config.ts` dikonfigurasi `fileParallelism: false`) lulus 100%.
+  - Screenshot bukti validasi tersimpan di `docs/redesign/after/UI-F2/`: `login-error.png`, `siswa-form-error.png`, dan `kelas-form-error.png`.
+
 
