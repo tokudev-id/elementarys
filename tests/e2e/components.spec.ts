@@ -29,6 +29,12 @@ for (const viewport of mobileViewports) {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: "Buka bottom sheet" }).tap();
     await expect(page.getByRole("dialog")).toBeVisible();
+    const dialogBox = await page.getByRole("dialog").boundingBox();
+    const dialogViewport = page.viewportSize()!;
+    expect(dialogBox!.x).toBeGreaterThanOrEqual(0);
+    expect(dialogBox!.y).toBeGreaterThanOrEqual(0);
+    expect(dialogBox!.x + dialogBox!.width).toBeLessThanOrEqual(dialogViewport.width);
+    expect(dialogBox!.y + dialogBox!.height).toBeLessThanOrEqual(dialogViewport.height);
     await page.getByRole("button", { name: "Konfirmasi", exact: true }).tap();
     await expect(page.getByLabel("Nama contoh", { exact: true })).toBeFocused();
     await expect(page.getByText("Isi nama sebelum mengonfirmasi.")).toBeVisible();
@@ -71,5 +77,5 @@ test("dialog keyboard focus and Escape", async ({ page }) => {
   const outline = await page
     .locator(".status-choices input:checked + span")
     .evaluate((el) => getComputedStyle(el).outlineWidth);
-  expect(outline).toBe("3px");
+  expect(outline).toBe("2px");
 });

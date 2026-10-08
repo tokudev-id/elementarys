@@ -1,3 +1,4 @@
+import { logout } from "./helpers/shell";
 import { test, expect } from "./fixtures";
 import { expectNoPageOverflow } from "./helpers/mobile";
 test("admin creates year/class and edits calendar on mobile; teacher reads without write controls", async ({
@@ -64,7 +65,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
     await page.setViewportSize({ width, height: 800 });
     await expectNoPageOverflow(page);
   }
-  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await logout(page);
   await expect(
     page.getByRole("heading", { name: "Masuk ke Absensi Sekolah", exact: true }),
   ).toBeVisible();

@@ -271,3 +271,4 @@ Setiap fase di-merge terpisah ke `main` dan dicatat di `docs/IMPLEMENTATION_LOG.
 1. Catatan per siswa untuk S/I ditunda ke fase berikutnya (lihat bagian 3).
 2. Bottom nav admin di HP: Beranda, Absensi, Siswa, Lainnya. Rekap diakses lewat link di Beranda dan menu Lainnya.
 3. Warna merek hijau dihapus dan diganti biru langit ala MBG (token di `DESIGN.md`). Hijau hanya untuk status Hadir. Nilai hex masih pendekatan; ganti dengan nilai resmi bila panduan warnanya tersedia.
+4. Klarifikasi 8 Oktober 2026: batas dua layar pada input absensi berlaku untuk scroll halaman. Roster boleh bergulir di area sendiri agar target sentuh dan baris nama/status tetap terbaca.

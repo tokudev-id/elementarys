@@ -5,6 +5,20 @@ import { Dialog } from "@/components/dialog";
 import { Field } from "@/components/field";
 import { StatusChoices, type AttendanceChoice } from "@/components/status-choices";
 import { StateBanner, type BannerState } from "@/components/state-banner";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
+import { KpiCard } from "@/components/kpi-card";
+import { EmptyState } from "@/components/empty-state";
+import { DataTable } from "@/components/data-table";
+import type { ColumnDef } from "@tanstack/react-table";
+const exampleRows = [
+  { id: "1", name: "Ahmad Fauzan", code: "S-0001" },
+  { id: "2", name: "Aisyah Putri", code: "S-0002" },
+];
+const exampleColumns: ColumnDef<(typeof exampleRows)[number]>[] = [
+  { accessorKey: "name", header: "Nama" },
+  { accessorKey: "code", header: "Kode" },
+];
 export function ComponentPreview() {
   const [choice, setChoice] = useState<AttendanceChoice>();
   const [dialog, setDialog] = useState<"dialog" | "sheet" | null>(null);
@@ -35,8 +49,32 @@ export function ComponentPreview() {
   }
   return (
     <>
-      <h1>Contoh komponen</h1>
-      <p>Halaman pengembangan. Isian hanya tersimpan selama halaman ini terbuka.</p>
+      <PageHeader
+        title="Contoh komponen"
+        description="Data sintetis. Isian hanya tersimpan selama halaman ini terbuka."
+      />
+      <section className="preview-section">
+        <h2>Ringkasan dan tabel sintetis</h2>
+        <div className="kpi-grid">
+          <KpiCard
+            label="Siswa contoh"
+            value={exampleRows.length}
+            context="Fixture komponen, bukan data sekolah"
+          />
+        </div>
+        <div className="button-row">
+          {["H", "S", "I", "A"].map((status) => (
+            <StatusBadge key={status} tone={status as "H" | "S" | "I" | "A"}>
+              {status}
+            </StatusBadge>
+          ))}
+        </div>
+        <DataTable items={exampleRows} columns={exampleColumns} label="Siswa sintetis" />
+        <EmptyState
+          title="Belum ada catatan contoh"
+          description="Isi form di bawah untuk memeriksa konfirmasi."
+        />
+      </section>
       <section className="preview-section">
         <h2>Pilihan kehadiran</h2>
         <StatusChoices

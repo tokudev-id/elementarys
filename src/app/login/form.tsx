@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 export function AccountForm({ change = false }: { change?: boolean }) {
   const router = useRouter();
@@ -83,7 +85,7 @@ export function AccountForm({ change = false }: { change?: boolean }) {
   );
 }
 
-export function Logout() {
+export function Logout({ asMenuItem = false }: { asMenuItem?: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -105,11 +107,21 @@ export function Logout() {
       setPending(false);
     }
   }
+  function selectLogout(event: Event) {
+    event.preventDefault();
+    void logout();
+  }
   return (
     <>
-      <button disabled={pending} onClick={logout}>
-        Keluar
-      </button>
+      {asMenuItem ? (
+        <DropdownMenuItem disabled={pending} onSelect={selectLogout}>
+          Keluar
+        </DropdownMenuItem>
+      ) : (
+        <Button variant="ghost" disabled={pending} onClick={logout}>
+          Keluar
+        </Button>
+      )}
       {message && <p role="alert">{message}</p>}
     </>
   );

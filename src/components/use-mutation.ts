@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { mutationResultSchema } from "@/contracts/mutations";
 import { HttpError, requestJson } from "@/lib/http-client";
 import type { BannerState } from "./state-banner";
+import { toast } from "sonner";
 
 export function useMutation(url: string, method: "POST" | "PATCH" | "PUT", onReload?: () => void) {
   const router = useRouter();
@@ -31,6 +32,7 @@ export function useMutation(url: string, method: "POST" | "PATCH" | "PUT", onRel
         mutationResultSchema,
       );
       setNotice({ state: "saved", message: "Perubahan tersimpan." });
+      toast.success("Perubahan tersimpan.");
       startRefresh(() => router.refresh());
       return true;
     } catch (error) {

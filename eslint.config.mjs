@@ -7,6 +7,11 @@ const eslintConfig = defineConfig([
   ...nextTs,
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
   {
+    files: ["src/components/data-table.tsx"],
+    // TanStack v8 returns a mutable table; this component explicitly opts out of React Compiler.
+    rules: { "react-hooks/incompatible-library": "off" },
+  },
+  {
     files: ["src/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-syntax": [

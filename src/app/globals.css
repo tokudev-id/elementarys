@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/tokens.css";
+@import "../styles/shell.css";
+@import "../styles/components.css";
 
 .resource-list {
   list-style: none;
@@ -264,17 +268,15 @@ textarea {
 }
 
 :root {
-  color-scheme: light;
-  --background: #f6f7f4;
-  --foreground: #243329;
-  --accent: #226040;
+  --accent: var(--primary);
 }
 body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
+  font-family: var(--font-inter), Arial, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
 }
 a {
   display: inline-flex;
@@ -298,11 +300,11 @@ p {
   max-width: 65ch;
 }
 ::selection {
-  background: #d9eadd;
+  background: var(--primary-soft);
 }
 :focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 a {
   color: var(--accent);
@@ -326,7 +328,7 @@ input {
   font: inherit;
   color: inherit;
   background: white;
-  border: 1px solid #68796b;
+  border: 1px solid var(--control-border);
   border-radius: 6px;
 }
 button {
@@ -342,7 +344,7 @@ button {
   cursor: pointer;
 }
 button:hover {
-  background: #194b31;
+  background: var(--primary-hover);
 }
 button:disabled {
   opacity: 0.65;
@@ -353,13 +355,11 @@ small {
   font-weight: 400;
 }
 [role="alert"] {
-  color: #8a2222;
+  color: var(--destructive);
 }
 
 :root {
-  --muted: #536457;
-  --border: #68796b;
-  --surface: #fff;
+  --muted: var(--muted-foreground);
 }
 body {
   overflow-wrap: anywhere;
@@ -432,7 +432,7 @@ a {
 }
 .app-nav a[aria-current="page"] {
   font-weight: 700;
-  background: #e3ede5;
+  background: var(--primary-soft);
 }
 .ui-button--secondary {
   border: 1px solid var(--border);
@@ -440,7 +440,7 @@ a {
   color: var(--foreground);
 }
 .ui-button--secondary:hover {
-  background: #e3ede5;
+  background: var(--primary-soft);
 }
 button:disabled {
   cursor: not-allowed;
@@ -449,11 +449,11 @@ button[aria-busy="true"] {
   cursor: wait;
 }
 .ui-button:active:not(:disabled) {
-  background: #194b31;
+  background: var(--primary-hover);
   color: white;
 }
 .status-choices label:active span {
-  background: #e3ede5;
+  background: var(--primary-soft);
 }
 .button-row {
   display: flex;
@@ -468,7 +468,7 @@ button[aria-busy="true"] {
   font-weight: 600;
 }
 .ui-field input[aria-invalid="true"] {
-  border: 2px solid #8a2222;
+  border: 2px solid var(--destructive);
 }
 .status-choices {
   padding: 0;
@@ -514,11 +514,11 @@ button[aria-busy="true"] {
 }
 .status-choices input:checked + span {
   border: 2px solid var(--accent);
-  background: #d9eadd;
+  background: var(--primary-soft);
 }
 .status-choices input:focus-visible + span {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 .status-choices input:disabled + span {
   opacity: 0.65;
@@ -538,7 +538,7 @@ button[aria-busy="true"] {
   color: #782323;
 }
 .state-banner--saved {
-  background: #e3ede5;
+  background: var(--primary-soft);
 }
 .state-banner__action {
   margin-top: 0.75rem;
