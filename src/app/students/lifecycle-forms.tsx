@@ -1,12 +1,39 @@
 "use client";
-import { useState, type FormEvent, type ChangeEvent } from "react";
+
+import { useState, type ChangeEvent } from "react";
+import type { z } from "zod";
 import type { StudentDetail } from "@/contracts/students";
+import {
+  enrollmentInputSchema,
+  enrollmentEndSchema,
+  studentArchiveSchema,
+} from "@/contracts/enrollments";
 import type { ClassView, AcademicYearView } from "@/contracts/school-master";
 import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
+import { TextareaField } from "@/components/textarea-field";
 import { Button } from "@/components/button";
 import { useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
+import { useZodForm } from "@/components/use-zod-form";
+import { FormErrorSummary } from "@/components/form-error-summary";
+
+type PlacementFormData =
+  | {
+      mode: "placement";
+      expectedVersion: number;
+      classId: string;
+      startsOn: string;
+      reason: string;
+    }
+  | {
+      mode: "transfer";
+      expectedVersion: number;
+      classId: string;
+      startsOn: string;
+      reason: string;
+      fromEnrollmentId: string;
+    };
 
 export function PlacementForm({
   student,
@@ -19,71 +46,102 @@ export function PlacementForm({
   years: AcademicYearView[];
   today: string;
 }) {
-  const [mode, setMode] = useState("transfer");
-  const mutation = useMutation(`/api/students/${student.id}/enrollments`, "POST");
+  const [mode, setMode] = useState<"transfer" | "placement">("transfer");
+  const mutation = useMutation(
+    `/api/students/${student.id}/enrollments`,
+    "POST",
+  );
+
+  const availableClasses = classes.filter(
+    (item) =>
+      !item.archivedAt &&
+      !years.find((year) => year.id === item.yearId)?.archivedAt,
+  );
+  const activeEnrollments = student.enrollments.filter((item) => !item.cancelled);
+
+  const form = useZodForm(
+    enrollmentInputSchema as unknown as z.ZodType<PlacementFormData>,
+    {
+      defaultValues: {
+        mode: "transfer",
+        expectedVersion: student.version,
+        fromEnrollmentId: activeEnrollments[0]?.id ?? "",
+        classId: availableClasses[0]?.id ?? "",
+        startsOn: today,
+        reason: "",
+      },
+      serverErrors: mutation.errors,
+      onSubmit: async (data: PlacementFormData) => {
+        await mutation.mutate(data);
+      },
+    },
+  );
+
   function changeMode(event: ChangeEvent<HTMLSelectElement>) {
-    setMode(event.currentTarget.value);
+    const nextMode = event.currentTarget.value as "transfer" | "placement";
+    setMode(nextMode);
+    form.setValue("mode", nextMode);
   }
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    await mutation.mutate({
-      mode,
-      expectedVersion: student.version,
-      classId: data.get("classId"),
-      startsOn: data.get("startsOn"),
-      reason: data.get("reason"),
-      ...(mode === "transfer" ? { fromEnrollmentId: data.get("fromEnrollmentId") } : {}),
-    });
-  }
+
   return (
     <section className="resource-section">
       <h2>Ubah penempatan</h2>
-      <form className="resource-form" onSubmit={submit} aria-label="Ubah penempatan siswa">
+      <form
+        className="resource-form"
+        {...form.formProps}
+        aria-label="Ubah penempatan siswa"
+      >
+        <FormErrorSummary errors={form.errorSummary} />
         <fieldset
           key={student.version}
           disabled={mutation.pending || mutation.notice?.state === "conflict"}
         >
           <SelectField label="Jenis perubahan" value={mode} onChange={changeMode}>
             <option value="transfer">Transfer dalam tahun yang sama</option>
-            <option value="placement">Penempatan baru atau tahun berikutnya</option>
+            <option value="placement">
+              Penempatan baru atau tahun berikutnya
+            </option>
           </SelectField>
           {mode === "transfer" && (
-            <SelectField label="Penempatan asal" name="fromEnrollmentId" required>
-              {student.enrollments
-                .filter((item) => !item.cancelled)
-                .map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.className} / {item.yearLabel} / {item.startsOn} sampai sebelum{" "}
-                    {item.endsOnExclusive}
-                  </option>
-                ))}
-            </SelectField>
-          )}
-          <SelectField label="Kelas tujuan" name="classId" required>
-            {classes
-              .filter(
-                (item) =>
-                  !item.archivedAt && !years.find((year) => year.id === item.yearId)?.archivedAt,
-              )
-              .map((item) => (
+            <SelectField
+              label="Penempatan asal"
+              required
+              {...form.register("fromEnrollmentId")}
+            >
+              {activeEnrollments.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {years.find((year) => year.id === item.yearId)?.label} / {item.name}
+                  {item.className} / {item.yearLabel} / {item.startsOn} sampai
+                  sebelum {item.endsOnExclusive}
                 </option>
               ))}
+            </SelectField>
+          )}
+          <SelectField
+            label="Kelas tujuan"
+            required
+            {...form.register("classId")}
+          >
+            {availableClasses.map((item) => (
+              <option key={item.id} value={item.id}>
+                {years.find((year) => year.id === item.yearId)?.label} / {item.name}
+              </option>
+            ))}
           </SelectField>
           <Field
             label="Mulai di kelas tujuan"
-            name="startsOn"
             type="date"
-            defaultValue={today}
             required
-            error={mutation.errors.startsOn?.[0]}
+            {...form.register("startsOn")}
           />
-          <Field label="Alasan penempatan" name="reason" required maxLength={1000} />
+          <TextareaField
+            label="Alasan penempatan"
+            required
+            maxLength={1000}
+            {...form.register("reason")}
+          />
           <p>
-            Tanggal ini menjadi hari pertama di kelas tujuan dan, untuk transfer, hari pertama tidak
-            berada di kelas asal.
+            Tanggal ini menjadi hari pertama di kelas tujuan dan, untuk transfer,
+            hari pertama tidak berada di kelas asal.
           </p>
           <Button type="submit" pending={mutation.pending}>
             Simpan penempatan
@@ -94,6 +152,13 @@ export function PlacementForm({
     </section>
   );
 }
+
+type EndFormData = {
+  expectedVersion: number;
+  endsOnExclusive: string;
+  reason: string;
+};
+
 export function EndEnrollmentForm({
   student,
   enrollment,
@@ -104,44 +169,63 @@ export function EndEnrollmentForm({
   today: string;
 }) {
   const future = enrollment.startsOn > today;
-  const mutation = useMutation(`/api/enrollments/${enrollment.id}/end`, "PATCH");
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    await mutation.mutate({
-      expectedVersion: student.version,
-      endsOnExclusive: future ? enrollment.startsOn : data.get("endsOnExclusive"),
-      reason: data.get("reason"),
-    });
-  }
+  const mutation = useMutation(
+    `/api/enrollments/${enrollment.id}/end`,
+    "PATCH",
+  );
+
+  const form = useZodForm(
+    enrollmentEndSchema as unknown as z.ZodType<EndFormData>,
+    {
+      defaultValues: {
+        expectedVersion: student.version,
+        endsOnExclusive: future ? enrollment.startsOn : today,
+        reason: "",
+      },
+      serverErrors: mutation.errors,
+      onSubmit: async (data: EndFormData) => {
+        await mutation.mutate({
+          expectedVersion: student.version,
+          endsOnExclusive: future ? enrollment.startsOn : data.endsOnExclusive,
+          reason: data.reason,
+        });
+      },
+    },
+  );
+
   return (
     <form
       className="resource-form"
-      onSubmit={submit}
+      {...form.formProps}
       aria-label={`Tutup penempatan ${enrollment.className}`}
     >
+      <FormErrorSummary errors={form.errorSummary} />
       <fieldset
         key={student.version}
         disabled={mutation.pending || mutation.notice?.state === "conflict"}
       >
         {future ? (
-          <p>Penempatan ini belum dimulai. Pembatalan tetap disimpan pada riwayat.</p>
+          <p>
+            Penempatan ini belum dimulai. Pembatalan tetap disimpan pada riwayat.
+          </p>
         ) : (
           <Field
             label="Tidak bersekolah mulai tanggal"
             type="date"
-            name="endsOnExclusive"
-            defaultValue={today}
             max={enrollment.endsOnExclusive}
             required
-            error={mutation.errors.endsOnExclusive?.[0]}
+            {...form.register("endsOnExclusive")}
           />
         )}
-        <Field
-          label={future ? "Alasan pembatalan penempatan" : "Alasan siswa keluar"}
-          name="reason"
+        <TextareaField
+          label={
+            future
+              ? "Alasan pembatalan penempatan"
+              : "Alasan siswa keluar"
+          }
           required
           maxLength={1000}
+          {...form.register("reason")}
         />
         <Button type="submit" variant="destructive" pending={mutation.pending}>
           {future ? "Batalkan penempatan mendatang" : "Tutup penempatan"}
@@ -151,28 +235,58 @@ export function EndEnrollmentForm({
     </form>
   );
 }
+
+type ArchiveFormData = {
+  expectedVersion: number;
+  archived: boolean;
+  reason: string;
+};
+
 export function StudentArchiveForm({ student }: { student: StudentDetail }) {
   const mutation = useMutation(`/api/students/${student.id}`, "PATCH");
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    await mutation.mutate({
-      expectedVersion: student.version,
-      archived: !student.archivedAt,
-      reason: data.get("reason"),
-    });
-  }
+
+  const form = useZodForm(
+    studentArchiveSchema as unknown as z.ZodType<ArchiveFormData>,
+    {
+      defaultValues: {
+        expectedVersion: student.version,
+        archived: !student.archivedAt,
+        reason: "",
+      },
+      serverErrors: mutation.errors,
+      onSubmit: async (data: ArchiveFormData) => {
+        await mutation.mutate(data);
+      },
+    },
+  );
+
   return (
     <section className="resource-section">
       <h2>{student.archivedAt ? "Aktifkan kembali siswa" : "Arsip siswa"}</h2>
       <p>
-        Riwayat dan laporan lama tetap tersedia. Tutup penempatan berjalan dan batalkan penempatan
-        mendatang sebelum arsip.
+        Riwayat dan laporan lama tetap tersedia. Tutup penempatan berjalan dan
+        batalkan penempatan mendatang sebelum arsip.
       </p>
-      <form className="resource-form" onSubmit={submit} aria-label="Status arsip siswa">
-        <fieldset disabled={mutation.pending || mutation.notice?.state === "conflict"}>
-          <Field label="Alasan status siswa" name="reason" required maxLength={1000} />
-          <Button type="submit" variant="destructive" pending={mutation.pending}>
+      <form
+        className="resource-form"
+        {...form.formProps}
+        aria-label="Status arsip siswa"
+      >
+        <FormErrorSummary errors={form.errorSummary} />
+        <fieldset
+          disabled={mutation.pending || mutation.notice?.state === "conflict"}
+        >
+          <TextareaField
+            label="Alasan status siswa"
+            required
+            maxLength={1000}
+            {...form.register("reason")}
+          />
+          <Button
+            type="submit"
+            variant="destructive"
+            pending={mutation.pending}
+          >
             {student.archivedAt ? "Aktifkan kembali siswa" : "Arsipkan siswa"}
           </Button>
         </fieldset>

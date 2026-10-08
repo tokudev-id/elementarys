@@ -153,6 +153,108 @@
   justify-content: flex-end;
   padding-block: 16px;
 }
+.field-required {
+  color: var(--destructive);
+  font-weight: 600;
+}
+.field-error {
+  color: var(--destructive);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+  display: block;
+}
+.field-counter {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.ui-field input[aria-invalid="true"],
+.ui-field select[aria-invalid="true"],
+.ui-field textarea[aria-invalid="true"] {
+  border: 1.5px solid var(--destructive) !important;
+  outline-color: var(--destructive);
+}
+.ui-field--textarea textarea {
+  min-height: 88px;
+  resize: vertical;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+}
+.ui-field--textarea textarea:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+.ui-field--checkbox .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+}
+.ui-field--checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.ui-field--switch .switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ui-field--switch .switch-label {
+  font-weight: normal;
+  cursor: pointer;
+}
+.ui-field__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.form-error-summary {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  color: #991b1b;
+}
+.form-error-summary__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.form-error-summary__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #991b1b;
+}
+.form-error-summary__list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+}
+.form-error-summary__list li {
+  margin-bottom: 4px;
+}
+.form-error-summary__list a {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+.form-error-summary__list a:hover {
+  color: #7f1d1d;
+}
 .empty-state {
   border: 1px dashed var(--border-strong);
   border-radius: 10px;

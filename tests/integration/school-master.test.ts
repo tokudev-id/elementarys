@@ -91,7 +91,7 @@ it("validates year ranges, uniqueness and grades, rejects teacher writes and sta
 });
 it("moves the current year with one active row and versions the previously current year", async () => {
   const created = await createAcademicYear(
-    { label: "2027", startsOn: "2027-01-01", endsOnExclusive: "2028-01-01", isCurrent: true },
+    { label: "2027/2028", startsOn: "2027-01-01", endsOnExclusive: "2028-01-01", isCurrent: true },
     actor,
     randomUUID(),
     source,
@@ -231,3 +231,41 @@ it("calendar update waits for submission and cannot turn its submitted day into 
   expect((await getAttendance(classId, view.date, source, clock)).sessionState).toBe("submitted");
   expect((await getCalendar(yearId, "2026-10", source)).weekdays).toContain(3);
 });
+it("enforces new year validation rules: YYYY/YYYY format and 400 days limit", async () => {
+  // Invalid format
+  await expect(
+    createAcademicYear(
+      { label: "2028-2029", startsOn: "2028-01-01", endsOnExclusive: "2029-01-01", isCurrent: false },
+      actor,
+      randomUUID(),
+      source,
+    ),
+  ).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+    fieldErrors: { label: ["Gunakan format 2026/2027."] },
+  });
+  // Non-consecutive years in label
+  await expect(
+    createAcademicYear(
+      { label: "2028/2030", startsOn: "2028-01-01", endsOnExclusive: "2029-01-01", isCurrent: false },
+      actor,
+      randomUUID(),
+      source,
+    ),
+  ).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+    fieldErrors: { label: ["Gunakan format 2026/2027."] },
+  });
+  // Exceeds 400 days
+  await expect(
+    createAcademicYear(
+      { label: "2028/2029", startsOn: "2028-01-01", endsOnExclusive: "2029-04-01", isCurrent: false },
+      actor,
+      randomUUID(),
+      source,
+    ),
+  ).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+  });
+});
+
