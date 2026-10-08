@@ -6,9 +6,13 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 |---|---|---|
 | UI-R0 | done | 58baf15 + 5b15661, main11f3f5b; domain18/integration105/e2e51, build dan kontras19 pasangan lulus |
 | UI-R1 | teknis done, needs_human | c947c06/a38906d, mainbe8fb09; domain18/integration105/e2e52; lima ketukan, H-03 pending |
-| UI-R2 | in_progress | Pagination dan halaman master; baseline600siswa128.07ms |
+| UI-R2 | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600siswa128.07ms |
+| UI-F1 | in_progress | Shell sticky, DataCard, kit tabel & pagination |
+| UI-F2 | not_started | Fondasi validasi form (useZodForm, error inline, zod contracts) |
+| UI-F3 | not_started | Daftar dan pagination halaman tersisa |
+| UI-F4 | not_started | Form inline → dialog/page dan perbaikan absensi |
 | UI-R3 | not_started | Beranda dan rekap |
-| UI-R4 | not_started | Kalender/audit/auth/settings dan penerimaan akhir |
+| UI-R4 | not_started | Polish redesign, audit CSS, penerimaan akhir |
 
 ## Fondasi UI-R0
 

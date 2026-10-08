@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 mulai |
-| Task berikutnya | UI-R2 → UI-R3 → UI-R4; checkpoint cloud/lapangan tetap pending |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done (dilanjutkan oleh UI-F1–F4); UI-F1 mulai |
+| Task berikutnya | UI-F1 → UI-F2 → UI-F3/F4 → UI-R3 → UI-R4 |
 
 ## 1. Aturan pencatatan
 
@@ -44,16 +44,19 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | done | ea5ec57; main domain9/integration100/e2e49 lulus; dataset6kelas60 dan p95lokal80.18ms |
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | needs_human | 7360b49 + 360156d; clone bersih domain18/integration105/e2e50; dependency S1-07/H-02 dan hosted/produksi menunggu akun/checkpoint |
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | done | 37a95a3 → efbd6a2; panduan/templat/link27; main domain18/integration105/e2e51 + production404 lulus |
-
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
 | FIX-03 | Validasi S2 | S2-A2, S2-D1 | done | ca07a54 → a4676c3; roundtrip9kelas, integration81, seluruh e2e44 lulus |
 | FIX-04 | Validasi S3 | S3-04 | done | e4af234 → 19fab45; proxy scoped sebelum streaming, main e2e51 + production404/no-store lulus |
 | UI-R0 | Redesign fondasi | Brief redesign | done | 58baf15 + 5b15661 → main11f3f5b; domain18/integration105/e2e51, kontras19 dan bounds keyboard lulus |
 | UI-R1 | Redesign absensi | UI-R0 | needs_human | c947c06 + a38906d → be8fb09; domain18/integration105/e2e52; 30siswa/3tidak hadir5tap, HP guru pending H-03 |
-| UI-R2 | Redesign master | UI-R1 teknis | in_progress | Pagination server, daftar tanpa form, new/detail/edit, lifecycle dialog; baseline600rows128.07ms |
-| UI-R3 | Redesign rekap/beranda | UI-R2 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin |
-| UI-R4 | Redesign lainnya | UI-R3 | not_started | Tahun/kalender/audit/settings/auth, Lighthouse dan seluruh penerimaan |
+| UI-R2 | Redesign master | UI-R1 teknis | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600rows128.07ms |
+| UI-F1 | Shell, card, kit tabel | UI-R2 | in_progress | Topbar sticky, DataCard, mobile filter sheet, pagination card, tabs detail |
+| UI-F2 | Fondasi validasi form | UI-F1 | not_started | useZodForm, noValidate, inline error ID, zod contracts, form terpisah/dialog |
+| UI-F3 | Daftar & pagination | UI-F2 | not_started | Tahun ajaran, audit, history absensi, unlinked accounts, grid kelas |
+| UI-F4 | Dialog/page form & absensi | UI-F2 | not_started | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi) |
+| UI-R3 | Redesign rekap/beranda | UI-F3, UI-F4 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin (/) |
+| UI-R4 | Polish & verifikasi akhir | UI-R3 | not_started | Lighthouse, audit CSS lama, kriteria penerimaan brief bagian 8 |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
