@@ -111,8 +111,14 @@ test("admin transfers, cancels a future placement, closes and archives a student
     ).toBeVisible();
     await page.getByRole("link", { name: "Kembali ke siswa", exact: true }).click();
     await page.getByLabel("Cari nama atau kode siswa", { exact: true }).fill(`Lifecycle ${tag} 0`);
-    await page.getByLabel("Status siswa", { exact: true }).selectOption("all");
-    await page.getByRole("button", { name: "Tampilkan", exact: true }).click();
+    const filterBtn = page.getByRole("button", { name: /Buka filter daftar/ });
+    if (await filterBtn.isVisible()) {
+      await filterBtn.click();
+      await page.getByRole("dialog", { name: "Filter daftar" }).getByLabel("Status siswa", { exact: true }).selectOption("all");
+      await page.getByRole("button", { name: "Selesai", exact: true }).click();
+    } else {
+      await page.getByLabel("Status siswa", { exact: true }).selectOption("all");
+    }
     await expect(page.getByRole("link", { name: `Lifecycle ${tag} 0`, exact: true })).toBeVisible();
     await page.goto(`/students/promote?classId=${classes[2]}`);
     await page.getByLabel("Kelas tujuan batch", { exact: true }).selectOption(classes[3]);

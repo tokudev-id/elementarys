@@ -28,7 +28,6 @@ export default async function Teacher({ params }: { params: Promise<{ teacherId:
       currentPath="/teachers"
       breadcrumbs={[{ label: "Guru", href: "/teachers" }, { label: teacher.fullName }]}
     >
-      <Link href="/teachers">Kembali ke guru</Link>
       <PageHeader
         title={teacher.fullName}
         meta={

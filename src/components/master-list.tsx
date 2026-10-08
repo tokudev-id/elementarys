@@ -25,12 +25,13 @@ export type MasterRow = {
   actions: { label: string; href: string; destructive?: boolean }[];
 };
 export type MasterColumn = { key: string; label: string; desktopOnly?: boolean };
+
 function Actions({ row }: { row: MasterRow }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" aria-label={`Aksi ${row.title}`}>
-          <MoreHorizontal aria-hidden="true" size={20} />
+        <Button variant="ghost" aria-label={`Aksi ${row.title}`} className="action-menu-trigger">
+          <MoreHorizontal aria-hidden="true" size={18} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -57,31 +58,42 @@ function Actions({ row }: { row: MasterRow }) {
     </DropdownMenu>
   );
 }
+
 function rowHref(row: MasterRow) {
   return row.href;
 }
+
 function mobileCard(row: MasterRow) {
   return (
     <article className="master-mobile-card">
-      <div>
-        <Link href={row.href} className="master-name">
-          {row.title}
-        </Link>
-        <StatusBadge tone={row.status.tone}>{row.status.label}</StatusBadge>
-        <p>{row.meta}</p>
+      <div className="master-mobile-card__content">
+        <div className="master-mobile-card__title-row">
+          <Link href={row.href} className="master-name">
+            {row.title}
+          </Link>
+          <StatusBadge tone={row.status.tone}>{row.status.label}</StatusBadge>
+        </div>
+        <p className="master-mobile-card__meta">{row.meta}</p>
       </div>
       <Actions row={row} />
     </article>
   );
 }
+
 export function MasterList({
   items,
   columns,
   label,
+  currentSort,
+  sortableColumns,
+  query,
 }: {
   items: MasterRow[];
   columns: MasterColumn[];
   label: string;
+  currentSort?: string;
+  sortableColumns?: Record<string, string>;
+  query?: Record<string, string>;
 }) {
   const definitions: ColumnDef<MasterRow>[] = [
     {
@@ -107,10 +119,12 @@ export function MasterList({
             {context.row.original.classNames.length > 2 && (
               <span>+{context.row.original.classNames.length - 2}</span>
             )}
-            {!context.row.original.classNames.length && "Belum dipilih"}
+            {!context.row.original.classNames.length && (
+              <span className="empty-dash">—</span>
+            )}
           </div>
         ) : (
-          context.row.original.cells[column.key] || "Belum diisi"
+          context.row.original.cells[column.key] || <span className="empty-dash">—</span>
         ),
     })),
     {
@@ -122,8 +136,13 @@ export function MasterList({
         </StatusBadge>
       ),
     },
-    { id: "actions", header: "Aksi", cell: (context) => <Actions row={context.row.original} /> },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">Aksi</span>,
+      cell: (context) => <Actions row={context.row.original} />,
+    },
   ];
+
   return (
     <>
       <div className="master-desktop">
@@ -133,6 +152,9 @@ export function MasterList({
           label={label}
           desktopOnly={columns.filter((column) => column.desktopOnly).map((column) => column.key)}
           getRowHref={rowHref}
+          currentSort={currentSort}
+          sortableColumns={sortableColumns}
+          query={query}
         />
       </div>
       <div className="master-mobile">

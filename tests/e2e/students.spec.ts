@@ -48,7 +48,7 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
   }
   await page.goto("/students");
   await page.getByLabel("Cari nama atau kode siswa", { exact: true }).fill(`Siswa Input ${tag}`);
-  await page.getByRole("button", { name: "Tampilkan", exact: true }).click();
+  await page.getByLabel("Cari nama atau kode siswa", { exact: true }).press("Enter");
   await expect(page.locator(".master-mobile .mobile-card-list > li")).toHaveCount(10);
   await page.getByRole("link", { name: `Siswa Input ${tag} 1`, exact: true }).click();
   await expect(
