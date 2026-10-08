@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-05 teknis lokal siap, needs_human H-02; S3-06 mulai |
+| Status saat ini | S3-06 di-merge; FIX-04 memperbaiki status 404 preview pada respons streaming |
 | Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
@@ -48,6 +48,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
 | FIX-03 | Validasi S2 | S2-A2, S2-D1 | done | ca07a54 → a4676c3; roundtrip9kelas, integration81, seluruh e2e44 lulus |
+| FIX-04 | Validasi S3 | S3-04 | in_progress | Penolakan component-preview sebelum streaming; pemeriksaan produksi masuk CI |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 

@@ -11,5 +11,6 @@ export default defineConfig({
     cwd: process.cwd(),
     url: `http://127.0.0.1:${port}`,
     reuseExistingServer: false,
+    env: { APP_ENV: "production" },
   },
 });
