@@ -10,6 +10,13 @@ import { SelectField } from "@/components/select-field";
 import { MasterList, type MasterRow } from "@/components/master-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { EmptyState } from "@/components/empty-state";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardToolbar,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
 import { classListSchema } from "@/contracts/lists";
 import { parseInput } from "@/contracts/attendance";
 
@@ -48,7 +55,7 @@ export default async function Classes({
     cells: {
       grade: String(item.grade),
       year: item.yearLabel,
-      teachers: item.primaryTeachers.map((teacher) => teacher.name).join(", ") || "Belum dipilih",
+      teachers: item.primaryTeachers.map((teacher) => teacher.name).join(", ") || "—",
       count: String(item.studentCount),
     },
     actions: [
@@ -56,12 +63,16 @@ export default async function Classes({
       ...(actor.role === "admin" ? [{ label: "Ubah", href: `/classes/${item.id}/edit` }] : []),
     ],
   }));
+
+  const activeFilterCount =
+    (filter.grade ? 1 : 0) + (filter.status && filter.status !== "all" ? 1 : 0);
+
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/classes">
       <PageHeader
         title="Kelas"
         description="Daftar kelas per tahun ajaran."
-        actions={
+        primaryAction={
           actor.role === "admin" ? (
             <Link className="button-link" href="/classes/new">
               Tambah kelas
@@ -69,54 +80,64 @@ export default async function Classes({
           ) : undefined
         }
       />
-      <ListFilters q={filter.q} query={query} searchLabel="Cari kelas">
-        <SelectField label="Tahun ajaran" name="yearId" defaultValue={filter.yearId}>
-          {years.map((year) => (
-            <option key={year.id} value={year.id}>
-              {year.label}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField label="Tingkat" name="grade" defaultValue={filter.grade ?? ""}>
-          <option value="">Semua tingkat</option>
-          {[1, 2, 3, 4, 5, 6].map((grade) => (
-            <option key={grade} value={grade}>
-              {grade}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField label="Status kelas" name="status" defaultValue={filter.status}>
-          <option value="all">Semua</option>
-          <option value="active">Aktif</option>
-          <option value="archived">Diarsipkan</option>
-        </SelectField>
-        <SelectField label="Per halaman" name="pageSize" defaultValue={filter.pageSize}>
-          {[10, 25, 50].map((size) => (
-            <option value={size} key={size}>
-              {size}
-            </option>
-          ))}
-        </SelectField>
-      </ListFilters>
-      {rows.length ? (
-        <MasterList
-          items={rows}
-          label="Daftar kelas"
-          columns={[
-            { key: "grade", label: "Tingkat" },
-            { key: "year", label: "Tahun ajaran", desktopOnly: true },
-            { key: "teachers", label: "Guru utama" },
-            { key: "count", label: "Siswa" },
-          ]}
-        />
-      ) : (
-        <EmptyState
-          title="Belum ada kelas yang cocok"
-          description="Periksa filter atau tambahkan kelas."
-          action={<Link href="/classes">Reset filter</Link>}
-        />
-      )}
-      <DataTablePagination {...result} pathname="/classes" query={query} />
+      <DataCard id="daftar">
+        <DataCardHeader title="Kelas" count={result.total} />
+        <DataCardToolbar>
+          <ListFilters
+            q={filter.q}
+            query={query}
+            searchLabel="Cari kelas"
+            activeFilterCount={activeFilterCount}
+          >
+            <SelectField label="Tahun ajaran" name="yearId" defaultValue={filter.yearId}>
+              {years.map((year) => (
+                <option key={year.id} value={year.id}>
+                  {year.label}
+                </option>
+              ))}
+            </SelectField>
+            <SelectField label="Tingkat" name="grade" defaultValue={filter.grade ?? ""}>
+              <option value="">Semua tingkat</option>
+              {[1, 2, 3, 4, 5, 6].map((grade) => (
+                <option key={grade} value={grade}>
+                  {grade}
+                </option>
+              ))}
+            </SelectField>
+            <SelectField label="Status kelas" name="status" defaultValue={filter.status}>
+              <option value="all">Semua</option>
+              <option value="active">Aktif</option>
+              <option value="archived">Diarsipkan</option>
+            </SelectField>
+          </ListFilters>
+        </DataCardToolbar>
+        <DataCardContent>
+          {rows.length ? (
+            <MasterList
+              items={rows}
+              label="Daftar kelas"
+              currentSort={filter.sort}
+              sortableColumns={{ grade: "grade", name: "name", year: "year" }}
+              query={query}
+              columns={[
+                { key: "grade", label: "Tingkat" },
+                { key: "year", label: "Tahun ajaran", desktopOnly: true },
+                { key: "teachers", label: "Guru utama" },
+                { key: "count", label: "Siswa" },
+              ]}
+            />
+          ) : (
+            <EmptyState
+              title="Belum ada kelas yang cocok"
+              description="Periksa filter atau tambahkan kelas."
+              action={<Link href="/classes">Reset filter</Link>}
+            />
+          )}
+        </DataCardContent>
+        <DataCardFooter>
+          <DataTablePagination {...result} pathname="/classes" query={query} />
+        </DataCardFooter>
+      </DataCard>
     </AppShell>
   );
 }

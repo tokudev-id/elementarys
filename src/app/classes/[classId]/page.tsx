@@ -10,6 +10,13 @@ import { StatusBadge } from "@/components/status-badge";
 import { MasterList, type MasterRow } from "@/components/master-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { EmptyState } from "@/components/empty-state";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+
 export default async function ClassDetail({
   params,
   searchParams,
@@ -37,6 +44,7 @@ export default async function ClassDetail({
     status: { label: "Aktif", tone: "success" },
     actions: [{ label: "Lihat siswa", href: `/students/${student.id}` }],
   }));
+
   return (
     <AppShell
       actor={actor}
@@ -44,7 +52,6 @@ export default async function ClassDetail({
       currentPath="/classes"
       breadcrumbs={[{ label: "Kelas", href: "/classes" }, { label: current.name }]}
     >
-      <Link href="/classes">Kembali ke kelas</Link>
       <PageHeader
         title={current.name}
         meta={
@@ -54,11 +61,22 @@ export default async function ClassDetail({
         }
         description={`Tingkat ${current.grade} · ${year?.label ?? ""}`}
         actions={
-          actor.role === "admin" ? (
-            <Link className="button-link" href={`/classes/${id}/edit`}>
-              Ubah
+          <>
+            <Link className="button-link" href={`/attendance/${id}?date=${school?.date ?? ""}`}>
+              Catat absensi
             </Link>
-          ) : undefined
+            <Link
+              className="button-link button-link--secondary"
+              href={`/reports?yearId=${current.yearId}&classId=${id}&month=${school?.date.slice(0, 7) ?? ""}`}
+            >
+              Rekap kelas
+            </Link>
+            {actor.role === "admin" && (
+              <Link className="button-link button-link--secondary" href={`/classes/${id}/edit`}>
+                Ubah
+              </Link>
+            )}
+          </>
         }
       />
       <section className="form-section">
@@ -77,29 +95,25 @@ export default async function ClassDetail({
             <dd>{students.total}</dd>
           </div>
         </dl>
-        <div className="button-row">
-          <Link className="button-link" href={`/attendance/${id}?date=${school?.date ?? ""}`}>
-            Catat absensi
-          </Link>
-          <Link
-            className="button-link button-link--secondary"
-            href={`/reports?yearId=${current.yearId}&classId=${id}&month=${school?.date.slice(0, 7) ?? ""}`}
-          >
-            Rekap kelas
-          </Link>
-        </div>
       </section>
-      <h2>Siswa aktif</h2>
-      {rows.length ? (
-        <MasterList
-          items={rows}
-          columns={[{ key: "code", label: "Kode" }]}
-          label="Siswa aktif kelas"
-        />
-      ) : (
-        <EmptyState title="Tidak ada siswa aktif pada tanggal sekolah" />
-      )}
-      <DataTablePagination {...students} pathname={`/classes/${id}`} />
+
+      <DataCard id="daftar">
+        <DataCardHeader title="Siswa aktif" count={students.total} />
+        <DataCardContent>
+          {rows.length ? (
+            <MasterList
+              items={rows}
+              columns={[{ key: "code", label: "Kode" }]}
+              label="Siswa aktif kelas"
+            />
+          ) : (
+            <EmptyState title="Tidak ada siswa aktif pada tanggal sekolah" />
+          )}
+        </DataCardContent>
+        <DataCardFooter>
+          <DataTablePagination {...students} pathname={`/classes/${id}`} />
+        </DataCardFooter>
+      </DataCard>
     </AppShell>
   );
 }

@@ -11,6 +11,13 @@ import { ListFilters } from "@/components/list-filters";
 import { SelectField } from "@/components/select-field";
 import { EmptyState } from "@/components/empty-state";
 import { DataTablePagination } from "@/components/data-table-pagination";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardToolbar,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
 import { parseInput } from "@/contracts/attendance";
 import { teacherListSchema } from "@/contracts/lists";
 import { UnlinkedAccountList } from "./unlinked-list";
@@ -72,7 +79,7 @@ export default async function Teachers({
               : "neutral",
     },
     cells: {
-      email: teacher.account?.email ?? "Belum punya akun",
+      email: teacher.account?.email ?? "—",
       role: teacher.account?.role === "admin" ? "Admin" : "Guru",
     },
     classNames: teacher.classes.map((item) => item.name),
@@ -81,12 +88,16 @@ export default async function Teachers({
       ...(actor.role === "admin" ? [{ label: "Ubah", href: `/teachers/${teacher.id}/edit` }] : []),
     ],
   }));
+
+  const activeFilterCount =
+    (filter.status && filter.status !== "all" ? 1 : 0) + (filter.role ? 1 : 0);
+
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/teachers">
       <PageHeader
         title="Guru"
         description="Profil, kelas utama dan akun sekolah."
-        actions={
+        primaryAction={
           actor.role === "admin" ? (
             <Link className="button-link" href="/teachers/new">
               Tambah guru
@@ -108,66 +119,79 @@ export default async function Teachers({
         </nav>
       )}
       {accounts ? (
-        <>
-          <UnlinkedAccountList accounts={accounts.items} />
-          <DataTablePagination
-            total={accounts.total}
-            page={accounts.page}
-            pageSize={accounts.pageSize}
-            pathname="/teachers"
-            query={{ ...query, tab: "accounts" }}
-          />
-        </>
+        <DataCard id="daftar">
+          <DataCardHeader title="Akun tanpa profil" count={accounts.total} />
+          <DataCardContent>
+            <UnlinkedAccountList accounts={accounts.items} />
+          </DataCardContent>
+          <DataCardFooter>
+            <DataTablePagination
+              total={accounts.total}
+              page={accounts.page}
+              pageSize={accounts.pageSize}
+              pathname="/teachers"
+              query={{ ...query, tab: "accounts" }}
+            />
+          </DataCardFooter>
+        </DataCard>
       ) : (
-        <>
-          <ListFilters q={filter.q} query={query} searchLabel="Cari guru">
-            <SelectField label="Status guru" name="status" defaultValue={filter.status}>
-              <option value="all">Semua</option>
-              <option value="active">Aktif</option>
-              <option value="inactive">Nonaktif</option>
-              <option value="unlinked">Belum punya akun</option>
-              {actor.role === "admin" && (
-                <option value="password_change">Wajib ganti password</option>
-              )}
-            </SelectField>
-            {actor.role === "admin" && (
-              <SelectField label="Peran akun" name="role" defaultValue={filter.role ?? ""}>
-                <option value="">Semua peran</option>
-                <option value="admin">Admin</option>
-                <option value="teacher">Guru</option>
+        <DataCard id="daftar">
+          <DataCardHeader title="Profil guru" count={teachers.total} />
+          <DataCardToolbar>
+            <ListFilters
+              q={filter.q}
+              query={query}
+              searchLabel="Cari guru"
+              activeFilterCount={activeFilterCount}
+            >
+              <SelectField label="Status guru" name="status" defaultValue={filter.status}>
+                <option value="all">Semua</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Nonaktif</option>
+                <option value="unlinked">Belum punya akun</option>
+                {actor.role === "admin" && (
+                  <option value="password_change">Wajib ganti password</option>
+                )}
               </SelectField>
+              {actor.role === "admin" && (
+                <SelectField label="Peran akun" name="role" defaultValue={filter.role ?? ""}>
+                  <option value="">Semua peran</option>
+                  <option value="admin">Admin</option>
+                  <option value="teacher">Guru</option>
+                </SelectField>
+              )}
+            </ListFilters>
+          </DataCardToolbar>
+          <DataCardContent>
+            {rows.length ? (
+              <MasterList
+                items={rows}
+                label="Daftar guru"
+                currentSort={filter.sort}
+                sortableColumns={{ name: "name", email: "email" }}
+                query={query}
+                columns={[
+                  ...(actor.role === "admin"
+                    ? [
+                        { key: "email", label: "Email akun", desktopOnly: true },
+                        { key: "role", label: "Peran" },
+                      ]
+                    : []),
+                  { key: "classes", label: "Kelas utama" },
+                ]}
+              />
+            ) : (
+              <EmptyState
+                title="Tidak ada guru yang cocok"
+                description="Periksa filter atau tambahkan profil guru."
+                action={<Link href="/teachers">Reset filter</Link>}
+              />
             )}
-            <SelectField label="Per halaman" name="pageSize" defaultValue={filter.pageSize}>
-              {[10, 25, 50].map((size) => (
-                <option value={size} key={size}>
-                  {size}
-                </option>
-              ))}
-            </SelectField>
-          </ListFilters>
-          {rows.length ? (
-            <MasterList
-              items={rows}
-              label="Daftar guru"
-              columns={[
-                ...(actor.role === "admin"
-                  ? [
-                      { key: "email", label: "Email akun", desktopOnly: true },
-                      { key: "role", label: "Peran" },
-                    ]
-                  : []),
-                { key: "classes", label: "Kelas utama" },
-              ]}
-            />
-          ) : (
-            <EmptyState
-              title="Tidak ada guru yang cocok"
-              description="Periksa filter atau tambahkan profil guru."
-              action={<Link href="/teachers">Reset filter</Link>}
-            />
-          )}
-          <DataTablePagination {...teachers} pathname="/teachers" query={query} />
-        </>
+          </DataCardContent>
+          <DataCardFooter>
+            <DataTablePagination {...teachers} pathname="/teachers" query={query} />
+          </DataCardFooter>
+        </DataCard>
       )}
     </AppShell>
   );

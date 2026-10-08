@@ -3,6 +3,7 @@ import { useState, type ChangeEvent } from "react";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Field } from "@/components/field";
+import { SelectField } from "@/components/select-field";
 import { StatusChoices, type AttendanceChoice } from "@/components/status-choices";
 import { StateBanner, type BannerState } from "@/components/state-banner";
 import { PageHeader } from "@/components/page-header";
@@ -10,21 +11,46 @@ import { StatusBadge } from "@/components/status-badge";
 import { KpiCard } from "@/components/kpi-card";
 import { EmptyState } from "@/components/empty-state";
 import { DataTable } from "@/components/data-table";
+import { DataTablePagination } from "@/components/data-table-pagination";
+import { ListFilters } from "@/components/list-filters";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardToolbar,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
 import type { ColumnDef } from "@tanstack/react-table";
+
 const exampleRows = [
-  { id: "1", name: "Ahmad Fauzan", code: "S-0001" },
-  { id: "2", name: "Aisyah Putri", code: "S-0002" },
+  { id: "1", name: "Ahmad Fauzan", code: "S-0001", status: "Aktif" },
+  { id: "2", name: "Aisyah Putri", code: "S-0002", status: "Aktif" },
+  { id: "3", name: "Budi Santoso", code: "S-0003", status: "Nonaktif" },
 ];
 const exampleColumns: ColumnDef<(typeof exampleRows)[number]>[] = [
   { accessorKey: "name", header: "Nama" },
   { accessorKey: "code", header: "Kode" },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: (ctx) => (
+      <StatusBadge tone={ctx.getValue() === "Aktif" ? "success" : "neutral"}>
+        {ctx.getValue() as string}
+      </StatusBadge>
+    ),
+  },
 ];
+
 export function ComponentPreview() {
   const [choice, setChoice] = useState<AttendanceChoice>();
   const [dialog, setDialog] = useState<"dialog" | "sheet" | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const page = 1;
+  const pageSize = 10;
+  const [filterClass, setFilterClass] = useState("");
+
   function openDialog() {
     setDialog("dialog");
   }
@@ -38,6 +64,9 @@ export function ComponentPreview() {
     setName(event.currentTarget.value);
     setError("");
   }
+  function changeFilterClass(event: ChangeEvent<HTMLSelectElement>) {
+    setFilterClass(event.currentTarget.value);
+  }
   function confirm() {
     if (!name.trim()) {
       setError("Isi nama sebelum mengonfirmasi.");
@@ -47,14 +76,58 @@ export function ComponentPreview() {
     setSaved(true);
     setDialog(null);
   }
+
   return (
     <>
       <PageHeader
         title="Contoh komponen"
         description="Data sintetis. Isian hanya tersimpan selama halaman ini terbuka."
+        primaryAction={<Button onClick={openDialog}>Aksi utama</Button>}
+        secondaryActions={[
+          { label: "Buka sheet filter", href: "#" },
+          { label: "Aksi sekunder", href: "#" },
+        ]}
       />
+
       <section className="preview-section">
-        <h2>Ringkasan dan tabel sintetis</h2>
+        <h2>DataCard dan tabel paginasi</h2>
+        <DataCard id="daftar">
+          <DataCardHeader title="Contoh DataCard" count={exampleRows.length} />
+          <DataCardToolbar>
+            <ListFilters
+              q=""
+              query={{}}
+              searchLabel="Cari contoh"
+              activeFilterCount={filterClass ? 1 : 0}
+            >
+              <SelectField
+                label="Filter kelas"
+                name="classId"
+                value={filterClass}
+                onChange={changeFilterClass}
+              >
+                <option value="">Semua kelas</option>
+                <option value="1">Kelas 1 A</option>
+                <option value="2">Kelas 2 A</option>
+              </SelectField>
+            </ListFilters>
+          </DataCardToolbar>
+          <DataCardContent>
+            <DataTable items={exampleRows} columns={exampleColumns} label="Siswa sintetis" />
+          </DataCardContent>
+          <DataCardFooter>
+            <DataTablePagination
+              total={42}
+              page={page}
+              pageSize={pageSize}
+              pathname="/component-preview"
+            />
+          </DataCardFooter>
+        </DataCard>
+      </section>
+
+      <section className="preview-section">
+        <h2>Ringkasan dan KPI</h2>
         <div className="kpi-grid">
           <KpiCard
             label="Siswa contoh"
@@ -69,12 +142,12 @@ export function ComponentPreview() {
             </StatusBadge>
           ))}
         </div>
-        <DataTable items={exampleRows} columns={exampleColumns} label="Siswa sintetis" />
         <EmptyState
           title="Belum ada catatan contoh"
           description="Isi form di bawah untuk memeriksa konfirmasi."
         />
       </section>
+
       <section className="preview-section">
         <h2>Pilihan kehadiran</h2>
         <StatusChoices
@@ -85,6 +158,7 @@ export function ComponentPreview() {
         />
         <p>Pilihan: {choice ?? "belum dipilih"}</p>
       </section>
+
       <section className="preview-section">
         <h2>Form dan konfirmasi</h2>
         <div className="button-row">
@@ -97,6 +171,7 @@ export function ComponentPreview() {
         </div>
         {saved && <StateBanner state="saved">Isian contoh dikonfirmasi.</StateBanner>}
       </section>
+
       <section className="preview-section">
         <h2>Status halaman</h2>
         {(
@@ -107,6 +182,7 @@ export function ComponentPreview() {
           </StateBanner>
         ))}
       </section>
+
       <Dialog
         open={dialog !== null}
         variant={dialog ?? "dialog"}

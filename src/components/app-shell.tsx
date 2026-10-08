@@ -16,6 +16,7 @@ import {
   MoreHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronLeft,
   type LucideIcon,
 } from "lucide-react";
 import { Logout } from "@/app/login/form";
@@ -139,6 +140,11 @@ export function AppShell({
     actor.role === "admin"
       ? ["home", "attendance", "students"]
       : ["attendance", "reports", "students"];
+  const parentCrumb =
+    breadcrumbs && breadcrumbs.length > 1
+      ? [...breadcrumbs.slice(0, -1)].reverse().find((item) => Boolean(item.href))
+      : undefined;
+
   function toggleCollapse() {
     setCollapsed((value) => !value);
   }
@@ -157,6 +163,13 @@ export function AppShell({
         <div className="shell-school-name">
           <strong title={name}>{name}</strong>
         </div>
+        <Button variant="ghost" className="shell-expand-rail" onClick={openMenu}>
+          <PanelLeftOpen aria-hidden="true" />
+          <span>Buka menu</span>
+        </Button>
+        <div className="shell-sidebar-nav">
+          <GroupedMenu role={actor.role} path={currentPath} />
+        </div>
         <Button
           variant="ghost"
           className="shell-collapse"
@@ -166,15 +179,20 @@ export function AppShell({
           {collapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
           <span>{collapsed ? "Perluas" : "Ciutkan"}</span>
         </Button>
-        <Button variant="ghost" className="shell-expand-rail" onClick={openMenu}>
-          <PanelLeftOpen aria-hidden="true" />
-          <span>Buka menu</span>
-        </Button>
-        <GroupedMenu role={actor.role} path={currentPath} />
       </aside>
       <div className="shell-workspace">
         <header className="shell-topbar">
           <div className="shell-topbar__identity">
+            {parentCrumb?.href && (
+              <Link
+                href={parentCrumb.href}
+                className="shell-mobile-back"
+                aria-label={`Kembali ke ${parentCrumb.label.toLowerCase()}`}
+              >
+                <ChevronLeft size={20} aria-hidden="true" />
+                <span className="sr-only">Kembali ke {parentCrumb.label.toLowerCase()}</span>
+              </Link>
+            )}
             <div className="shell-mobile-school">
               <strong title={name}>{name}</strong>
               {school && (

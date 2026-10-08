@@ -75,7 +75,6 @@ export function StudentDetailView({
   }
   return (
     <>
-      <Link href="/students">Kembali ke siswa</Link>
       <PageHeader
         title={student.fullName}
         meta={
