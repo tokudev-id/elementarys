@@ -27,7 +27,7 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
   await page.getByLabel("Email", { exact: true }).fill("admin@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/students");
   const form = page.getByTestId("student-create");
   for (let index = 1; index <= 10; index++) {
@@ -68,7 +68,7 @@ test("admin enters ten students on mobile, filters and edits identity; teacher c
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/students");
   await expect(page.getByTestId("student-create")).toHaveCount(0);
   expect(

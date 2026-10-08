@@ -1,6 +1,6 @@
 # Panduan guru
 
-Gunakan akun sendiri. Nama sekolah, tanggal dan zona waktu tampil di bagian atas. Jika nama/tanggal sekolah keliru atau akun tidak dapat dibuka, hubungi admin. Simpan belum berhasil sampai halaman menampilkan **Tersimpan**.
+Gunakan akun sendiri. Nama sekolah dan tanggal tampil di bagian atas. Pada tablet/laptop, fokuskan atau arahkan pointer ke tanggal untuk melihat zona waktu sekolah. Menu akun dibuka melalui tombol **Menu pengguna** di pojok kanan atas. Jika nama/tanggal sekolah keliru atau akun tidak dapat dibuka, hubungi admin. Simpan belum berhasil sampai halaman menampilkan **Tersimpan**.
 
 ## Masuk dan password sementara
 
@@ -8,10 +8,12 @@ Masukkan **Email** dan **Password**, lalu pilih **Masuk**. Bila diarahkan ke **G
 
 ## Mencatat kehadiran
 
-1. Buka **Hari ini**. Periksa tanggal, lalu pilih **Buka kelas** pada kelas yang akan dicatat. Kelas utama tampil lebih dahulu; guru aktif juga dapat mencatat kelas lain.
-2. Periksa nama dan kode siswa. Sebelum disimpan, siswa tanpa pilihan masih **Belum dicatat**. Tandai **Sakit**, **Izin**, atau **Alpa** pada siswa yang tidak hadir; pilih **Hadir** bila diperlukan.
-3. Pilih **Simpan, siswa lainnya hadir**. Periksa jumlah Hadir/Sakit/Izin/Alpa. Siswa yang belum ditandai akan dianggap hadir saat konfirmasi.
-4. Pilih **Konfirmasi simpan**. **Batal**, **Tutup**, atau Escape menutup konfirmasi tanpa menyimpan. Tunggu **Tersimpan**, jumlah dan nama pencatat sebelum berpindah halaman.
+1. Buka **Absensi**. Periksa tanggal, lalu pilih **Catat absensi** pada kelas yang akan dicatat. Kelas utama tampil lebih dahulu; guru aktif juga dapat mencatat kelas lain.
+2. Periksa nama dan kode siswa. **Hadir** dipilih sebagai awal, tetapi belum menjadi catatan tersimpan. Tandai **Sakit**, **Izin**, atau **Alpa** pada siswa yang tidak hadir. Daftar siswa dapat digulir di areanya sendiri. **Cari nama siswa** tampil untuk kelas besar; filter **Tidak hadir** memperlihatkan pilihan selain Hadir. **Semua hadir** mengembalikan seluruh pilihan ke Hadir.
+3. Pilih **Simpan absensi**. Periksa jumlah Hadir/Sakit/Izin/Alpa dan nama setiap siswa yang tidak hadir. Siswa lain akan dicatat Hadir setelah konfirmasi.
+4. Pilih **Simpan** pada konfirmasi. **Batal**, **Tutup**, atau Escape menutup konfirmasi tanpa menyimpan. Tunggu **Tersimpan**, jumlah dan nama pencatat sebelum **Kembali ke daftar kelas** atau **Kelas berikutnya**.
+
+Tombol tanggal sebelumnya/berikutnya dan **Buka kalender tanggal** membantu memilih hari. Libur ditandai pada kalender; tanggal mendatang tidak dapat dipilih. Pada laptop, panah atas/bawah berpindah siswa, H/S/I/A mengubah pilihan, dan Ctrl+Enter membuka konfirmasi.
 
 Memutar layar mempertahankan pilihan selama halaman tetap terbuka. Bila koneksi gagal, periksa koneksi lalu coba simpan kembali; pilihan tetap di halaman. Jangan menutup halaman sebelum mendapat konfirmasi. Jika muncul **Data telah berubah**, pilih **Muat data terbaru**, periksa catatan/pencatat terbaru, lalu lakukan perubahan yang diperlukan. Jika sesi habis, masuk kembali dan buka ulang kelas; jangan menganggap pilihan lama sudah tersimpan.
 

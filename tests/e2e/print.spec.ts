@@ -46,7 +46,7 @@ test("print snapshot, receipt and A4 landscape PDF give one page per 10-student 
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   const count = async () =>
     (
       await source.query(

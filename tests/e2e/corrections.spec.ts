@@ -58,14 +58,12 @@ async function login(page: Page, role: "admin" | "guru") {
   await page.getByLabel("Email", { exact: true }).fill(`${role}@example.test`);
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
 }
 async function confirmSave(page: Page) {
-  await page.getByRole("button", { name: "Simpan, siswa lainnya hadir", exact: true }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Konfirmasi simpan", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Simpan absensi", exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Simpan", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: /^Simpan absensi/ })).toBeHidden();
 }
 async function version(classId: string) {
   return (
@@ -95,14 +93,14 @@ test("late arrival, no-op, conflicting correction, void and refill retain comple
   ).toBeVisible();
   await page.getByRole("button", { name: "Koreksi catatan", exact: true }).click();
   await first.getByRole("radio", { name: "H Hadir" }).check();
-  await page.getByRole("button", { name: "Simpan, siswa lainnya hadir", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan absensi", exact: true }).click();
   await expect(
     page.getByText("Isi alasan koreksi atau pengisian ulang.", { exact: true }),
   ).toBeVisible();
   await page
     .getByLabel("Alasan koreksi atau isi ulang", { exact: true })
     .fill("Siswa datang belakangan");
-  await page.getByRole("button", { name: "Simpan, siswa lainnya hadir", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan absensi", exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.getByLabel("Alasan koreksi atau isi ulang")).toHaveValue(
@@ -155,7 +153,7 @@ test("late arrival, no-op, conflicting correction, void and refill retain comple
     await expect(
       page.getByText("Catatan terbaru sudah dimuat. Periksa status dan nama pencatat."),
     ).toBeVisible();
-    await expect(first.getByText("Izin", { exact: true })).toBeVisible();
+    await expect(first.getByText("I Izin", { exact: true })).toBeVisible();
     expect(await version(data.classId)).toBe(3);
     await page.getByRole("button", { name: "Muat data terbaru", exact: true }).click();
     await expect(page.getByLabel("Alasan koreksi atau isi ulang")).toHaveCount(0);
@@ -167,6 +165,8 @@ test("late arrival, no-op, conflicting correction, void and refill retain comple
       },
     );
     expect(denied.status()).toBe(403);
+    await admin.getByRole("button", { name: "Aksi catatan", exact: true }).click();
+    await admin.getByRole("menuitem", { name: "Batalkan catatan", exact: true }).click();
     await admin.getByLabel("Alasan pembatalan", { exact: true }).fill("Periksa ulang kelas");
     await admin.getByRole("button", { name: "Batalkan sesi", exact: true }).click();
     await admin.keyboard.press("Escape");

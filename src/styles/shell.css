@@ -128,6 +128,22 @@
 .shell-menu {
   min-width: 0;
 }
+.shell-breadcrumb ol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.shell-breadcrumb li {
+  min-width: 0;
+}
+.shell-breadcrumb li + li::before {
+  content: "/";
+  margin-right: 8px;
+  color: var(--muted-foreground);
+}
 .user-menu-trigger {
   padding: 0;
   flex-shrink: 0;

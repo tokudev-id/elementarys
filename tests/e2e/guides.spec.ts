@@ -44,11 +44,9 @@ async function prepareClass() {
 }
 
 async function confirmSave(page: Page) {
-  await page.getByRole("button", { name: "Simpan, siswa lainnya hadir", exact: true }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Konfirmasi simpan", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Simpan absensi", exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Simpan", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: /^Simpan absensi/ })).toBeHidden();
 }
 
 test("teacher follows guide from daily attendance through correction and monthly exports", async ({
@@ -63,11 +61,11 @@ test("teacher follows guide from daily attendance through correction and monthly
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page
     .getByTestId("class-row")
     .filter({ has: page.locator(`a[href*="${data.classId}"]`) })
-    .getByRole("link", { name: "Buka kelas", exact: true })
+    .getByRole("link", { name: "Catat absensi", exact: true })
     .click();
   const first = page.getByTestId("student-row").first();
   await first.getByRole("radio", { name: "A Alpa", exact: true }).check();

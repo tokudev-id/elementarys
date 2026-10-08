@@ -7,7 +7,7 @@ test("shell groups menus by role and reflows into rail and bottom navigation", a
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await expect(
     page.locator(".shell-school-name").getByText("Sekolah Contoh", { exact: true }),
   ).toBeVisible();
@@ -21,7 +21,7 @@ test("shell groups menus by role and reflows into rail and bottom navigation", a
   await expect(page.locator("time:visible")).toHaveAttribute("datetime", expectedDate);
   const nav = page.getByRole("navigation", { name: "Navigasi sekolah", exact: true });
   await expect(nav.getByRole("link")).toHaveCount(7);
-  await expect(nav.getByRole("link", { name: "Hari ini", exact: true })).toHaveAttribute(
+  await expect(nav.getByRole("link", { name: "Absensi", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );

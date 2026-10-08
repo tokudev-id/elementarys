@@ -42,7 +42,7 @@ test("unduhan gagal memberi pesan dan dapat dicoba kembali", async ({ page }) =>
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/reports");
   await page.route("**/api/reports/attendance.xlsx?*", (route) => route.abort("failed"));
   await page.getByRole("button", { name: "Unduh Excel", exact: true }).click();

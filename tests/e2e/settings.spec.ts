@@ -5,7 +5,7 @@ async function login(page: Page, email = "admin@example.test") {
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
 }
 for (const width of [360, 768, 1024]) {
   test(`settings preview validation and save ${width}px`, async ({ page }) => {
