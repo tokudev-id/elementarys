@@ -40,7 +40,7 @@ beforeEach(async () => {
   current = (await source.query("SELECT id FROM academic_years WHERE is_current")).rows[0].id;
   next = (
     await source.query(
-      "INSERT INTO academic_years(label,starts_on,ends_on_exclusive) VALUES('2027','2027-01-01','2028-01-01') RETURNING id",
+      "INSERT INTO academic_years(label,starts_on,ends_on_exclusive) VALUES('2027/2028','2027-01-01','2028-01-01') RETURNING id",
     )
   ).rows[0].id;
   nextClass = (
@@ -113,7 +113,7 @@ it("archiving classes/year is blocked by effective enrollments including future 
 it("old report cells, totals, records and Excel row remain identical after new placement, current switch and archival", async () => {
   const oldYear = (
     await source.query(
-      "INSERT INTO academic_years(label,starts_on,ends_on_exclusive) VALUES('2018','2018-01-01','2019-01-01') RETURNING id",
+      "INSERT INTO academic_years(label,starts_on,ends_on_exclusive) VALUES('2018/2019','2018-01-01','2019-01-01') RETURNING id",
     )
   ).rows[0].id;
   const oldClass = (

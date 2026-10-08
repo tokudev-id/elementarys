@@ -26,6 +26,7 @@ test("ganti password mempertahankan sesi baru lalu logout", async ({ page }) => 
   await openPassword(page);
   await page.getByLabel("Password saat ini", { exact: true }).fill("SyntheticTest123!");
   await page.getByLabel("Password baru", { exact: true }).fill("FreshSynthetic123!");
+  await page.getByLabel("Ulangi password baru", { exact: true }).fill("FreshSynthetic123!");
   await page.getByRole("button", { name: "Simpan password baru" }).click();
   await openAccount(page);
   await expect(page.getByText("Guru Admin Contoh · Admin", { exact: true })).toBeVisible();
@@ -33,6 +34,7 @@ test("ganti password mempertahankan sesi baru lalu logout", async ({ page }) => 
   await openPassword(page);
   await page.getByLabel("Password saat ini", { exact: true }).fill("FreshSynthetic123!");
   await page.getByLabel("Password baru", { exact: true }).fill("SyntheticTest123!");
+  await page.getByLabel("Ulangi password baru", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Simpan password baru" }).click();
   await logout(page);
   await expect(page.getByRole("heading", { name: "Masuk ke Absensi Sekolah" })).toBeVisible();

@@ -94,7 +94,7 @@ it("rejects stale and duplicate code edits, guards teacher writes and keeps sequ
     expectedVersion: 1,
     fullName: "Nama Diperbaiki",
     nis: null,
-    nisn: "00045",
+    nisn: "0004500000",
     studentCode: current.studentCode,
   };
   await expect(
@@ -118,3 +118,35 @@ it("rejects stale and duplicate code edits, guards teacher writes and keeps sequ
   ).rejects.toMatchObject({ code: "INVALID_INPUT" });
   expect((await getStudent(current.id, source)).studentCode).toBe("S-10000");
 });
+it("enforces new student validation rules: name letters, NIS format, NISN 10 digits, studentCode chars", async () => {
+  // Name without letters
+  await expect(
+    createStudent({ ...input(), fullName: "12345" }, actor, randomUUID(), source),
+  ).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+    fieldErrors: { fullName: ["Nama minimal 2 huruf."] },
+  });
+  // NIS with invalid characters
+  await expect(
+    createStudent({ ...input(), nis: "NIS ABC 123" }, actor, randomUUID(), source),
+  ).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+    fieldErrors: { nis: ["NIS hanya boleh angka, titik, garis miring, atau strip."] },
+  });
+  // NISN not 10 digits
+  await expect(
+    createStudent({ ...input(), nisn: "12345" }, actor, randomUUID(), source),
+  ).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+    fieldErrors: { nisn: ["NISN harus 10 digit angka."] },
+  });
+  // Valid student with NIS and NISN
+  const valid = await createStudent(
+    { ...input(), fullName: "Siswa Valid", nis: "123.45/6-7", nisn: "1234567890" },
+    actor,
+    randomUUID(),
+    source,
+  );
+  expect(valid.id).toBeDefined();
+});
+

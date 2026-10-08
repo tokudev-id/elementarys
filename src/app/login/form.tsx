@@ -1,86 +1,148 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Field } from "@/components/field";
+import { useZodForm } from "@/components/use-zod-form";
+import { FormErrorSummary } from "@/components/form-error-summary";
+import { loginSchema, changePasswordSchema } from "@/contracts/auth";
 
 export function AccountForm({ change = false }: { change?: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    setMessage("");
-    const data = new FormData(event.currentTarget);
-    const body = change
-      ? { currentPassword: data.get("password"), newPassword: data.get("newPassword") }
-      : { email: data.get("email"), password: data.get("password") };
-    try {
-      const response = await fetch(
-        change ? "/api/account/change-password" : "/api/auth/sign-in/email",
-        {
+
+  const loginForm = useZodForm(loginSchema, {
+    defaultValues: { email: "", password: "" },
+    onSubmit: async (data) => {
+      setPending(true);
+      setMessage("");
+      try {
+        const response = await fetch("/api/auth/sign-in/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        },
-      );
-      if (!response.ok) {
-        const error = await response.json();
-        setMessage(
-          response.status === 401
-            ? "Email atau password tidak sesuai. Coba kembali."
-            : (error.error?.message ?? "Belum berhasil. Periksa isian lalu coba kembali."),
-        );
-      } else {
-        router.push("/");
-        router.refresh();
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          setMessage(
+            response.status === 401
+              ? "Email atau password tidak sesuai. Coba kembali."
+              : (error.error?.message ??
+                  "Belum berhasil. Periksa isian lalu coba kembali."),
+          );
+        } else {
+          router.push("/");
+          router.refresh();
+        }
+      } catch {
+        setMessage("Belum terhubung. Periksa internet lalu coba kembali.");
+      } finally {
+        setPending(false);
       }
-    } catch {
-      setMessage("Belum terhubung. Periksa internet lalu coba kembali.");
-    } finally {
-      setPending(false);
-    }
-  }
-  return (
-    <form onSubmit={submit} className="account-form">
-      {!change && (
-        <label>
-          Email
-          <input name="email" type="email" autoComplete="username" required maxLength={254} />
-        </label>
-      )}
-      <label>
-        {change ? "Password saat ini" : "Password"}
-        <input
-          name="password"
+    },
+  });
+
+  const changeForm = useZodForm(changePasswordSchema, {
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    },
+    onSubmit: async (data) => {
+      setPending(true);
+      setMessage("");
+      try {
+        const response = await fetch("/api/account/change-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            currentPassword: data.currentPassword,
+            newPassword: data.newPassword,
+          }),
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          setMessage(
+            error.error?.message ??
+              "Belum berhasil. Periksa isian lalu coba kembali.",
+          );
+        } else {
+          router.push("/");
+          router.refresh();
+        }
+      } catch {
+        setMessage("Belum terhubung. Periksa internet lalu coba kembali.");
+      } finally {
+        setPending(false);
+      }
+    },
+  });
+
+  if (change) {
+    return (
+      <form className="account-form" {...changeForm.formProps}>
+        <FormErrorSummary errors={changeForm.errorSummary} />
+        <Field
+          label="Password saat ini"
           type="password"
-          autoComplete="current-password"
           required
+          autoComplete="current-password"
           maxLength={128}
+          {...changeForm.register("currentPassword")}
         />
-      </label>
-      {change && (
-        <>
-          <label>
-            Password baru
-            <input
-              name="newPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              maxLength={128}
-              aria-describedby="new-password-help"
-            />
-          </label>
-          <small id="new-password-help">Gunakan minimal 12 karakter.</small>
-        </>
-      )}
+        <Field
+          label="Password baru"
+          type="password"
+          required
+          autoComplete="new-password"
+          minLength={12}
+          maxLength={128}
+          hint="Gunakan minimal 12 karakter."
+          {...changeForm.register("newPassword")}
+        />
+        <Field
+          label="Ulangi password baru"
+          type="password"
+          required
+          autoComplete="new-password"
+          minLength={12}
+          maxLength={128}
+          {...changeForm.register("confirmNewPassword")}
+        />
+        {message && <p role="alert">{message}</p>}
+        <Button disabled={pending} type="submit" pending={pending}>
+          Simpan password baru
+        </Button>
+      </form>
+    );
+  }
+
+  return (
+    <form className="account-form" {...loginForm.formProps}>
+      <FormErrorSummary errors={loginForm.errorSummary} />
+      <Field
+        label="Email"
+        type="email"
+        required
+        autoComplete="username"
+        maxLength={254}
+        {...loginForm.register("email")}
+      />
+      <Field
+        label="Password"
+        type="password"
+        required
+        autoComplete="current-password"
+        maxLength={128}
+        {...loginForm.register("password")}
+      />
       {message && <p role="alert">{message}</p>}
-      <button disabled={pending} type="submit">
-        {pending ? "Mohon tunggu…" : change ? "Simpan password baru" : "Masuk"}
-      </button>
+      <Button disabled={pending} type="submit" pending={pending}>
+        Masuk
+      </Button>
     </form>
   );
 }
@@ -89,6 +151,7 @@ export function Logout({ asMenuItem = false }: { asMenuItem?: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+
   async function logout() {
     setPending(true);
     try {
@@ -107,10 +170,12 @@ export function Logout({ asMenuItem = false }: { asMenuItem?: boolean }) {
       setPending(false);
     }
   }
+
   function selectLogout(event: Event) {
     event.preventDefault();
     void logout();
   }
+
   return (
     <>
       {asMenuItem ? (

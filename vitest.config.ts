@@ -11,5 +11,6 @@ export default defineConfig({
   test: {
     include: ["tests/domain/**/*.test.ts", "tests/integration/**/*.test.ts"],
     env: { APP_ENV: "test" },
+    fileParallelism: false,
   },
 });

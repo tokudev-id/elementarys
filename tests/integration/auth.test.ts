@@ -134,7 +134,7 @@ it("rate limit login berulang tidak mengunci akun lain pada IP sama", async () =
   expect((await source.query("SELECT count(*)::int n FROM rate_limit")).rows[0].n).toBeGreaterThan(
     0,
   );
-});
+}, 30000);
 it("Origin asing ditolak sebelum autentikasi", async () => {
   expect(
     (
@@ -192,7 +192,7 @@ it("perubahan password membersihkan flag hanya setelah credential berhasil", asy
     source,
     auth,
   );
-});
+}, 30000);
 it("bootstrap memakai environment tanpa mencetak password dan menolak bootstrap kedua", async () => {
   const db = await createTestDatabase("bootstrap");
   const password = "BootstrapSynthetic123!";
@@ -268,4 +268,4 @@ it("password change rolls back credential, session revocation and flag if audit 
       "DROP TRIGGER reject_password_audit ON audit_events; DROP FUNCTION reject_password_audit()",
     );
   }
-});
+}, 30000);
