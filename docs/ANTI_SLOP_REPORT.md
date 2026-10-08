@@ -107,3 +107,12 @@ Bukti tiap aturan ada pada tabel berikut dan [log implementasi](IMPLEMENTATION_L
 Interaksi S3 yang dijalankan: transfer/tutup/batalkan penempatan mendatang/arsip/aktifkan siswa; batch preview/save/hasil; persiapan tahun/current/arsip/laporan lama; audit filter/pagination/details; login/reset/password atomik; panduan guru sampai Excel/cetak. Race transfer/kalender/submit, retry deadlock terbatas, rollback audit/credential, timestamp mikrodetik, log allowlist, matriks seluruh method API dan smoke read-only diuji. Clone bersih S3-05 domain18/integration105/e2e50 lulus; hosted CI/preview cloud belum menjadi bukti. Templat pilot tetap kosong.
 
 PASS: komentar dekoratif pada config dihapus; komentar batasan transaksi, subprocess dan keamanan dipertahankan. Perubahan fungsional mengikuti tugas aplikasi, sedangkan pembersihan komentar terbatas pada komentar tersebut. Prettier dan ESLint memeriksa format serta larangan style/handler JSX inline.
+
+## Simulasi data lokal untuk uji manual
+
+Tambahan 8 Oktober 2026, main1498e49: nama siswa/guru dibuat wajar untuk simulasi atas permintaan pengguna. Sekolah tetap bertanda data sintetis, email memakai domain .example dan tidak ada klaim bahwa ini orang/data sekolah nyata. Database terpisah memuat enam kelas/60 siswa/60 sesi/600 records; hari ini awalnya belum dicatat. Browser admin/guru menjalankan login→daftar siswa→rekap→Excel→logout pada360px, tanpa overflow/pageerror; screenshot diperiksa. Health aplikasi HTTP200, domain18/integration105, format/lint/type lulus. UI/stylesheet mengikuti build final sebelumnya; tidak menambah aset atau perubahan desain.
+
+- Hard Gate PASS: label data sintetis jelas, nama/totals berasal dari DB dan browser tidak overflow.
+- Purpose Gate PASS: data memenuhi uji absensi/rekap sekolah; font, layout dan palette tetap mengikuti DESIGN.md.
+- Liveliness PASS: ENERGY1/RHYTHM1/MOTION1 serta motif nama/kode/status tetap terlihat pada screenshot.
+- Craftsmanship & Quality Locks PASS: login dua role, rekap/Excel/logout, guard produksi/reseed dan pemeriksaan kode benar-benar dijalankan; credential tidak terlacak Git.
