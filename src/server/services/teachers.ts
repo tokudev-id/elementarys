@@ -1,4 +1,5 @@
 import "server-only";
+export { listTeachers } from "../queries/master-lists";
 import { z } from "zod";
 import type { Pool, PoolClient } from "pg";
 import {
@@ -100,7 +101,10 @@ function transactionAuth(client: PoolClient, options: TeacherOptions) {
   if (!secret || !baseURL) throw new Error("Konfigurasi auth belum lengkap.");
   return createAuth(client, secret, baseURL);
 }
-export async function listTeachers(actor: Actor, source: Pool = pool): Promise<TeacherView[]> {
+export async function listTeacherOptions(
+  actor: Actor,
+  source: Pool = pool,
+): Promise<TeacherView[]> {
   return transaction(async (client) => {
     await client.query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY");
     const rows = (
@@ -133,6 +137,12 @@ export async function listTeachers(actor: Actor, source: Pool = pool): Promise<T
         .map((item) => ({ id: item.id, name: item.name })),
     }));
   }, source);
+}
+export async function getTeacher(id: string, actor: Actor, source: Pool = pool) {
+  parseInput(z.uuid(), id);
+  const teacher = (await listTeacherOptions(actor, source)).find((item) => item.id === id);
+  if (!teacher) throw new DomainError("RESOURCE_NOT_FOUND", "Guru tidak ditemukan.", 404);
+  return teacher;
 }
 export async function unlinkedAccounts(
   actor: Actor,

@@ -1,4 +1,5 @@
 import "server-only";
+export { listStudents } from "../queries/master-lists";
 import { z } from "zod";
 import type { Pool } from "pg";
 import {
@@ -15,7 +16,7 @@ import { audit, pool, transaction, lockRows } from "@/server/db/pool";
 
 const studentColumns =
   'id,student_code "studentCode",full_name "fullName",nis,nisn,version,archived_at::text "archivedAt"';
-export async function listStudents(
+export async function listStudentOptions(
   filter: { classId?: string; search?: string; includeArchived?: boolean } = {},
   source: Pool = pool,
 ): Promise<StudentView[]> {

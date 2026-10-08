@@ -32,6 +32,8 @@ export function PromotionForm({
   const router = useRouter();
   const busy = useRef(false);
   const [pending, setPending] = useState(false);
+  const [step, setStep] = useState(1);
+  const [yearId, setYearId] = useState("");
   const [refreshing, startRefresh] = useTransition();
   const [input, setInput] = useState<PromotionInput | null>(null);
   const [preview, setPreview] = useState<PromotionPreview | null>(null);
@@ -45,7 +47,20 @@ export function PromotionForm({
   }
   function reloadLatest() {
     invalidatePreview();
+    setStep(1);
     startRefresh(() => router.refresh());
+  }
+  function nextStep(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStep(2);
+  }
+  function previousStep() {
+    invalidatePreview();
+    setStep(step - 1);
+  }
+  function selectYear(event: React.ChangeEvent<HTMLSelectElement>) {
+    setYearId(event.currentTarget.value);
+    invalidatePreview();
   }
   function showFailure(error: unknown) {
     setNotice({
@@ -106,6 +121,7 @@ export function PromotionForm({
         throw new Error("Incomplete preview receipt");
       setInput(parsed.data);
       setPreview(value);
+      setStep(3);
     } catch (error) {
       showFailure(error);
     } finally {
@@ -155,46 +171,101 @@ export function PromotionForm({
     pending || refreshing || notice?.state === "conflict" || notice?.state === "session-expired";
   return (
     <>
+      <ol className="wizard-steps" aria-label="Langkah naik kelas">
+        {["Pilih kelas", "Pilih siswa", "Konfirmasi"].map((label, index) => (
+          <li key={label} aria-current={step === index + 1 ? "step" : undefined}>
+            <span>{index + 1}</span> {label}
+          </li>
+        ))}
+      </ol>
       <form
         className="resource-form"
-        onSubmit={prepare}
+        onSubmit={step === 1 ? nextStep : prepare}
         onChange={invalidatePreview}
         aria-label="Preview naik kelas"
       >
         <fieldset disabled={blocked}>
-          <SelectField label="Kelas tujuan batch" name="classId" required>
-            {classes
-              .filter(
-                (item) =>
-                  !item.archivedAt && !years.find((year) => year.id === item.yearId)?.archivedAt,
-              )
-              .map((item) => (
-                <option key={item.id} value={item.id}>
-                  {years.find((year) => year.id === item.yearId)?.label} / {item.name}
-                </option>
-              ))}
-          </SelectField>
-          <Field
-            label="Tanggal mulai tahun berikutnya"
-            name="startsOn"
-            type="date"
-            defaultValue={startsOn}
-            required
-          />
-          <Field label="Alasan batch penempatan" name="reason" required maxLength={1000} />
-          <p>
-            Pilih siswa yang akan ditempatkan. Satu masalah membatalkan seluruh batch; riwayat lama
-            tetap tersedia.
-          </p>
-          {students.map((student) => (
-            <label className="checkbox-field" key={student.id}>
-              <input type="checkbox" name="studentId" value={student.id} />
-              {student.fullName} · {student.studentCode}
-            </label>
-          ))}
-          <Button type="submit" pending={pending}>
-            Periksa preview
-          </Button>
+          <div hidden={step !== 1}>
+            <SelectField label="Tahun ajaran tujuan" value={yearId} onChange={selectYear}>
+              <option value="">Semua tahun tersedia</option>
+              {years
+                .filter((year) => !year.archivedAt)
+                .map((year) => (
+                  <option key={year.id} value={year.id}>
+                    {year.label}
+                  </option>
+                ))}
+            </SelectField>
+            <SelectField label="Kelas tujuan batch" name="classId" required>
+              {classes
+                .filter(
+                  (item) =>
+                    !item.archivedAt &&
+                    (!yearId || item.yearId === yearId) &&
+                    !years.find((year) => year.id === item.yearId)?.archivedAt,
+                )
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {years.find((year) => year.id === item.yearId)?.label} / {item.name}
+                  </option>
+                ))}
+            </SelectField>
+            <Field
+              label="Tanggal mulai tahun berikutnya"
+              name="startsOn"
+              type="date"
+              defaultValue={startsOn}
+              required
+            />
+            <Field label="Alasan batch penempatan" name="reason" required maxLength={1000} />
+            <Button type="submit">Lanjut: pilih siswa</Button>
+          </div>
+          <div hidden={step !== 2}>
+            <p>
+              Pilih siswa yang akan ditempatkan. Satu masalah membatalkan seluruh batch; riwayat
+              lama tetap tersedia.
+            </p>
+            <div className="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pilih</th>
+                    <th scope="col">Nama siswa</th>
+                    <th scope="col">Kode</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr key={student.id}>
+                      <td>
+                        <label className="checkbox-field">
+                          <input
+                            type="checkbox"
+                            name="studentId"
+                            value={student.id}
+                            defaultChecked
+                          />
+                          <span className="sr-only">
+                            {student.fullName} · {student.studentCode}
+                          </span>
+                        </label>
+                      </td>
+                      <td>{student.fullName}</td>
+                      <td>{student.studentCode}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="button-row">
+              <Button type="button" variant="secondary" onClick={previousStep}>
+                Kembali
+              </Button>
+              <Button type="submit" pending={pending}>
+                Periksa preview
+              </Button>
+            </div>
+          </div>
         </fieldset>
       </form>
       {(pending || refreshing) && (
@@ -238,6 +309,9 @@ export function PromotionForm({
             onClick={save}
           >
             Simpan seluruh batch
+          </Button>
+          <Button variant="secondary" onClick={previousStep} disabled={blocked}>
+            Ubah pilihan
           </Button>
         </section>
       )}

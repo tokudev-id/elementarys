@@ -39,3 +39,11 @@ Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh ber
 - Purpose Gate PASS: compact roster untuk pencatatan, warna hanya status, tombol secondary/risiko dibedakan.
 - Liveliness PASS: dials1/1/1, nama/kode/status sebagai motif, aksi simpan dan ringkasan sebagai fokus.
 - Craftsmanship PASS: receipt/protokol tetap, tests105PostgreSQL dan52browser lulus; H-03 tetap pending.
+
+## Data master UI-R2
+
+- Daftar siswa/guru/kelas memakai pagination SQL dalam snapshot read-only, urutan stabil dengan ID, pencarian/filter allowlist, serta opsi penuh terpisah untuk penempatan/promosi. Kelas aktif siswa memakai tanggal sekolah dan rentang penempatan eksklusif. Akun guru tetap hanya terlihat oleh admin; endpoint mutasi tidak berubah.
+- Halaman new/detail/edit menggantikan form pada daftar. Detail siswa memiliki ringkasan, timeline dan ringkasan kehadiran dari proyeksi rekap. Pindah/tutup/arsip memakai dialog. Detail guru memisahkan profil, kelas utama dan akun; reset password serta penonaktifan akses/profil memerlukan dialog. Kelas menggunakan select tingkat dan read-only tahun/tingkat setelah ada penempatan.
+- Wizard promosi tiga langkah mempertahankan versi tiap siswa, pratinjau authoritative dan transaksi seluruh batch. Siswa dipilih secara default; pengecualian dapat dilepas sebelum konfirmasi. Form menjaga perubahan sebelum meninggalkan halaman melalui link atau penutupan tab.
+- Uji browser 600 siswa membuktikan25baris, halaman berikutnya tanpa pengulangan, filter/NIS, navigasi kembali dan pembatalan keluar dari draft. Empat tes PostgreSQL tambahan mencakup pagination600, penempatan efektif, arsip/filter invalid dan pembatasan rincian akun.
+- Pengukuran pertama sesudah redesign berlangsung bersamaan dengan regresi browser:25baris, median133.12ms; belum memenuhi pembanding128.07ms. Pengukuran ulang saat regresi menunggu locator wizard lama:25baris, median118.39ms. Pengukuran final setelah build main harus berjalan tanpa build atau test lain. Cleanup backup Windows sempat melewati timeout10detik dan meninggalkan DB restore fixture; hook cleanup diberi30detik tanpa mengubah perilaku restore yang menolak target yang sudah ada.

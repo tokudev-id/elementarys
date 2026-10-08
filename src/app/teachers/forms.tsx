@@ -7,50 +7,122 @@ import { SelectField } from "@/components/select-field";
 import { Button } from "@/components/button";
 import { useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
+import { useRouter } from "next/navigation";
+import { useFormGuard } from "@/components/use-form-guard";
+import { FormSection } from "@/components/form-section";
+import { FormActions } from "@/components/form-actions";
+import { Switch } from "@/components/ui/switch";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
-export function TeacherProfileForm({ teacher }: { teacher?: TeacherView }) {
+export function TeacherProfileForm({
+  teacher,
+  redirect = false,
+}: {
+  teacher?: TeacherView;
+  redirect?: boolean;
+}) {
+  const router = useRouter();
   const mutation = useMutation(
     teacher ? `/api/teachers/${teacher.id}` : "/api/teachers",
     teacher ? "PATCH" : "POST",
+    undefined,
+    { refresh: !redirect, successMessage: "Data guru tersimpan" },
   );
+  const { ref: formRef, markDirty, markSaved } = useFormGuard(mutation.errors);
+  const [deactivation, setDeactivation] = useState<{
+    fullName: FormDataEntryValue | null;
+    active: boolean;
+    expectedVersion: number;
+  } | null>(null);
+  function closeDeactivation() {
+    setDeactivation(null);
+  }
+  async function confirmDeactivation() {
+    if (!deactivation) return;
+    const saved = await mutation.mutate(deactivation);
+    if (saved) {
+      markSaved();
+      setDeactivation(null);
+      if (redirect) router.push(`/teachers/${saved.id}`);
+    }
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    if (
-      (await mutation.mutate({
+    if (teacher?.active && !data.has("active")) {
+      setDeactivation({
         fullName: data.get("fullName"),
-        active: data.has("active"),
-        ...(teacher ? { expectedVersion: teacher.version } : {}),
-      })) &&
-      !teacher
-    )
-      form.reset();
+        active: false,
+        expectedVersion: teacher.version,
+      });
+      return;
+    }
+    const saved = await mutation.mutate({
+      fullName: data.get("fullName"),
+      active: data.has("active"),
+      ...(teacher ? { expectedVersion: teacher.version } : {}),
+    });
+    if (saved) {
+      markSaved();
+      if (redirect) router.push(`/teachers/${saved.id}`);
+      else if (!teacher) form.reset();
+    }
   }
   return (
     <form
-      className="resource-form"
+      className="resource-form redesigned-form"
       onSubmit={submit}
+      ref={formRef}
+      onChange={markDirty}
       data-testid={teacher ? `teacher-edit-${teacher.id}` : "teacher-create"}
     >
       <fieldset disabled={mutation.pending} key={teacher?.version ?? "create"}>
-        <Field
-          label="Nama lengkap guru"
-          name="fullName"
-          required
-          maxLength={200}
-          defaultValue={teacher?.fullName}
-        />
-        <label className="checkbox-field">
-          <input type="checkbox" name="active" defaultChecked={teacher?.active ?? true} />
-          Profil aktif
-        </label>
-        <p>Menonaktifkan profil juga menonaktifkan akun terhubung dan mengakhiri sesinya.</p>
-        <Button type="submit" pending={mutation.pending}>
-          {teacher ? "Simpan profil guru" : "Tambah profil guru"}
-        </Button>
+        <FormSection title="Profil guru">
+          <Field
+            label="Nama lengkap guru"
+            name="fullName"
+            required
+            maxLength={200}
+            defaultValue={teacher?.fullName}
+            error={mutation.errors.fullName?.[0]}
+          />
+          <label className="checkbox-field">
+            <Switch
+              name="active"
+              defaultChecked={teacher?.active ?? true}
+              className="form-switch"
+            />
+            Profil aktif
+          </label>
+          <p>Menonaktifkan profil juga menonaktifkan akun terhubung dan mengakhiri sesinya.</p>
+        </FormSection>
+        {redirect ? (
+          <FormActions
+            cancelHref={teacher ? `/teachers/${teacher.id}` : "/teachers"}
+            pending={mutation.pending}
+            label={teacher ? "Simpan profil guru" : "Tambah profil guru"}
+          />
+        ) : (
+          <Button type="submit" pending={mutation.pending}>
+            {teacher ? "Simpan profil guru" : "Tambah profil guru"}
+          </Button>
+        )}
       </fieldset>
       <MutationFeedback mutation={mutation} />
+      <ConfirmDialog
+        open={deactivation !== null}
+        onClose={closeDeactivation}
+        title="Nonaktifkan profil guru?"
+        onConfirm={confirmDeactivation}
+        pending={mutation.pending}
+        destructive
+        label="Nonaktifkan profil"
+      >
+        <p>
+          Akun terhubung ikut dinonaktifkan dan sesinya berakhir. Riwayat absensi tetap tersedia.
+        </p>
+      </ConfirmDialog>
     </form>
   );
 }

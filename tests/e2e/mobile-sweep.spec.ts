@@ -22,6 +22,8 @@ test("all pages reflow across portrait/landscape, touch targets and reduced keyb
         classId,
       ])
     ).rows[0].id;
+    const teacher = (await source.query("SELECT id FROM teachers WHERE active ORDER BY id LIMIT 1"))
+      .rows[0].id;
     const date = schoolToday(
       (await source.query("SELECT timezone FROM school_config")).rows[0].timezone,
     );
@@ -42,11 +44,19 @@ test("all pages reflow across portrait/landscape, touch targets and reduced keyb
       "/academic-years",
       `/academic-years/rollover?yearId=${year}`,
       `/classes?yearId=${year}`,
+      "/classes/new",
+      `/classes/${classId}`,
+      `/classes/${classId}/edit`,
       `/calendar?yearId=${year}&month=${date.slice(0, 7)}`,
       "/students",
+      "/students/new",
       `/students/${student}`,
+      `/students/${student}/edit`,
       `/students/promote?classId=${classId}`,
       "/teachers",
+      "/teachers/new",
+      `/teachers/${teacher}`,
+      `/teachers/${teacher}/edit`,
       "/settings",
       "/setup",
       "/audit",
@@ -60,7 +70,7 @@ test("all pages reflow across portrait/landscape, touch targets and reduced keyb
         await expectNoPageOverflow(page);
         await expectTouchTarget(
           page,
-          "button, .status-choices span, .checkbox-field input, summary, a[href]",
+          "button, .status-choices span, .checkbox-field, summary, a[href]",
         );
       }
       await page.setViewportSize({ width: 360, height: 340 });

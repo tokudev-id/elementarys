@@ -143,7 +143,7 @@ export function EndEnrollmentForm({
           required
           maxLength={1000}
         />
-        <Button type="submit" variant="secondary" pending={mutation.pending}>
+        <Button type="submit" variant="destructive" pending={mutation.pending}>
           {future ? "Batalkan penempatan mendatang" : "Tutup penempatan"}
         </Button>
       </fieldset>
@@ -172,7 +172,7 @@ export function StudentArchiveForm({ student }: { student: StudentDetail }) {
       <form className="resource-form" onSubmit={submit} aria-label="Status arsip siswa">
         <fieldset disabled={mutation.pending || mutation.notice?.state === "conflict"}>
           <Field label="Alasan status siswa" name="reason" required maxLength={1000} />
-          <Button type="submit" variant="secondary" pending={mutation.pending}>
+          <Button type="submit" variant="destructive" pending={mutation.pending}>
             {student.archivedAt ? "Aktifkan kembali siswa" : "Arsipkan siswa"}
           </Button>
         </fieldset>

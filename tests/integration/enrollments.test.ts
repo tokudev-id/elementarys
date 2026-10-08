@@ -10,7 +10,7 @@ import {
   previewPromotion,
   promoteStudents,
 } from "../../src/server/services/enrollments";
-import { getStudent, listStudents } from "../../src/server/services/students";
+import { getStudent, listStudentOptions } from "../../src/server/services/students";
 import { getAttendance } from "../../src/server/queries/attendance";
 import { saveAttendance } from "../../src/server/services/attendance/save";
 import { buildMonthlyAttendanceReport } from "../../src/server/reports/monthly";
@@ -229,9 +229,11 @@ it("archive requires closed active enrollment and cancelled future placement, pr
     randomUUID(),
     options(),
   );
-  expect((await listStudents({}, source)).some((student) => student.id === studentId)).toBe(false);
+  expect((await listStudentOptions({}, source)).some((student) => student.id === studentId)).toBe(
+    false,
+  );
   expect(
-    (await listStudents({ includeArchived: true }, source)).find(
+    (await listStudentOptions({ includeArchived: true }, source)).find(
       (student) => student.id === studentId,
     )?.archivedAt,
   ).toBeTruthy();

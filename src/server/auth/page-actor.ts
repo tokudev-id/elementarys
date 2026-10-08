@@ -12,3 +12,8 @@ export async function requirePageActor() {
     redirect(error.code === "PASSWORD_CHANGE_REQUIRED" ? "/change-password" : "/login");
   }
 }
+export async function requireAdminPageActor() {
+  const actor = await requirePageActor();
+  if (actor.role !== "admin") redirect("/attendance");
+  return actor;
+}

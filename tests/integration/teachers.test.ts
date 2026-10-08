@@ -9,7 +9,7 @@ import { requireActor, type Actor } from "../../src/server/auth/guards";
 import {
   createTeacher,
   updateTeacher,
-  listTeachers,
+  listTeacherOptions,
   linkTeacherAccount,
   assignTeacherClasses,
   updateAccountAccess,
@@ -78,7 +78,7 @@ it("permits profiles without accounts, links an existing account once, and hides
     source,
   );
   expect(
-    (await listTeachers(actor, source)).find((item) => item.id === profile.id)?.hasAccount,
+    (await listTeacherOptions(actor, source)).find((item) => item.id === profile.id)?.hasAccount,
   ).toBe(false);
   const account = await createManagedAccount(auth, {
     email: "linked@example.test",
@@ -120,7 +120,9 @@ it("permits profiles without accounts, links an existing account once, and hides
     ),
   ).rejects.toMatchObject({ code: "INVALID_INPUT" });
   const reader = await requireActor(teacherHeaders, {}, source, auth);
-  expect((await listTeachers(reader, source)).every((item) => item.account === null)).toBe(true);
+  expect((await listTeacherOptions(reader, source)).every((item) => item.account === null)).toBe(
+    true,
+  );
 });
 it("account creation and linking use one transaction; a real SQL failure leaves no user or credential account", async () => {
   const profile = await createTeacher(

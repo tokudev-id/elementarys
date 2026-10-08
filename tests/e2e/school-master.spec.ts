@@ -25,7 +25,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await expect(
     page.getByRole("heading", { name: "Tahun Uji 2030 Diubah", exact: true }),
   ).toBeVisible();
-  await page.goto("/classes");
+  await page.goto("/classes/new");
   const classForm = page.getByTestId("class-create");
   await classForm.getByLabel("Nama kelas", { exact: true }).fill("Kelas Uji Kalender");
   await classForm
@@ -35,10 +35,11 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await expect(
     page.getByRole("heading", { name: "Kelas Uji Kalender", exact: true }),
   ).toBeVisible();
+  await page.getByRole("link", { name: "Ubah", exact: true }).click();
   const editClass = page
     .locator('[data-testid^="class-edit-"]')
     .filter({ has: page.locator('input[name="name"][value="Kelas Uji Kalender"]') });
-  await editClass.getByLabel("Tingkat kelas", { exact: true }).fill("2");
+  await editClass.getByLabel("Tingkat kelas", { exact: true }).selectOption("2");
   await editClass.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await expect(page.getByText("Tingkat 2 · Tahun Uji 2030 Diubah", { exact: true })).toBeVisible();
   await page.goto("/calendar");

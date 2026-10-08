@@ -10,11 +10,11 @@ Pada **Tahun ajaran**, tambahkan periode. **Berakhir sebelum tanggal** adalah se
 
 ## Siswa dan penempatan
 
-Di **Siswa**, isi nama lengkap, kelas awal dan tanggal mulai. NIS/NISN opsional; kode dibuat otomatis dan nama sama boleh ada. **Cari siswa** memakai nama/kode serta filter kelas. Buka detail untuk **Simpan identitas siswa** dan membaca **Riwayat penempatan**. Periksa kode, bukan hanya nama, saat memilih siswa.
+Di **Siswa**, pilih **Tambah siswa** lalu isi nama lengkap, kelas awal dan tanggal mulai. NIS/NISN opsional; kode dibuat otomatis dan nama sama boleh ada. Pencarian memakai nama, kode atau NIS; filter kelas/status dan pagination membatasi daftar. Buka detail, pilih **Ubah** untuk menyimpan identitas, atau tab **Riwayat penempatan** untuk membaca riwayat. Periksa kode, bukan hanya nama, saat memilih siswa.
 
-**Ubah penempatan** menyediakan transfer dalam tahun sama atau penempatan baru/tahun berikutnya. Pilih penempatan asal untuk transfer, kelas tujuan, tanggal mulai dan alasan, lalu **Simpan penempatan**. Pada tanggal efektif, siswa berhenti berada di kelas asal dan mulai berada di tujuan. Transfer harus setelah tanggal mulai sumber dan sebelum akhir sumber. Jika tanggal mengubah absensi tersimpan, sistem menunjukkan tanggal aman; perbaikan historis memerlukan pemelihara dan [runbook](RUNBOOK.md#koreksi-penempatan-historis-s3-01).
+Menu **Aksi siswa → Pindah kelas** membuka dialog transfer dalam tahun sama atau penempatan baru/tahun berikutnya. Pilih penempatan asal untuk transfer, kelas tujuan, tanggal mulai dan alasan, lalu **Simpan penempatan**. Pada tanggal efektif, siswa berhenti berada di kelas asal dan mulai berada di tujuan. Transfer harus setelah tanggal mulai sumber dan sebelum akhir sumber. Jika tanggal mengubah absensi tersimpan, sistem menunjukkan tanggal aman; perbaikan historis memerlukan pemelihara dan [runbook](RUNBOOK.md#koreksi-penempatan-historis-s3-01).
 
-Untuk siswa keluar, isi **Tidak bersekolah mulai tanggal** dan alasan, lalu **Tutup penempatan**. Siswa tidak diwajibkan hadir mulai tanggal itu, tetapi riwayat lama tetap. Rencana yang belum dimulai dapat **Batalkan penempatan mendatang**; riwayat menandainya dibatalkan. Sebelum **Arsipkan siswa**, tutup penempatan berjalan dan batalkan rencana mendatang. **Tampilkan siswa diarsipkan** membuka daftar arsip; **Aktifkan kembali siswa** tidak membuat penempatan baru otomatis.
+Untuk siswa keluar, buka **Aksi siswa → Tutup penempatan**, isi **Tidak bersekolah mulai tanggal** dan alasan, lalu simpan. Siswa tidak diwajibkan hadir mulai tanggal itu, tetapi riwayat lama tetap. Rencana yang belum dimulai dapat **Batalkan penempatan mendatang**; riwayat menandainya dibatalkan. Sebelum **Aksi siswa → Arsipkan siswa**, tutup penempatan berjalan dan batalkan rencana mendatang. Filter **Status siswa → Diarsipkan** membuka daftar arsip; **Aktifkan kembali siswa** tidak membuat penempatan baru otomatis.
 
 ## Tahun berikutnya dan arsip
 
@@ -24,7 +24,7 @@ Kembali ke persiapan, periksa tanggal sekolah/rentang, lalu **Aktifkan tahun ini
 
 ## Guru, akun dan akses
 
-Menu **Guru** mendukung profil tanpa akun. Buat profil, lalu buat atau tautkan akun yang tersedia. Password sementara diberikan melalui jalur aman dan wajib diganti. Tetapkan kelas utama; pilihan ini mengatur urutan, bukan membatasi guru dari kelas lain.
+Menu **Guru → Tambah guru** mendukung profil tanpa akun. Buka detail, lalu tab **Akun & akses** untuk membuat/menautkan akun. Password sementara diberikan melalui jalur aman dan wajib diganti. Tab **Kelas utama** mengatur kelas tahun berjalan; pilihan ini mengatur urutan, bukan membatasi guru dari kelas lain. Tab **Akun tanpa profil** di daftar memuat akun yang belum terhubung. **Ubah** membuka halaman edit profil.
 
 Perubahan peran/akses, reset password dan arsip dilakukan pada akun/profil yang tepat. **Reset password akun** mencabut sesi dan mewajibkan ganti password. Menonaktifkan profil juga menonaktifkan akun terhubung serta mengakhiri sesinya. Mengaktifkan profil kembali tidak otomatis membuka akses akun; periksa pengaturan akses. Admin aktif terakhir tidak dapat dinonaktifkan, diarsipkan atau diturunkan. Siapkan admin aktif lain lebih dahulu.
 

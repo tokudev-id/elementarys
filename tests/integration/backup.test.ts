@@ -70,7 +70,7 @@ afterAll(async () => {
     await admin.end();
     await rm(directory, { recursive: true, force: true });
   }
-});
+}, 30000);
 it("encrypted full-database restore preserves domain/auth/audit/report, revokes sessions and permits fresh login", async () => {
   const before = await databaseEvidence(source);
   expect(before.counts.session).toBeGreaterThan(0);

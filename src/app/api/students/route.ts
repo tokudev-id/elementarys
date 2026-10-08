@@ -2,14 +2,15 @@ import { handler, json } from "@/server/http";
 import { requireActor, requireOrigin } from "@/server/auth/guards";
 import { readJsonBody } from "@/server/request";
 import { listStudents, createStudent } from "@/server/services/students";
+import { listQuery } from "@/contracts/lists";
 export const GET = handler(async (request, requestId) => {
   await requireActor(request.headers);
   const query = new URL(request.url).searchParams;
   return json(
     await listStudents({
-      classId: query.get("classId") ?? undefined,
-      search: query.get("search") ?? undefined,
-      includeArchived: query.get("includeArchived") === "true",
+      ...listQuery(query, ["page", "pageSize", "q", "classId", "status", "sort"]),
+      ...(query.has("search") && !query.has("q") ? { q: query.get("search") } : {}),
+      ...(query.get("includeArchived") === "true" && !query.has("status") ? { status: "all" } : {}),
     }),
     requestId,
   );
