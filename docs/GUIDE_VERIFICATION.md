@@ -20,3 +20,5 @@ Panduan menamai kontrol sesuai UI yang diuji. Langkah yang membutuhkan akun prov
 | Perangkat/Excel/printer/pilot/handover                                     | H-03/H-06/H-07/H-08/H-09 masih memerlukan bukti manusia             |
 
 guides.spec menjalankan urutan login→pilih kelas→Alpa→konfirmasi→koreksi Hadir dengan alasan→history→rekap→Excel→halaman Cetak dengan kontrol yang dinamai dalam panduan guru. Uji fitur lain melaksanakan langkah admin yang dipetakan di atas. Dialog cetak sistem diganti stub pada automation; printer fisik tetap H-06. Templat pilot tetap kosong dan tidak berisi hasil contoh yang menyerupai bukti lapangan.
+
+Receipt 8 Oktober 2026: main 19fab45 lulus frozen install, format/lint/type, domain 18, integration 105, seluruh browser 51 dan satu pemeriksaan HTTP404 mode produksi lokal. Build final lulus pada kode FIX-04 yang identik setelah merge. Pemeriksaan tautan panduan/README/runbook memverifikasi 27 tujuan berkas lokal. Hosted CI, provider dan penerimaan lapangan tetap mengikuti checkpoint log.

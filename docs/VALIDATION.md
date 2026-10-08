@@ -10,6 +10,12 @@ Uji integration menahan lock PostgreSQL nyata dan memeriksa pg_stat_activity: su
 
 mobile-sweep.spec.ts memeriksa17 halaman operasi pada enam kombinasi viewport/orientasi:360×800,800×360,768×1024,1024×768,1024×1366,1366×1024. Tombol/status/checkbox/link/summary minimal44×44; field diuji dengan viewport360×340 sebagai emulasi keyboard. Status memuat, kosong, gagal, konflik, sesi habis dan tersimpan tersedia; error boundary mempunyai retry/kembali. Uji khusus dialog membuktikan Tab/Shift+Tab/Escape/focus trap/restore, sementara rotasi/draft/retry dibuktikan suite absensi. Capture360 diperiksa langsung. Tidak ada hover-only atau horizontal page overflow; tabel bulanan memakai area gulir sendiri.
 
+## Penolakan halaman pengembangan (FIX-04)
+
+Setelah boundary loading ditambahkan, halaman component-preview pada APP_ENV=production menyembunyikan komponen tetapi HTTP masih 200. Respons streaming dapat mempertahankan status 200 saat notFound dipanggil, sesuai [dokumentasi Next.js](https://nextjs.org/docs/app/api-reference/file-conventions/not-found). Proxy yang hanya mencakup /component-preview kini menolak request sebelum render dengan status 404 dan Cache-Control private, no-store. Halaman tetap memeriksa kebijakan yang sama. Mode test/development/preview diizinkan hanya bila VERCEL_ENV bukan production.
+
+Build terbaru, tujuh uji komponen dan satu uji production lokal lulus. Pemeriksaan production memastikan alamat/port yang dituju benar, status 404, no-store dan tidak ada isi contoh. Job CI menambahkan pemeriksaan ini setelah suite browser dengan koneksi PostgreSQL uji loopback; job hosted belum dijalankan. Tidak ada koneksi atau SQL produksi.
+
 ## Pengukuran 8 Oktober 2026
 
 Command: pnpm measure:attendance sesudah build. Fixture enam kelas,60 siswa (10 per kelas), dua akun guru dengan tiga kelas utama masing-masing. Tiap sampel menyimpan10 siswa pada kelas terpilih dan benar-benar mengubah status/version; bukan no-op. Script membuat serta membersihkan DB uji tersendiri.

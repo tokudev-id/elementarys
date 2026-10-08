@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-06 di-merge; FIX-04 memperbaiki status 404 preview pada respons streaming |
-| Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
+| Status saat ini | S3-01/02/03/04/06 done; S3-05 teknis lokal siap, needs_human H-02; FIX-04 done |
+| Task berikutnya | Tidak ada task implementasi siap; S1-07/S3-05 menunggu H-02, checkpoint operasional/lapangan pending |
 
 ## 1. Aturan pencatatan
 
@@ -43,12 +43,12 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | done | e2478c7; main domain9/integration95/e2e audit+auth+teachers6 lulus |
 | [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | done | ea5ec57; main domain9/integration100/e2e49 lulus; dataset6kelas60 dan p95lokal80.18ms |
 | [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | needs_human | 7360b49 + 360156d; clone bersih domain18/integration105/e2e50; dependency S1-07/H-02 dan hosted/produksi menunggu akun/checkpoint |
-| [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | in_progress | Panduan per role, pemelihara, pilot/handover dan verifikasi UI |
+| [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | done | 37a95a3 → efbd6a2; panduan/templat/link27; main domain18/integration105/e2e51 + production404 lulus |
 
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
 | FIX-02 | Konvensi | S2-B3 | done | 08bcdb9; format assertion navigasi siswa dan pemeriksaan main lulus |
 | FIX-03 | Validasi S2 | S2-A2, S2-D1 | done | ca07a54 → a4676c3; roundtrip9kelas, integration81, seluruh e2e44 lulus |
-| FIX-04 | Validasi S3 | S3-04 | in_progress | Penolakan component-preview sebelum streaming; pemeriksaan produksi masuk CI |
+| FIX-04 | Validasi S3 | S3-04 | done | e4af234 → 19fab45; proxy scoped sebelum streaming, main e2e51 + production404/no-store lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -74,6 +74,7 @@ Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah reg
 | M1 teknis | done | S1-01 sampai S1-06 done; pemeriksaan main domain7/integration52/e2e27 |
 | M1 preview | pending | S1-07 done dan H-02 |
 | M1 guru | pending | H-03 |
+| M2 otomasi teknis | done | F-01 sampai F-08 dan mobile diuji; main domain18/integration105/e2e51 + production404 |
 | M2 fitur | pending | Slice 2, S3-01 sampai S3-04 done; F-01 sampai F-08 dan PRD 7.1 diterima |
 | M2 backup/release | pending | S2-E1, S3-05, H-04, H-05, H-07 |
 | M2 cetak/perangkat | pending | H-06 |
@@ -139,12 +140,12 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 
 | Tool/pemeriksaan | Hasil |
 |---|---|
-| Node.js | 22.23.3 dipakai melalui PATH lokal command; memenuhi syarat prompt |
+| Node.js | 24.21.0 pada Windows, diverifikasi 8 Oktober 2026; memenuhi syarat prompt |
 | pnpm | 12.4.2 |
-| Git | 2.45.2; main/worktree/commit berfungsi setelah izin dipulihkan |
-| PostgreSQL | PostgreSQL 18 via Docker pada loopback 55433; sama dengan metadata Neon project; client dump18 via wrapper Docker |
-| Docker | CLI/daemon 29.6.1; Docker Desktop dimulai dan image postgres:18 berhasil ditarik |
-| Neon CLI | 8.0.11; DEFAULT profile OAuth tersedia; metadata project rough-dawn-85427948 dibaca tanpa SQL. H-02/penautan development belum selesai |
+| Git | 2.56.0.windows.1; main/commit/merge berfungsi |
+| PostgreSQL | PostgreSQL 18 via Docker pada loopback 55433; client18.6 dan age1.3.2 portable di .local/tools untuk drill sintetis |
+| Docker | CLI/daemon 29.8.1; Compose PostgreSQL healthy |
+| Neon CLI | Tidak ditemukan pada PATH Windows; penautan development/H-02 belum selesai; metadata sesi sebelumnya tidak membuktikan akses sesi ini |
 | Vercel CLI | Tidak ditemukan pada PATH |
 | GitHub CLI | Tidak ditemukan pada PATH |
 | Batas sesi | Filesystem unrestricted; network tersedia. Larangan data nyata/SQL produksi/deploy produksi/push tetap berlaku |
@@ -360,3 +361,18 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Lima CLI (seed/migrate/bootstrap lokal dan release migrate/bootstrap) dengan APP_ENV production tanpa metadata/konfirmasi menolak sebelum write; database uji tetap user/student0 dan password tidak muncul pada output. Unit metadata guard tidak membuka koneksi cloud dan memeriksa branch/env/operation/direct/TLS/role/database mismatch. Smoke e2e mempertahankan counts siswa/sesi/audit.
 - RELEASE_RUNBOOK.md memuat provisioning development/produksi, role minimum, environment/pemilik, schema/migrasi/bootstrap di luar build, smoke, H-05, rollback/kuota serta tautan dokumentasi resmi Neon/Vercel/PostgreSQL/GitHub/age yang dibaca8Oktober2026. Manifest hanya check konsistensi; verifikasi dashboard dan persetujuan H-04 tetap wajib, tidak dianggap dibuktikan oleh file.
 - Status needs_human karena dependency S1-07 belum done: H-02 membutuhkan login Neon CLI/skills/MCP, project Vercel tertaut serta metadata/URL preview aktual. Hosted CI dan produksi tidak dijalankan; H-04/H-05/H-07 memerlukan operator/credential/data/runner/keys nyata. Tidak ada push, SQL/data produksi, branch cloud baru atau deploy. Artefak teknis selesai; gerbang rilis tetap pending. S3-06 independen dari S1-07 dan dilanjutkan.
+
+### S3-06: 8 Oktober 2026
+
+- Commit 37a95a3 di-merge --no-ff menjadi efbd6a2. Panduan guru memakai istilah kontrol untuk login/password sementara, absensi/konfirmasi/batal/retry, koreksi/history, rekap/Excel/cetak dan penanda perubahan. Panduan admin mencakup setup/tahun/kalender, siswa/lifecycle/batch/arsip, guru/akun/reset, void, ekspor dan audit. Panduan pemelihara menghubungkan backup/restore/kuota/deploy/rollback/tahun baru dengan runbook dan tabel handover. Templat pilot lima hari tetap kosong; waktu/akurasi/kelengkapan/masalah dan owner menunggu sekolah.
+- GUIDE_VERIFICATION.md memetakan langkah ke suite fitur. guides.spec menjalankan login guru → kelas → Alpa → konfirmasi → Hadir dengan alasan → history → filter rekap → unduhan Excel → halaman Cetak pada 360 px, dengan dua siswa sintetis dan pemeriksaan overflow/pageerror. OS print distub; tidak menjadi bukti printer. Assertion alasan awal salah karena paragraf memuat awalan "Alasan:"; locator diperbaiki, lalu alur lulus. Pemeriksaan tautan lokal panduan/README/runbook: 27 tujuan berkas valid.
+- Task: frozen install, format/lint/type, domain18, integration105 dan guides e2e1 lulus. Main setelah merge: frozen install, format/lint/type, domain18, integration105, build dan seluruh e2e51 lulus. Pemeriksaan tambahan produksi menemukan HTTP200 meskipun komponen sudah disembunyikan; diselesaikan sebagai FIX-04 sebelum penutupan.
+- Penerimaan bahasa/alur guru dan panduan admin sesuai UI/automation lulus; pemeliharaan lokal didukung restore drill dan guard CLI yang benar-benar dijalankan. Akun provider, Excel/printer nyata, backup operasional, pilot dan handover tetap H-02 sampai H-09. Tidak ada hasil lapangan atau penerus fiktif.
+
+### FIX-04 dan penutupan S3: 8 Oktober 2026
+
+- Commit e4af234 di-merge --no-ff menjadi 19fab45. Boundary loading S3-04 membuat notFound menghasilkan respons streaming HTTP200 walaupun isi preview tidak ada. Perilaku ini tercatat pada [dokumentasi Next.js](https://nextjs.org/docs/app/api-reference/file-conventions/not-found). Proxy hanya mencakup /component-preview dan menolak sebelum render dengan HTTP404/private,no-store; halaman dan proxy memakai kebijakan environment yang sama. URL/port test diperiksa dan production check ditambahkan ke CI dengan database sintetis lokal. Auth/API tetap memakai guard masing-masing.
+- Task: frozen install, format/lint/type, domain18, integration105, build, components e2e7 dan production404 e2e1 lulus. Main final19fab45: frozen install, format:check, lint, typecheck, domain18, integration PostgreSQL105, seluruh e2e51 (2.7menit) dan production404/no-store1 (2.9detik) lulus. Build pada task FIX identik dengan source setelah merge. Tidak ada SQL produksi atau deploy; APP_ENV production hanya mode server lokal dengan koneksi uji.
+- Sweep17 halaman ×6 viewport/orientasi, keyboard360×340, target44×44, state/dialog/focus, matriks setiap method API dan regresi S1/S2/S3 lulus. Capture terbaru audit/persiapan tahun/batch360 diperiksa langsung; kontras/palette tetap. Pencarian source tidak menemukan em dash, buzzword pemasaran atau style/handler JSX inline; ESLint dan Prettier lulus. ANTI_SLOP_REPORT.md mencatat Hard Gate/Purpose Gate/Liveliness/Craftsmanship PASS dengan bukti, arah Operate1/1/1 dan batas bukti lokal.
+- Status akhir: S3-01/02/03/04/06 done, FIX-04 done; S3-05 needs_human karena S1-07/H-02 belum selesai. CI hosted belum dijalankan. M1 teknis dan M2 otomasi teknis done; preview/penerimaan sekolah/backup-release/perangkat/pilot/handover tetap pending. Tidak ada pertanyaan scope baru; ENV-01 sudah selesai. Semua task yang dapat dikerjakan tanpa akun/data/perangkat nyata telah ditangani.
+- Lingkungan Windows diverifikasi ulang: Node24.21.0, pnpm12.4.2, Git2.56.0, Docker29.8.1 dan PostgreSQL18 healthy. Neon/Vercel/gh tidak tersedia pada PATH dan .vercel/project.json belum ada. Branch task/S3-06 dan task/FIX-04 dihapus setelah merge/checks; clone validasi S3-05 tetap tersedia untuk review. Tidak ada push atau perubahan data cloud.

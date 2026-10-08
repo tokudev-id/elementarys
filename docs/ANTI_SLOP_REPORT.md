@@ -1,21 +1,26 @@
-# Pemeriksaan anti-slop, 7 Oktober 2026
+# Pemeriksaan anti-slop, 8 Oktober 2026
 
-Scope: Slice 2 A1-A3, B1-B3, C1, D1 dan verifikasi E1, beserta regresi alur absensi S1 dan konvensi kode. Mode during sesuai instruksi sesi. Arah visual mengikuti DESIGN.md: operasi sekolah, ENERGY 1 / RHYTHM 1 / MOTION 1. H-03, H-06 dan H-07 operasional tetap pending; laporan ini tidak menyatakan rilis selesai.
+Scope: S3-01 sampai S3-06 dan FIX-04, dengan regresi Slice 1/2, konvensi kode dan panduan pengguna. Mode during sesuai instruksi sesi. Arah visual mengikuti DESIGN.md: operasi sekolah, ENERGY 1 / RHYTHM 1 / MOTION 1. Persiapan teknis S3-05 tersedia; akun cloud, perangkat, backup operasional, pilot dan handover tetap pending. Laporan ini tidak menyatakan rilis selesai.
 
-Bukti akhir pada main a4676c3: frozen install, format:check, lint, typecheck, domain 8, integration PostgreSQL 18 sebanyak 81, build/start dan seluruh e2e 44 lulus. APP_ENV=production pada server lokal dengan koneksi database uji menolak component-preview404 (satu test lulus). Capture tambahan guru/kalender/siswa/settings/setup pada 360/768/1024 (15 capture) tidak overflow; lima capture360 diperiksa langsung. Capture rekap, print, dialog absensi dan history juga diperiksa selama implementasi. Komponen diuji enam viewport/orientasi serta resize keyboard360x340. Palette teks tetap dari S1: teks12.36:1, tombol7.46:1, muted5.87:1, error9.36:1, border4.63:1; print memakai hitam/putih21:1.
+Bukti akhir pada main 19fab45: frozen install, format:check, lint, typecheck, domain 18, integration PostgreSQL 18 sebanyak 105 dan seluruh e2e 51 lulus. Build/start lulus pada kode FIX-04 yang identik setelah merge. APP_ENV=production pada server lokal dengan database uji menolak component-preview dengan HTTP 404/no-store (satu test lulus). Sweep memeriksa 17 halaman pada enam viewport/orientasi dan keyboard 360×340; semua assertion overflow/touch 44×44 lulus. Capture audit, persiapan tahun dan batch 360 px diperiksa langsung pada validasi S3-06; lima capture S3-04 juga sudah diperiksa. Palette tetap dari S1: teks 12.36:1, tombol 7.46:1, muted 5.87:1, error 9.36:1, border 4.63:1; print hitam/putih 21:1. [Validasi](VALIDATION.md) mencatat kondisi dan batas bukti lokal; [verifikasi panduan](GUIDE_VERIFICATION.md) memetakan langkah ke automation.
 
-Hard Gate PASS; Purpose Gate PASS; Liveliness PASS; Craftsmanship & Quality Locks PASS. Bukti tiap aturan ada pada tabel berikut dan log implementasi.
+- Hard Gate PASS: tidak ada overflow pada 17 halaman × 6 viewport; izin seluruh API, kontrol aktif, keyboard dan state diuji.
+- Purpose Gate PASS: font sistem, daftar sekolah, aksen hijau dan transisi status mengikuti alasan tertulis pada DESIGN.md; tanpa dekorasi tambahan.
+- Liveliness PASS: ENERGY 1 / RHYTHM 1 / MOTION 1, fokus tugas dan motif nama/kode/status konsisten pada capture yang diperiksa.
+- Craftsmanship & Quality Locks PASS: build dan 51 e2e lulus, 404 produksi terverifikasi, panduan sesuai UI dan tidak ada bukti lapangan buatan.
+
+Bukti tiap aturan ada pada tabel berikut dan [log implementasi](IMPLEMENTATION_LOG.md).
 
 ## Hard Gate
 
 | Aturan | Status dan bukti |
 |---|---|
 | R-02 | PASS: pencarian source tidak menemukan em dash pada teks antarmuka. |
-| R-03 | PASS: assertion overflow dan screenshot pada360/768/1024, portrait/landscape serta keyboard resize. |
+| R-03 | PASS: 17 halaman × 6 viewport/orientasi dan keyboard 360×340 tanpa overflow; capture diperiksa langsung. |
 | R-17 | PASS: jumlah siswa dan H/S/I/A berasal dari roster/respons server; tidak ada statistik pemasaran. |
 | R-18 | PASS: tidak ada testimonial atau avatar buatan. |
 | R-23 | PASS: identitas sekolah dibaca dari config; seed diberi label data sintetis; tidak membuat logo/aset baru. |
-| R-24 | PASS: delapan tujuan guru dan sepuluh tujuan admin aktif tersedia; Beranda/Audit yang belum siap tetap tidak ditampilkan. Navigasi dan role diperiksa domain, shell dan browser fitur. |
+| R-24 | PASS: delapan tujuan guru dan sebelas tujuan admin aktif tersedia, termasuk Audit hanya admin. Beranda yang belum siap tidak ditampilkan. Navigasi/role diperiksa shell, matriks API dan browser fitur. |
 | R-25 | PASS: semua pasangan teks utama yang digunakan melebihi4.5:1; rasio tercatat di atas. |
 | R-26 | PASS: navigasi, filter, form master, akun, radios, tanggal, koreksi, void, history, download, print, konfirmasi dan reload memiliki handler/tujuan nyata; interaksinya tercatat di bawah. |
 | R-27 | PASS: banner memuat, kosong, gagal, konflik, sesi habis dan tersimpan tersedia; kegagalan/retry diuji pada browser. |
@@ -23,7 +28,7 @@ Hard Gate PASS; Purpose Gate PASS; Liveliness PASS; Craftsmanship & Quality Lock
 | R-32 | PASS: Tab/Shift+Tab, Enter, panah radio, Escape, focus trap, focus restore dan indikator3px diuji. |
 | R-33 | PASS: fitur ditulis langsung pada source melalui patch; Prettier hanya merapikan format kode. |
 | R-34 | PASS: tema terang mengikuti DESIGN.md; tidak ada toggle atau tema kedua yang belum bekerja. |
-| R-35 | PASS: build/start dan seluruh e2e44 dijalankan pada main, termasuk flow S2 dan regresi S1; pageerror diperiksa pada simpan/rekap/koreksi dan capture tambahan. PDF dan workbook dibaca ulang. |
+| R-35 | PASS: build/start pada kode final, seluruh e2e51 dan production404 dijalankan pada main. Flow S3/guide, pageerror, sweep, PDF dan workbook diperiksa; job CI hosted masih pending akun. |
 | R-36 | PASS: tidak ada klaim keamanan, kepatuhan, performa provider atau pelanggan buatan. |
 | R-37 | PASS: arah dari DESIGN.md, daftar siswa vertikal, permukaan terang, aksen hijau dan dials1/1/1 dipakai. |
 | R-38 | PASS: nama/status/waktu berasal dari database; data pengujian diberi label sintetis. |
@@ -98,5 +103,7 @@ Hard Gate PASS; Purpose Gate PASS; Liveliness PASS; Craftsmanship & Quality Lock
 - Backup: tiga integration test memverifikasi pg_dump→age→dekripsi→pg_restore ke DB baru, evidence domain/auth/audit/export, revoke sesi/login baru, retensi30, upload failure dan exit nonzero. Runner/storage/identity/pemilik/notifikasi nyata tetap H-07.
 
 ## Komentar dan konvensi
+
+Interaksi S3 yang dijalankan: transfer/tutup/batalkan penempatan mendatang/arsip/aktifkan siswa; batch preview/save/hasil; persiapan tahun/current/arsip/laporan lama; audit filter/pagination/details; login/reset/password atomik; panduan guru sampai Excel/cetak. Race transfer/kalender/submit, retry deadlock terbatas, rollback audit/credential, timestamp mikrodetik, log allowlist, matriks seluruh method API dan smoke read-only diuji. Clone bersih S3-05 domain18/integration105/e2e50 lulus; hosted CI/preview cloud belum menjadi bukti. Templat pilot tetap kosong.
 
 PASS: komentar dekoratif pada config dihapus; komentar batasan transaksi, subprocess dan keamanan dipertahankan. Perubahan fungsional mengikuti tugas aplikasi, sedangkan pembersihan komentar terbatas pada komentar tersebut. Prettier dan ESLint memeriksa format serta larangan style/handler JSX inline.
