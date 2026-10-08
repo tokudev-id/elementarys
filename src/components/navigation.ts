@@ -9,7 +9,7 @@ export const navigation: readonly NavigationItem[] = [
   { id: "home", label: "Beranda", href: "/", roles: ["admin", "teacher"], ready: false },
   {
     id: "attendance",
-    label: "Hari ini",
+    label: "Absensi",
     href: "/attendance",
     roles: ["admin", "teacher"],
     ready: true,

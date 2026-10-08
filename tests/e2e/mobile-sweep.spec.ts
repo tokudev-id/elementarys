@@ -30,7 +30,7 @@ test("all pages reflow across portrait/landscape, touch targets and reduced keyb
     await page.getByLabel("Email", { exact: true }).fill("admin@example.test");
     await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
     await page.getByRole("button", { name: "Masuk", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     const routes = [
@@ -98,7 +98,7 @@ test("all pages reflow across portrait/landscape, touch targets and reduced keyb
       page.getByRole("heading", { name: "Halaman belum dapat dimuat", exact: true }),
     ).toBeVisible();
     await page.getByRole("link", { name: "Kembali ke hari ini", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   } finally {
     await source.end();
   }

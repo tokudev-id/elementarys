@@ -19,7 +19,7 @@ test("profile account classes reset and temporary-password journey work on mobil
   const resetPassword = "ResetSynthetic123!";
   await page.setViewportSize({ width: 360, height: 800 });
   await login(page, "admin@example.test", "SyntheticTest123!");
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/teachers");
   const create = page.getByTestId("teacher-create");
   await create.getByLabel("Nama lengkap guru", { exact: true }).fill(name);
@@ -69,7 +69,7 @@ test("profile account classes reset and temporary-password journey work on mobil
   await page.getByLabel("Password saat ini", { exact: true }).fill(resetPassword);
   await page.getByLabel("Password baru", { exact: true }).fill("ChangedSynthetic123!");
   await page.getByRole("button", { name: "Simpan password baru", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/teachers");
   await expect(page.getByRole("button", { name: "Reset password akun", exact: true })).toHaveCount(
     0,
@@ -77,7 +77,7 @@ test("profile account classes reset and temporary-password journey work on mobil
   const context = await browser.newContext();
   const admin = await context.newPage();
   await login(admin, "admin@example.test", "SyntheticTest123!");
-  await expect(admin.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(admin.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await admin.goto("/teachers");
   const adminCard = admin
     .locator('[data-testid^="teacher-"]')

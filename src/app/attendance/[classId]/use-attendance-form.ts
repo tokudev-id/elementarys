@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState, type ChangeEvent } from "react";
 import type { AttendanceView } from "@/contracts/attendance-view";
 import type { AttendanceStatus } from "@/domain/attendance";
 import type { BannerState } from "@/components/state-banner";
+import { toast } from "sonner";
 import {
   attendanceClient,
   AttendanceRequestError,
@@ -37,13 +37,11 @@ export function useAttendanceForm(
   role: "teacher" | "admin",
   client: AttendanceClient = attendanceClient,
 ) {
-  const router = useRouter();
   const busyRef = useRef(false);
   const [view, setView] = useState(initial);
   const [draft, setDraft] = useState(() => createDraft(initial));
   const [date, setDate] = useState(initial.date);
   const [pending, setPending] = useState(false);
-  const [refreshing, startRefresh] = useTransition();
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [notice, setNotice] = useState<AttendanceNotice | null>(null);
@@ -55,8 +53,7 @@ export function useAttendanceForm(
   const canEdit = canEditAttendance(view, role);
   const requiresReason = view.sessionState !== "not_recorded" || !view.isCurrentYear;
   const entries = buildEntries(view, draft);
-  const blocked =
-    pending || refreshing || loading || notice?.state === "session-expired" || conflictNeedsReload;
+  const blocked = pending || loading || notice?.state === "session-expired" || conflictNeedsReload;
 
   async function load(nextDate: string, conflict = false) {
     setLoading(true);
@@ -105,6 +102,9 @@ export function useAttendanceForm(
 
   async function changeDate(event: ChangeEvent<HTMLInputElement>) {
     const nextDate = event.currentTarget.value;
+    await selectDate(nextDate);
+  }
+  async function selectDate(nextDate: string) {
     if (!nextDate || busyRef.current) return;
     const dirty =
       reason.length > 0 ||
@@ -123,6 +123,13 @@ export function useAttendanceForm(
   function changeStatus(enrollmentId: string, status: AttendanceStatus) {
     if (!canRecord || blocked || busyRef.current) return;
     setDraft((current) => ({ ...current, [enrollmentId]: status }));
+    setNotice(null);
+  }
+  function markAllPresent() {
+    if (!canRecord || blocked || busyRef.current) return;
+    setDraft(
+      Object.fromEntries(view.students.map((student) => [student.enrollmentId, "H" as const])),
+    );
     setNotice(null);
   }
 
@@ -193,7 +200,8 @@ export function useAttendanceForm(
       setReason("");
       setReasonError(undefined);
       setNotice(null);
-      startRefresh(() => router.refresh());
+      // The receipt is authoritative; a refresh would remount the page and close newly opened menus.
+      toast.success(`Absensi ${view.className} tersimpan`);
     } catch (error) {
       if (error instanceof AttendanceRequestError && error.status === 409) {
         await load(view.date, true);
@@ -216,7 +224,7 @@ export function useAttendanceForm(
     view,
     draft,
     date,
-    pending: pending || refreshing,
+    pending,
     loading,
     confirm,
     notice,
@@ -229,6 +237,8 @@ export function useAttendanceForm(
     entries,
     blocked,
     changeDate,
+    selectDate,
+    markAllPresent,
     changeStatus,
     changeReason,
     startEditing,

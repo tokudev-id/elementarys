@@ -6,6 +6,15 @@
   gap: 16px;
   margin-bottom: 24px;
 }
+.button-link.button-link--secondary {
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--control-border);
+}
+.button-link.button-link--secondary:hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}
 .page-header h1 {
   font-size: 20px;
   line-height: 28px;

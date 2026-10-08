@@ -9,7 +9,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await page.getByLabel("Email", { exact: true }).fill("admin@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/academic-years");
   const create = page.getByTestId("year-create");
   await create.getByLabel("Nama tahun ajaran", { exact: true }).fill("Tahun Uji 2030");
@@ -72,7 +72,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto("/calendar");
   await expect(page.getByRole("button", { name: "Simpan hari rutin", exact: true })).toHaveCount(0);
   expect(

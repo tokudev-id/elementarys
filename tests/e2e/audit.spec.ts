@@ -32,7 +32,7 @@ test("admin filters, pages and opens audit snapshots while teacher is denied", a
     await page.getByLabel("Email", { exact: true }).fill("admin@example.test");
     await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
     await page.getByRole("button", { name: "Masuk", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
     await navigate(page, "Audit");
     await page.getByLabel("Jenis entitas", { exact: true }).selectOption("student");
     await page.getByLabel("ID entitas (opsional)", { exact: true }).fill(entityId);
@@ -63,11 +63,11 @@ test("admin filters, pages and opens audit snapshots while teacher is denied", a
     await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
     await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
     await page.getByRole("button", { name: "Masuk", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Audit", exact: true })).toHaveCount(0);
     expect((await page.request.get("/api/audit")).status()).toBe(403);
     await page.goto("/audit");
-    await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   } finally {
     await source.end();
   }

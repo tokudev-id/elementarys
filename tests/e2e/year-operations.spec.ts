@@ -53,7 +53,7 @@ test("year preparation links into batch, confirms activation and preserves archi
     await page.getByLabel("Email", { exact: true }).fill("admin@example.test");
     await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
     await page.getByRole("button", { name: "Masuk", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
     await page.goto(`/academic-years/rollover?yearId=${next}`);
     await expect(
       page.getByRole("button", { name: "Aktifkan tahun ini", exact: true }),

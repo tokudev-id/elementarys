@@ -56,7 +56,11 @@ try {
   await page.goto(new URL("/login", base).toString());
   for (const width of [360, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.screenshot({ path: resolve(output, `login-${width}.png`), fullPage: true });
+    await page.screenshot({
+      path: resolve(output, `login-${width}.png`),
+      fullPage: true,
+      animations: "disabled",
+    });
   }
   await page.getByLabel("Email", { exact: true }).fill("dewi.lestari@sdharapan.example");
   await page.getByLabel("Password", { exact: true }).fill(password);
@@ -72,7 +76,11 @@ try {
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         window.scrollTo(0, 0);
       });
-      await page.screenshot({ path: resolve(output, `${name}-${width}.png`), fullPage: true });
+      await page.screenshot({
+        path: resolve(output, `${name}-${width}.png`),
+        fullPage: true,
+        animations: "disabled",
+      });
     }
   }
   console.log(`Screenshot ${stage}: ${(routes.length + 1) * 2} capture sintetis.`);

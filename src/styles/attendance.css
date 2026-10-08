@@ -1,0 +1,356 @@
+.attendance-compact {
+  padding-bottom: 100px;
+}
+.attendance-compact .page-header {
+  margin-bottom: 16px;
+}
+.attendance-compact .page-header h1 {
+  font-size: 20px;
+  line-height: 28px;
+}
+.date-stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
+  gap: 4px;
+  align-items: end;
+  max-width: 380px;
+  margin-block: 16px;
+}
+.date-stepper .ui-field {
+  min-width: 0;
+}
+.date-stepper .ui-field label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.date-stepper input {
+  padding: 8px;
+  min-width: 0;
+}
+.date-stepper .ui-button {
+  padding: 8px;
+}
+.roster-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-block: 16px 8px;
+}
+.roster-toolbar .ui-field {
+  width: 100%;
+}
+.roster-filters {
+  display: flex;
+  gap: 4px;
+}
+.roster-filters .ui-button {
+  padding: 8px;
+  font-size: 13px;
+}
+.roster-filters [aria-pressed="true"] {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.roster-help {
+  color: var(--muted-foreground);
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.roster-scroll {
+  position: relative;
+  max-height: clamp(220px, calc(100dvh - 340px), 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.roster-row .status-choices {
+  position: relative;
+  min-width: 0;
+}
+.roster-scroll .roster-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 2px 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.roster-scroll .roster-row:last-child {
+  border-bottom: 0;
+}
+.roster-number {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.roster-identity {
+  min-width: 0;
+}
+.roster-identity h2 {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+.roster-identity small {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted-foreground);
+}
+.roster-row > .status-choices,
+.roster-row > .status-badge {
+  grid-column: 1 / -1;
+}
+.roster-row .status-choices legend {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.roster-row .status-choices__options {
+  max-width: none;
+  gap: 2px;
+}
+.roster-row .status-choices span {
+  min-height: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  padding: 3px;
+  font-size: 14px;
+  line-height: 18px;
+  border-color: var(--control-border);
+}
+.roster-row .status-choice-label {
+  font-size: 11px;
+  line-height: 14px;
+}
+.roster-row [data-status="H"] input:checked + span {
+  background: var(--status-h-selected);
+  color: var(--primary-foreground);
+  border-color: var(--status-h-selected);
+}
+.roster-row [data-status="S"] input:checked + span {
+  background: var(--status-s-selected);
+  color: var(--primary-foreground);
+  border-color: var(--status-s-selected);
+}
+.roster-row [data-status="I"] input:checked + span {
+  background: var(--status-i-selected);
+  color: var(--primary-foreground);
+  border-color: var(--status-i-selected);
+}
+.roster-row [data-status="A"] input:checked + span {
+  background: var(--status-a-selected);
+  color: var(--primary-foreground);
+  border-color: var(--status-a-selected);
+}
+.roster-scroll .roster-row[data-status="S"] {
+  background: var(--status-s-soft);
+  border-left-color: var(--status-s);
+}
+.roster-scroll .roster-row[data-status="I"] {
+  background: var(--status-i-soft);
+  border-left-color: var(--status-i);
+}
+.roster-scroll .roster-row[data-status="A"] {
+  background: var(--status-a-soft);
+  border-left-color: var(--status-a);
+}
+.roster-empty {
+  padding: 20px;
+  color: var(--muted-foreground);
+}
+.attendance-compact .attendance-action-bar {
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  padding: 12px 16px;
+  background: var(--surface);
+  box-shadow: var(--floating-shadow);
+}
+.live-totals {
+  font-size: 12px;
+  line-height: 18px;
+  margin: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  max-width: none;
+}
+.attendance-action-bar .ui-button {
+  width: 100%;
+}
+.attendance-back-link {
+  margin-top: 16px;
+}
+.confirmation-absence h3 {
+  margin: 16px 0 4px;
+  font-size: 14px;
+}
+.confirmation-absence ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.confirmation-absence li {
+  padding: 4px 0;
+}
+.confirmation-absence small {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.month-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.date-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0;
+}
+.date-picker-grid > small {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  padding-block: 8px;
+}
+.date-picker-grid .date-picker-day {
+  min-height: 56px;
+  min-width: 44px;
+  padding: 4px 1px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 14px;
+}
+.date-picker-day strong,
+.date-picker-day small {
+  display: block;
+}
+.date-picker-day small {
+  font-size: 10px;
+  line-height: 12px;
+}
+.date-picker-grid .date-picker-day--holiday {
+  background: var(--status-holiday-soft);
+  color: var(--status-holiday);
+}
+.date-picker-grid .date-picker-day:hover:not(:disabled) {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.attendance-class-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+.attendance-class-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  min-width: 0;
+}
+.attendance-class-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  margin: 0 0 12px;
+}
+.attendance-class-card p {
+  margin: 12px 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.attendance-class-card .button-link {
+  display: flex;
+  margin-top: 16px;
+}
+.primary-class-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.class-progress {
+  margin-block: 20px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.class-progress progress {
+  display: block;
+  width: 100%;
+  height: 8px;
+  margin-top: 8px;
+  accent-color: var(--primary);
+}
+@media (max-width: 399px) {
+  .roster-row .status-choice-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+@media (min-width: 400px) {
+  .roster-scroll .roster-row {
+    grid-template-columns: 20px minmax(0, 1fr) 192px;
+    min-height: 64px;
+  }
+  .roster-row > .status-choices,
+  .roster-row > .status-badge {
+    grid-column: auto;
+  }
+}
+@media (min-width: 640px) {
+  .attendance-class-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .roster-toolbar .ui-field {
+    width: 260px;
+  }
+  .roster-scroll .roster-row {
+    grid-template-columns: 24px minmax(0, 1fr) 204px;
+    padding-block: 6px;
+    min-height: 56px;
+  }
+  .attendance-compact .attendance-action-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .attendance-action-bar .ui-button {
+    width: auto;
+  }
+  .live-totals {
+    font-size: 14px;
+  }
+}
+@media (min-width: 1024px) {
+  .attendance-class-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -1,14 +1,24 @@
 "use client";
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
+import { MoreHorizontal, History } from "lucide-react";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Field } from "@/components/field";
+import { DateStepper } from "@/components/date-stepper";
 import { StateBanner } from "@/components/state-banner";
+import { StatusBadge } from "@/components/status-badge";
+import { PageHeader } from "@/components/page-header";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import type { AttendanceView } from "@/contracts/attendance-view";
-import { attendanceTotals } from "@/domain/attendance";
-import { formatAttendanceDate } from "./attendance-state";
+import type { CalendarView } from "@/contracts/school-master";
+import { attendanceTotals, type AttendanceStatus } from "@/domain/attendance";
+import { formatAttendanceDate, statusLabels } from "./attendance-state";
 import { AttendanceSummary, AttendanceAvailability } from "./attendance-feedback";
 import { StudentAttendanceRow } from "./student-attendance-row";
 import { useAttendanceForm } from "./use-attendance-form";
@@ -17,58 +27,145 @@ import { VoidAttendanceForm } from "./void-form";
 export function AttendanceForm({
   initial,
   role,
+  calendar,
+  nextClassHref,
 }: {
   initial: AttendanceView;
   role: "teacher" | "admin";
+  calendar?: CalendarView;
+  nextClassHref?: string;
 }) {
   const form = useAttendanceForm(initial, role);
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const rosterRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState("");
+  const [absentOnly, setAbsentOnly] = useState(false);
+  const [voidOpen, setVoidOpen] = useState(false);
   const { view, notice, pending, loading } = form;
   const totals = attendanceTotals(form.entries);
-
+  const absences = view.students.filter(
+    (student) => (form.draft[student.enrollmentId] ?? "H") !== "H",
+  );
+  const visibleStudents = view.students.filter(
+    (student) =>
+      (!absentOnly || (form.draft[student.enrollmentId] ?? "H") !== "H") &&
+      (student.fullName + " " + student.studentCode)
+        .toLocaleLowerCase("id")
+        .includes(query.trim().toLocaleLowerCase("id")),
+  );
   useEffect(() => {
     if (notice || view.sessionState !== "not_recorded") {
       feedbackRef.current?.focus({ preventScroll: true });
-      feedbackRef.current?.scrollIntoView({ block: "center" });
+      feedbackRef.current?.scrollIntoView({ block: "nearest" });
     }
   }, [notice, view.sessionState]);
-
+  function search(event: ChangeEvent<HTMLInputElement>) {
+    setQuery(event.currentTarget.value);
+  }
+  function showAll() {
+    setAbsentOnly(false);
+  }
+  function showAbsent() {
+    setAbsentOnly(true);
+  }
+  function openVoid() {
+    setVoidOpen(true);
+  }
+  function closeVoid() {
+    setVoidOpen(false);
+  }
+  function selectDate(date: string) {
+    void form.selectDate(date);
+  }
+  function keyboard(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.ctrlKey && event.key === "Enter") {
+      event.preventDefault();
+      form.openConfirmation();
+      return;
+    }
+    const target = event.target as HTMLElement;
+    if (target.matches('input:not([type="radio"]), textarea, select')) return;
+    const row = target.closest<HTMLElement>('[data-testid="student-row"]');
+    if (!row) return;
+    const rows = Array.from(
+      rosterRef.current?.querySelectorAll<HTMLElement>('[data-testid="student-row"]') ?? [],
+    );
+    const index = rows.indexOf(row);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      rows[
+        Math.max(0, Math.min(rows.length - 1, index + (event.key === "ArrowDown" ? 1 : -1)))
+      ]?.focus();
+    } else if (["H", "S", "I", "A"].includes(event.key.toUpperCase())) {
+      event.preventDefault();
+      const enrollmentId = row.dataset.enrollmentId;
+      if (enrollmentId)
+        form.changeStatus(enrollmentId, event.key.toUpperCase() as AttendanceStatus);
+    }
+  }
+  const state = !view.isSchoolDay
+    ? "Libur"
+    : view.sessionState === "submitted"
+      ? "Sudah dicatat"
+      : view.sessionState === "voided"
+        ? "Dibatalkan"
+        : "Belum dicatat";
   return (
-    <div className="attendance-form">
-      <header className="attendance-toolbar">
-        <div>
-          <h1>{view.className}</h1>
-          <p>
-            {view.students.length} siswa · {formatAttendanceDate(view.date)}
-          </p>
-        </div>
-        <Field
-          label="Tanggal absensi"
-          type="date"
-          value={form.date}
-          max={view.schoolToday}
-          disabled={pending || loading}
-          onChange={form.changeDate}
-        />
-      </header>
-      <Link href="/attendance" prefetch={false}>
-        Kembali ke hari ini
-      </Link>
-      <div className="attendance-links">
-        <Link href={`/attendance/${view.classId}/history?date=${view.date}`} prefetch={false}>
-          Riwayat absensi
-        </Link>
-        {form.canEdit && !form.editing && (
-          <Button variant="secondary" disabled={form.blocked} onClick={form.startEditing}>
-            {view.sessionState === "voided" ? "Isi ulang catatan" : "Koreksi catatan"}
-          </Button>
-        )}
-        {form.editing && (
-          <Button variant="secondary" disabled={form.blocked} onClick={form.cancelEditing}>
-            Batal koreksi
-          </Button>
-        )}
-      </div>
+    <div className="attendance-form attendance-compact" onKeyDown={keyboard}>
+      <PageHeader
+        title={view.className}
+        meta={
+          <StatusBadge tone={view.sessionState === "submitted" ? "success" : "neutral"}>
+            {state}
+          </StatusBadge>
+        }
+        description={`${view.students.length} siswa · ${formatAttendanceDate(view.date)}`}
+        actions={
+          <>
+            <Link
+              href={`/attendance/${view.classId}/history?date=${view.date}`}
+              prefetch={false}
+              className="button-link button-link--secondary"
+              aria-label="Riwayat absensi"
+            >
+              <History aria-hidden="true" size={16} />
+              Riwayat
+            </Link>
+            {form.canEdit && !form.editing && (
+              <Button variant="secondary" disabled={form.blocked} onClick={form.startEditing}>
+                {view.sessionState === "voided" ? "Isi ulang catatan" : "Koreksi catatan"}
+              </Button>
+            )}
+            {form.editing && (
+              <Button variant="secondary" disabled={form.blocked} onClick={form.cancelEditing}>
+                Batal koreksi
+              </Button>
+            )}
+            {role === "admin" && view.sessionState === "submitted" && !form.editing && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" aria-label="Aksi catatan">
+                    <MoreHorizontal aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem variant="destructive" onSelect={openVoid}>
+                    Batalkan catatan
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </>
+        }
+      />
+      <DateStepper
+        date={form.date}
+        max={view.schoolToday}
+        disabled={pending || loading}
+        onChange={form.changeDate}
+        onSelect={selectDate}
+        calendar={calendar}
+      />
       {notice && (
         <div ref={feedbackRef} tabIndex={-1}>
           <StateBanner
@@ -102,6 +199,16 @@ export function AttendanceForm({
               <StateBanner state="saved">
                 <AttendanceSummary view={view} />
               </StateBanner>
+              <div className="button-row">
+                <Link href="/attendance" className="button-link button-link--secondary">
+                  Kembali ke daftar kelas
+                </Link>
+                {nextClassHref && (
+                  <Link href={nextClassHref} className="button-link">
+                    Kelas berikutnya
+                  </Link>
+                )}
+              </div>
             </div>
           )}
           <div
@@ -110,28 +217,57 @@ export function AttendanceForm({
           >
             <AttendanceAvailability view={view} />
           </div>
-          {form.canRecord && (
-            <>
-              <p>Periksa kehadiran siswa. Tandai yang tidak hadir, lalu simpan kehadiran kelas.</p>
-              {form.requiresReason && (
-                <Field
-                  label="Alasan koreksi atau isi ulang"
-                  value={form.reason}
-                  onChange={form.changeReason}
-                  required
-                  maxLength={1000}
-                  disabled={form.blocked}
-                  error={form.reasonError}
-                  hint="Catatan sebelumnya tetap tersedia di riwayat."
-                />
-              )}
-            </>
+          {form.canRecord && form.requiresReason && (
+            <Field
+              label="Alasan koreksi"
+              aria-label="Alasan koreksi atau isi ulang"
+              value={form.reason}
+              onChange={form.changeReason}
+              required
+              maxLength={1000}
+              disabled={form.blocked}
+              error={form.reasonError}
+              hint="Catatan sebelumnya tetap tersedia di riwayat."
+            />
           )}
-          <div>
-            {view.students.map((student) => (
+          <div className="roster-toolbar">
+            {view.students.length > 15 && (
+              <Field label="Cari nama siswa" type="search" value={query} onChange={search} />
+            )}
+            <div className="roster-filters">
+              <Button variant="ghost" aria-pressed={!absentOnly} onClick={showAll}>
+                Semua ({view.students.length})
+              </Button>
+              <Button variant="ghost" aria-pressed={absentOnly} onClick={showAbsent}>
+                Tidak hadir ({absences.length})
+              </Button>
+            </div>
+            {form.canRecord && (
+              <Button variant="secondary" onClick={form.markAllPresent} disabled={form.blocked}>
+                Semua hadir
+              </Button>
+            )}
+          </div>
+          {form.canRecord && view.sessionState === "not_recorded" && (
+            <small className="roster-help">
+              Hadir disiapkan untuk siswa lain. Catatan dibuat setelah konfirmasi.
+            </small>
+          )}
+          <div
+            className="roster-scroll"
+            ref={rosterRef}
+            role="region"
+            aria-label="Daftar siswa dan status kehadiran"
+            tabIndex={0}
+          >
+            {!visibleStudents.length && (
+              <p className="roster-empty">Tidak ada siswa yang cocok dengan filter ini.</p>
+            )}
+            {visibleStudents.map((student) => (
               <StudentAttendanceRow
                 key={student.enrollmentId}
                 student={student}
+                number={view.students.indexOf(student) + 1}
                 value={form.draft[student.enrollmentId] ?? null}
                 editable={form.canRecord}
                 disabled={form.blocked}
@@ -139,23 +275,34 @@ export function AttendanceForm({
               />
             ))}
           </div>
-          {role === "admin" && view.sessionState === "submitted" && !form.editing && (
-            <VoidAttendanceForm key={`${view.date}:${view.sessionVersion}`} view={view} />
-          )}
         </>
       )}
       {form.canRecord && (
-        <div className="attendance-actions">
+        <div className="attendance-actions attendance-action-bar">
+          <p className="live-totals">
+            <span className="status-text--H">{totals.H} Hadir</span> ·{" "}
+            <span className="status-text--S">{totals.S} Sakit</span> ·{" "}
+            <span className="status-text--I">{totals.I} Izin</span> ·{" "}
+            <span className="status-text--A">{totals.A} Alpa</span>
+          </p>
           <Button pending={pending} disabled={form.blocked} onClick={form.openConfirmation}>
-            {pending ? "Sedang menyimpan…" : "Simpan, siswa lainnya hadir"}
+            {pending ? "Sedang menyimpan…" : "Simpan absensi"}
           </Button>
         </div>
       )}
+      <Link
+        href="/attendance"
+        prefetch={false}
+        className="attendance-back-link"
+        aria-label="Kembali ke hari ini"
+      >
+        Kembali ke daftar kelas
+      </Link>
       <Dialog
         open={form.confirm}
         closeDisabled={pending}
         onClose={form.closeConfirmation}
-        title={`Konfirmasi absensi ${view.className}`}
+        title={`Simpan absensi ${view.className}?`}
         variant="sheet"
         actions={
           <>
@@ -163,31 +310,43 @@ export function AttendanceForm({
               Batal
             </Button>
             <Button pending={pending} onClick={form.save}>
-              {pending ? "Sedang menyimpan…" : "Konfirmasi simpan"}
+              {pending ? "Sedang menyimpan…" : "Simpan"}
             </Button>
           </>
         }
       >
         <p>{formatAttendanceDate(view.date)}</p>
-        {form.requiresReason && <p>Alasan: {form.reason.trim()}</p>}
         <div className="attendance-totals">
-          <p>
-            <strong>{totals.H}</strong> Hadir
-          </p>
-          <p>
-            <strong>{totals.S}</strong> Sakit
-          </p>
-          <p>
-            <strong>{totals.I}</strong> Izin
-          </p>
-          <p>
-            <strong>{totals.A}</strong> Alpa
-          </p>
+          {(["H", "S", "I", "A"] as const).map((status) => (
+            <p key={status} className={`status-text--${status}`}>
+              <strong>{totals[status]}</strong> {statusLabels[status]}
+            </p>
+          ))}
         </div>
-        <p>
-          Anda memastikan siswa yang belum ditandai hadir. Setelah dikonfirmasi, seluruh kelas
-          disimpan bersama.
-        </p>
+        {(["S", "I", "A"] as const).map((status) => {
+          const students = absences.filter(
+            (student) => form.draft[student.enrollmentId] === status,
+          );
+          return students.length ? (
+            <section className="confirmation-absence" key={status}>
+              <h3>
+                <StatusBadge tone={status}>{statusLabels[status]}</StatusBadge>
+              </h3>
+              <ul>
+                {students.map((student) => (
+                  <li key={student.enrollmentId}>
+                    <strong>{student.fullName}</strong> <small>{student.studentCode}</small>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null;
+        })}
+        <p>Siswa lain dicatat Hadir.</p>
+        {form.requiresReason && <p>Alasan: {form.reason.trim()}</p>}
+      </Dialog>
+      <Dialog open={voidOpen} onClose={closeVoid} title="Batalkan catatan?" variant="sheet">
+        <VoidAttendanceForm key={`${view.date}:${view.sessionVersion}`} view={view} />
       </Dialog>
     </div>
   );

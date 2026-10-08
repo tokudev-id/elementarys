@@ -65,11 +65,11 @@ async function login(page: Page, email: string) {
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Hari ini", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
 }
 const url = (classId: string) => `/attendance/${classId}?date=${workingDate}`;
 const saveButton = (page: Page) =>
-  page.getByRole("button", { name: "Simpan, siswa lainnya hadir", exact: true });
+  page.getByRole("button", { name: "Simpan absensi", exact: true });
 async function choose(page: Page) {
   const rows = page.getByTestId("student-row");
   await expect(rows).toHaveCount(10);
@@ -91,7 +91,9 @@ for (const width of [360, 768, 1024]) {
     await page.setViewportSize({ width, height: 800 });
     await login(page, data.email);
     await page.goto(url(data.classId));
-    await expect(page.getByText("Belum dicatat", { exact: true })).toHaveCount(10);
+    await expect(page.getByTestId("student-row").locator('input[value="H"]:checked')).toHaveCount(
+      10,
+    );
     const start = Date.now();
     await choose(page);
     await expectNoPageOverflow(page);
@@ -101,8 +103,11 @@ for (const width of [360, 768, 1024]) {
     await expect(dialog.getByText("1 Sakit", { exact: true })).toBeVisible();
     await expect(dialog.getByText("1 Izin", { exact: true })).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.screenshot({ path: `test-results/attendance-confirm-${width}.png` });
-    await dialog.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+    await page.screenshot({
+      path: `test-results/attendance-confirm-${width}.png`,
+      animations: "disabled",
+    });
+    await dialog.getByRole("button", { name: "Simpan", exact: true }).click();
     await expect(page.getByText("Tersimpan", { exact: true })).toBeInViewport();
     await expect(
       page.getByText("8 Hadir · 1 Sakit · 1 Izin · 0 Alpa", { exact: true }),
@@ -146,7 +151,7 @@ test("jaringan gagal dan rotasi mempertahankan pilihan, retry menyimpan", async 
     route.abort("failed"),
   );
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Belum mendapat konfirmasi" }),
   ).toBeVisible();
@@ -156,7 +161,7 @@ test("jaringan gagal dan rotasi mempertahankan pilihan, retry menyimpan", async 
   expect(await counts(data.classId)).toBe(0);
   await page.unroute(`**/api/classes/${data.classId}/attendance/${workingDate}`);
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 });
 test("konflik dua akun memuat status dan pencatat terbaru", async ({ page, browser }) => {
@@ -170,10 +175,10 @@ test("konflik dua akun memuat status dan pencatat terbaru", async ({ page, brows
   await login(second, other.email);
   await second.goto(url(data.classId));
   await saveButton(second).click();
-  await second.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await second.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(second.getByText("Tersimpan", { exact: true })).toBeVisible();
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Catatan terbaru sudah dimuat" }),
   ).toBeVisible();
@@ -195,14 +200,14 @@ test("respons hilang setelah commit dapat dicoba ulang tanpa duplikasi", async (
     await route.abort("failed");
   });
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Belum mendapat konfirmasi" }),
   ).toBeVisible();
   expect(await counts(data.classId)).toBe(10);
   await page.unroute(`**/api/classes/${data.classId}/attendance/${workingDate}`);
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
   const session = (
     await source.query("SELECT id,version FROM attendance_sessions WHERE class_id=$1", [
@@ -225,7 +230,7 @@ test("sesi habis mempertahankan pilihan dan tidak mengklaim tersimpan", async ({
   await choose(page);
   await source.query('DELETE FROM "session" WHERE user_id=$1', [data.userId]);
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Sesi telah habis" })).toBeVisible();
   await expect(
     page.getByTestId("student-row").nth(0).getByRole("radio", { name: "S Sakit" }),
@@ -252,7 +257,7 @@ test("konflik roster dengan reload gagal mengunci simpan sampai data terbaru dim
   );
   await page.route(`**/api/classes/${data.classId}/attendance?*`, (route) => route.abort("failed"));
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "data terbaru belum dapat dimuat" }),
   ).toBeVisible();
@@ -266,7 +271,7 @@ test("konflik roster dengan reload gagal mengunci simpan sampai data terbaru dim
   await expect(page.getByTestId("student-row")).toHaveCount(11);
   await expect(saveButton(page)).toBeEnabled();
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
   expect(await counts(data.classId)).toBe(11);
 });
@@ -282,7 +287,7 @@ test("respons simpan tidak valid tidak mengklaim berhasil dan tetap dapat dicoba
     route.fulfill({ status: 200, contentType: "application/json", body: "{}" }),
   );
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Belum mendapat konfirmasi" }),
   ).toBeVisible();
@@ -293,7 +298,7 @@ test("respons simpan tidak valid tidak mengklaim berhasil dan tetap dapat dicoba
   expect(await counts(data.classId)).toBe(0);
   await page.unroute(`**/api/classes/${data.classId}/attendance/${workingDate}`);
   await saveButton(page).click();
-  await page.getByRole("button", { name: "Konfirmasi simpan", exact: true }).click();
+  await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 });
 
@@ -313,7 +318,7 @@ test("ganti tanggal menghormati batal, memuat hari terlewat, dan keyboard membat
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByLabel("Tanggal absensi", { exact: true }).fill(previousDate);
   await expect(page).toHaveURL(new RegExp(`date=${previousDate}`));
-  await expect(page.getByText("Belum dicatat", { exact: true })).toHaveCount(10);
+  await expect(page.getByTestId("student-row").locator('input[value="H"]:checked')).toHaveCount(10);
   const trigger = saveButton(page);
   await trigger.focus();
   await page.keyboard.press("Enter");

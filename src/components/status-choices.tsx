@@ -30,7 +30,7 @@ export function StatusChoices({
       <legend>{legend}</legend>
       <div className="status-choices__options">
         {attendanceChoices.map((choice) => (
-          <label key={choice.value}>
+          <label key={choice.value} data-status={choice.value}>
             <input
               type="radio"
               name={name}
@@ -39,7 +39,8 @@ export function StatusChoices({
               onChange={changeStatus}
             />
             <span>
-              <strong>{choice.value}</strong> {choice.label}
+              <strong>{choice.value}</strong>{" "}
+              <small className="status-choice-label">{choice.label}</small>
             </span>
           </label>
         ))}

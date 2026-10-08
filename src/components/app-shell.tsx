@@ -115,11 +115,13 @@ export function AppShell({
   school,
   actor,
   currentPath = "/",
+  breadcrumbs,
   children,
 }: {
   school: { name: string; date: string; timezone: string } | null;
   actor: { name: string; role: "admin" | "teacher" };
   currentPath?: string;
+  breadcrumbs?: { label: string; href?: string }[];
   children: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -187,7 +189,21 @@ export function AppShell({
               )}
             </div>
             <nav className="shell-breadcrumb" aria-label="Breadcrumb">
-              <span>{page?.label ?? "Sekolah"}</span>
+              {breadcrumbs ? (
+                <ol>
+                  {breadcrumbs.map((item, index) => (
+                    <li key={`${item.label}:${index}`}>
+                      {item.href ? (
+                        <Link href={item.href}>{item.label}</Link>
+                      ) : (
+                        <span>{item.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <span>{page?.label ?? "Sekolah"}</span>
+              )}
             </nav>
             {synthetic && <span className="data-label">Data uji</span>}
           </div>
@@ -216,7 +232,6 @@ export function AppShell({
                   <span className="user-initials" aria-hidden="true">
                     {initials}
                   </span>
-                  <span className="user-name">{actor.name}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="user-menu-content">
