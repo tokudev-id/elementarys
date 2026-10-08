@@ -438,12 +438,12 @@
     left: 72px;
   }
 }
-@media (max-width: 639px) {
-  .app-toaster {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-  }
+.app-toaster[data-sonner-toaster] {
+  width: min(356px, calc(100vw - 32px));
+}
+.app-toaster [data-sonner-toast] {
+  width: 100%;
+  font-family: var(--font-inter), Arial, sans-serif;
 }
 @media (prefers-reduced-motion: reduce) {
   *,
