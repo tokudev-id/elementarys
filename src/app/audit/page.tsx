@@ -2,48 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { auditActors, auditQuery, getAuditPage } from "@/server/queries/audit";
-import { auditEntities, type AuditEvent } from "@/contracts/audit";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
-import { StateBanner } from "@/components/state-banner";
-import { Field } from "@/components/field";
-import { SelectField } from "@/components/select-field";
-import { Button } from "@/components/button";
-import { formatSchoolTime } from "@/domain/format";
-const labels: Record<(typeof auditEntities)[number], string> = {
-  school_config: "Sekolah",
-  academic_year: "Tahun/kalender",
-  class: "Kelas",
-  student: "Siswa/penempatan",
-  teacher: "Guru",
-  user: "Akun/akses",
-  attendance_session: "Absensi",
-  report_export: "Ekspor laporan",
-};
-function EventDetails({ event, timezone }: { event: AuditEvent; timezone: string }) {
-  return (
-    <li>
-      <h2>{event.action}</h2>
-      <p>
-        {event.actor.name} ·{" "}
-        <time dateTime={event.occurredAt}>{formatSchoolTime(event.occurredAt, timezone)}</time>
-      </p>
-      <p>
-        {labels[event.entityType as keyof typeof labels] ?? event.entityType} · {event.entityId}
-      </p>
-      {event.reason && <p>Alasan: {event.reason}</p>}
-      <details>
-        <summary>Nilai sebelum dan sesudah</summary>
-        <h3>Sebelum</h3>
-        <pre className="audit-json">{JSON.stringify(event.before, null, 2)}</pre>
-        <h3>Sesudah</h3>
-        <pre className="audit-json">{JSON.stringify(event.after, null, 2)}</pre>
-        {event.requestId && <p>ID pemeriksaan: {event.requestId}</p>}
-      </details>
-    </li>
-  );
-}
+import { PageHeader } from "@/components/page-header";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+import { AuditClient } from "./audit-client";
+
 export default async function Audit({
   searchParams,
 }: {
@@ -51,75 +21,91 @@ export default async function Audit({
 }) {
   const actor = await requirePageActor();
   if (actor.role !== "admin") redirect("/attendance");
+
   const values = await searchParams;
   const query = new URLSearchParams(
     Object.entries(values).filter(
       (entry): entry is [string, string] => typeof entry[1] === "string",
     ),
   );
+
   const result = await getAuditPage(auditQuery(new URL(`http://localhost/audit?${query}`)), actor);
   const actors = await auditActors(actor);
   const settings = await getSchoolSettings();
-  const next = new URLSearchParams(query);
-  if (result.nextCursor) next.set("cursor", result.nextCursor);
+
+  const prevQuery = new URLSearchParams(query);
+  prevQuery.delete("cursor");
+  if (result.prevCursor) prevQuery.set("before", result.prevCursor);
+
+  const nextQuery = new URLSearchParams(query);
+  nextQuery.delete("before");
+  if (result.nextCursor) nextQuery.set("cursor", result.nextCursor);
+
+  const resetQuery = new URLSearchParams(query);
+  resetQuery.delete("cursor");
+  resetQuery.delete("before");
+
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/audit">
-      <h1>Audit administratif</h1>
-      <p>
-        Perubahan dan ekspor yang tercatat. Waktu mengikuti zona sekolah; tanggal akhir filter ikut
-        dihitung.
-      </p>
-      <form className="filter-form" action="/audit">
-        <SelectField label="Jenis entitas" name="entityType" defaultValue={values.entityType ?? ""}>
-          <option value="">Semua entitas</option>
-          {auditEntities.map((entity) => (
-            <option key={entity} value={entity}>
-              {labels[entity]}
-            </option>
-          ))}
-        </SelectField>
-        <Field
-          label="ID entitas (opsional)"
-          name="entityId"
-          defaultValue={values.entityId}
-          maxLength={128}
-        />
-        <SelectField label="Pelaku perubahan" name="actorId" defaultValue={values.actorId ?? ""}>
-          <option value="">Semua pelaku</option>
-          {actors.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </SelectField>
-        <Field label="Dari tanggal" name="from" type="date" defaultValue={values.from} />
-        <Field label="Sampai tanggal" name="to" type="date" defaultValue={values.to} />
-        <SelectField label="Catatan per halaman" name="limit" defaultValue={values.limit ?? "20"}>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </SelectField>
-        <Button type="submit">Tampilkan audit</Button>
-      </form>
-      {!result.events.length ? (
-        <StateBanner state="empty">Tidak ada catatan yang cocok dengan filter ini.</StateBanner>
-      ) : (
-        <ul className="resource-list audit-list">
-          {result.events.map((event) => (
-            <EventDetails key={event.id} event={event} timezone={result.timezone} />
-          ))}
-        </ul>
-      )}
-      <nav className="attendance-links" aria-label="Halaman audit">
-        {values.cursor && (
-          <Link
-            href={`/audit?${new URLSearchParams(Object.entries(values).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[0] !== "cursor"))}`}
-          >
-            Kembali ke halaman pertama
-          </Link>
-        )}
-        {result.nextCursor && <Link href={`/audit?${next}`}>Catatan berikutnya</Link>}
-      </nav>
+      <PageHeader
+        title="Audit administratif"
+        description="Perubahan dan ekspor yang tercatat. Waktu mengikuti zona waktu sekolah."
+      />
+      <DataCard id="daftar">
+        <DataCardHeader title="Catatan audit" count={result.events.length} />
+        <DataCardContent>
+          <AuditClient
+            events={result.events}
+            timezone={result.timezone}
+            actors={actors}
+            values={values}
+          />
+        </DataCardContent>
+        <DataCardFooter>
+          <nav className="data-table-pagination" aria-label="Navigasi audit">
+            <div className="data-table-pagination__info">
+              {values.cursor || values.before ? (
+                <Link
+                  href={`/audit?${resetQuery}`}
+                  className="data-table-pagination__reset"
+                >
+                  Kembali ke awal
+                </Link>
+              ) : (
+                <span>Menampilkan {result.events.length} catatan</span>
+              )}
+            </div>
+            <div className="data-table-pagination__nav">
+              {result.prevCursor ? (
+                <Link
+                  href={`/audit?${prevQuery}`}
+                  className="pagination-btn pagination-btn--prev"
+                  aria-label="Halaman sebelumnya"
+                >
+                  ‹ Sebelumnya
+                </Link>
+              ) : (
+                <span className="pagination-btn pagination-btn--disabled" aria-disabled="true">
+                  ‹ Sebelumnya
+                </span>
+              )}
+              {result.nextCursor ? (
+                <Link
+                  href={`/audit?${nextQuery}`}
+                  className="pagination-btn pagination-btn--next"
+                  aria-label="Halaman berikutnya"
+                >
+                  Berikutnya ›
+                </Link>
+              ) : (
+                <span className="pagination-btn pagination-btn--disabled" aria-disabled="true">
+                  Berikutnya ›
+                </span>
+              )}
+            </div>
+          </nav>
+        </DataCardFooter>
+      </DataCard>
     </AppShell>
   );
 }

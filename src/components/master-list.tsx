@@ -84,6 +84,7 @@ export function MasterList({
   items,
   columns,
   label,
+  nameHeader = "Nama",
   currentSort,
   sortableColumns,
   query,
@@ -91,6 +92,7 @@ export function MasterList({
   items: MasterRow[];
   columns: MasterColumn[];
   label: string;
+  nameHeader?: string;
   currentSort?: string;
   sortableColumns?: Record<string, string>;
   query?: Record<string, string>;
@@ -98,7 +100,7 @@ export function MasterList({
   const definitions: ColumnDef<MasterRow>[] = [
     {
       id: "name",
-      header: "Nama",
+      header: nameHeader,
       cell: (context) => (
         <Link href={context.row.original.href} className="master-name">
           {context.row.original.title}

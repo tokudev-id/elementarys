@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 mulai |
-| Task berikutnya | UI-F3 → UI-F4 → UI-R3 → UI-R4 |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 mulai |
+| Task berikutnya | UI-F4 → UI-R3 → UI-R4 |
 
 ## 1. Aturan pencatatan
 
@@ -53,8 +53,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-R2 | Redesign master | UI-R1 teknis | done | b26c76f; dilanjutkan oleh UI-F1–F4; baseline600rows128.07ms |
 | UI-F1 | Shell, card, kit tabel | UI-R2 | done | a147c1a; DataCard master/detail, sticky topbar 1440/768/390 (y===0), pagination card, mobile filter sheet; domain 18/integration 109/e2e redesign-f1+enrollments+students+mobile-sweep+shell lulus |
 | UI-F2 | Fondasi validasi form | UI-F1 | done | 0dc5e84; useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary, skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
-| UI-F3 | Daftar & pagination | UI-F2 | in_progress | Tahun ajaran, audit, history absensi, unlinked accounts, grid kelas |
-| UI-F4 | Dialog/page form & absensi | UI-F2 | not_started | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi) |
+| UI-F3 | Daftar & pagination | UI-F2 | done | DataCard tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; integration 111, domain 18, e2e redesign-f3 lulus |
+| UI-F4 | Dialog/page form & absensi | UI-F2 | in_progress | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi) |
 | UI-R3 | Redesign rekap/beranda | UI-F3, UI-F4 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin (/) |
 | UI-R4 | Polish & verifikasi akhir | UI-R3 | not_started | Lighthouse, audit CSS lama, kriteria penerimaan brief bagian 8 |
 
@@ -414,5 +414,21 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - Seluruh rangkaian E2E terkait (`auth.spec.ts`, `school-master.spec.ts`, `students.spec.ts`, `redesign-f1.spec.ts`) lulus 100%.
   - 18 domain tests dan 111 integration tests (`vitest.config.ts` dikonfigurasi `fileParallelism: false`) lulus 100%.
   - Screenshot bukti validasi tersimpan di `docs/redesign/after/UI-F2/`: `login-error.png`, `siswa-form-error.png`, dan `kelas-form-error.png`.
+
+### UI-F3: 8 Oktober 2026
+
+- Halaman daftar dan pagination tersisa dimigrasikan:
+  - **Tahun Ajaran** (`/academic-years`): Dimigrasi ke `DataCard` dengan `MasterList` 5 kolom (Label, Mulai, Selesai, Status, Aksi), filter status (Aktif, Berjalan, Diarsipkan), pencarian didebounce, dan `DataTablePagination` server (25 item/halaman). Tombol primary "Tambah tahun ajaran" mengarah ke halaman mandiri `/academic-years/new` dan secondary "Persiapan tahun berikutnya" ke `/academic-years/rollover`. Form inline dihilangkan dari halaman list (memperbaiki Finding A10).
+  - Halaman form mandiri: `/academic-years/new` dan `/academic-years/[yearId]/edit` dibangun dengan breadcrumb dan `AcademicYearForm` yang terintegrasi dengan `useZodForm`, `noValidate: true`, fokus/scroll ke error pertama, skema Zod `academicYearInputSchema` (format `YYYY/YYYY` tahun berurutan, durasi ≤ 400 hari).
+  - **Audit Log** (`/audit`): Dimigrasi ke `DataCard` dengan cursor pagination dua arah (`cursor` / `before`) dan navigasi "‹ Sebelumnya", "Berikutnya ›", serta "Kembali ke awal". Filter mobile menggunakan `MobileFilterSheet`. Klik baris audit membuka slide-over sheet diff data (`audit-diff-sheet`) dengan tampilan visual field `sebelum` vs `sesudah` dan accordion data mentah JSON (`audit-raw-json`).
+  - **Riwayat Absensi & Akun Tanpa Profil**: Riwayat sesi absensi (`/attendance/[classId]/history`) dibungkus `DataCard` dengan pagination 10 sesi per halaman dan tombol kembali ke catatan. Daftar akun tanpa profil (`/teachers`) dilengkapi tabel responsif dan kartu mobile.
+  - **Placement History, Rollover, Promote Wizard, & Attendance Grid**: Tab riwayat penempatan siswa (`/students/[studentId]`) dibungkus `DataCard` dengan pagination 10 item per halaman. Daftar kelas persiapan rollover (`/academic-years/rollover`) dibungkus `DataCard` dengan pagination 25 kelas. Wizard kenaikan kelas (`/students/promote`) Step 2 pemilihan kandidat dibungkus `DataCard` dengan pagination 25 siswa per halaman, tombol "Pilih semua di semua halaman", dan pengiriman mutasi batch. Grid kelas absensi (`/attendance`) dibungkus `DataCard` dengan pagination jika kelas > 12.
+- Pengujian & Bukti:
+  - Turbopack production build sukses.
+  - Domain tests: 18 passed (100%).
+  - Integration tests: 111 passed (100%).
+  - E2E: `tests/e2e/redesign-f3.spec.ts` lulus 100% (pagination tahun ajaran, halaman form terpisah, sheet diff audit visual & JSON mentah, riwayat absensi, rollover card, promote wizard multi-page selection, dan attendance card).
+  - Bukti screenshot tersimpan di `docs/redesign/after/UI-F3/`: `tahun-ajaran-list.png`, `tahun-ajaran-new.png`, `audit-list-diff.png`, `attendance-history.png`, dan `promote-wizard.png`.
+
 
 

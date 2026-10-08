@@ -4,6 +4,7 @@ import type { Actor } from "../auth/guards";
 import { pool, transaction } from "../db/pool";
 import { parseInput } from "../../contracts/attendance";
 import {
+  academicYearListSchema,
   classListSchema,
   studentListSchema,
   teacherListSchema,
@@ -15,6 +16,7 @@ import {
 import { schoolToday } from "../../domain/calendar";
 import { DomainError } from "../../domain/errors";
 import type { SchoolAccount } from "../../contracts/teachers";
+import type { AcademicYearView } from "../../contracts/school-master";
 import { assertAdmin } from "../mutations";
 
 async function snapshot<T>(source: Pool, work: (client: PoolClient) => Promise<T>) {
@@ -163,4 +165,28 @@ export async function listUnlinkedAccounts(
       input,
     ),
   );
+}
+
+export async function listAcademicYearsPage(
+  filter: unknown = {},
+  source: Pool = pool,
+): Promise<PageResult<AcademicYearView>> {
+  const input = parseInput(academicYearListSchema, filter);
+  return snapshot(source, async (client) => {
+    const from = `FROM academic_years WHERE ($1='' OR label ILIKE $1) AND ($2='all' OR ($2='active' AND archived_at IS NULL) OR ($2='archived' AND archived_at IS NOT NULL))`;
+    const columns =
+      'id,label,starts_on::text "startsOn",ends_on_exclusive::text "endsOnExclusive",is_current "isCurrent",version,archived_at::text "archivedAt"';
+    const orders = {
+      startsOn: "is_current DESC,starts_on DESC,id",
+      label: "label,id",
+    };
+    return pageQuery<AcademicYearView>(
+      client,
+      from,
+      columns,
+      [input.q ? `%${input.q}%` : "", input.status],
+      orders[input.sort],
+      input,
+    );
+  });
 }

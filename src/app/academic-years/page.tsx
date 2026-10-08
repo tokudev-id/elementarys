@@ -1,45 +1,139 @@
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
-import { listAcademicYears } from "@/server/services/school-master";
+import { listAcademicYearsPage } from "@/server/services/school-master";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
-import { StateBanner } from "@/components/state-banner";
-import { AcademicYearForm } from "./form";
-export default async function AcademicYears() {
+import { PageHeader } from "@/components/page-header";
+import { MasterList, type MasterRow } from "@/components/master-list";
+import { ListFilters } from "@/components/list-filters";
+import { SelectField } from "@/components/select-field";
+import { EmptyState } from "@/components/empty-state";
+import { DataTablePagination } from "@/components/data-table-pagination";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardToolbar,
+  DataCardContent,
+  DataCardFooter,
+} from "@/components/data-card";
+import { parseInput } from "@/contracts/attendance";
+import { academicYearListSchema } from "@/contracts/lists";
+
+export default async function AcademicYears({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const actor = await requirePageActor();
-  const years = await listAcademicYears();
-  const settings = await getSchoolSettings();
+  const selected = await searchParams;
+  const filter = parseInput(academicYearListSchema, {
+    page: selected.page,
+    pageSize: selected.pageSize,
+    q: selected.q,
+    status: selected.status,
+    sort: selected.sort,
+  });
+
+  const [settings, years] = await Promise.all([
+    getSchoolSettings(),
+    listAcademicYearsPage(filter),
+  ]);
+
+  const query = Object.fromEntries(
+    Object.entries(filter)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [key, String(value)]),
+  );
+
+  const rows: MasterRow[] = years.items.map((year) => ({
+    id: year.id,
+    title: year.label,
+    href: actor.role === "admin" ? `/academic-years/${year.id}/edit` : "/academic-years",
+    meta: `${year.startsOn} – ${year.endsOnExclusive}`,
+    status: {
+      label: year.isCurrent ? "Aktif" : year.archivedAt ? "Diarsipkan" : "Tidak aktif",
+      tone: year.isCurrent ? "success" : year.archivedAt ? "neutral" : "neutral",
+    },
+    cells: {
+      startsOn: year.startsOn,
+      endsOnExclusive: year.endsOnExclusive,
+    },
+    actions: [
+      ...(actor.role === "admin"
+        ? [{ label: "Ubah", href: `/academic-years/${year.id}/edit` }]
+        : []),
+    ],
+  }));
+
+  const activeFilterCount = filter.status && filter.status !== "all" ? 1 : 0;
+
   return (
-    <AppShell school={schoolIdentity(settings)} actor={actor} currentPath="/academic-years">
-      <h1>Tahun ajaran</h1>
-      {actor.role === "admin" && (
-        <p>
-          <Link href="/academic-years/rollover">Persiapan tahun ajaran baru</Link>
-        </p>
-      )}
-      {actor.role === "admin" && (
-        <section>
-          <h2>Tambah periode</h2>
-          <AcademicYearForm />
-        </section>
-      )}
-      {!years.length && (
-        <StateBanner state="empty">
-          Belum ada tahun ajaran. Admin perlu menambahkan periode belajar.
-        </StateBanner>
-      )}
-      {years.map((year) => (
-        <section className="resource-section" key={year.id}>
-          <h2>{year.label}</h2>
-          <p>
-            {year.startsOn} sampai sebelum {year.endsOnExclusive} ·{" "}
-            {year.isCurrent ? "Aktif" : "Tidak aktif"}
-            {year.archivedAt ? " · Diarsipkan" : ""}
-          </p>
-          {actor.role === "admin" && <AcademicYearForm current={year} />}
-        </section>
-      ))}
+    <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/academic-years">
+      <PageHeader
+        title="Tahun ajaran"
+        description="Periode kalender dan tahun ajaran sekolah."
+        primaryAction={
+          actor.role === "admin" ? (
+            <Link className="button-link" href="/academic-years/new">
+              Tambah tahun ajaran
+            </Link>
+          ) : undefined
+        }
+        secondaryActions={
+          actor.role === "admin"
+            ? [{ label: "Persiapan tahun berikutnya", href: "/academic-years/rollover" }]
+            : undefined
+        }
+      />
+      <DataCard id="daftar">
+        <DataCardHeader title="Daftar tahun ajaran" count={years.total} />
+        <DataCardToolbar>
+          <ListFilters
+            q={filter.q}
+            query={query}
+            searchLabel="Cari tahun ajaran"
+            activeFilterCount={activeFilterCount}
+          >
+            <SelectField label="Status" name="status" defaultValue={filter.status}>
+              <option value="all">Semua</option>
+              <option value="active">Aktif</option>
+              <option value="archived">Diarsipkan</option>
+            </SelectField>
+          </ListFilters>
+        </DataCardToolbar>
+        <DataCardContent>
+          {rows.length ? (
+            <MasterList
+              items={rows}
+              label="Daftar tahun ajaran"
+              nameHeader="Label"
+              currentSort={filter.sort}
+              sortableColumns={{ label: "label", startsOn: "startsOn" }}
+              query={query}
+              columns={[
+                { key: "startsOn", label: "Mulai" },
+                { key: "endsOnExclusive", label: "Selesai" },
+              ]}
+            />
+          ) : (
+            <EmptyState
+              title="Tidak ada tahun ajaran yang cocok"
+              description="Periksa filter atau tambahkan tahun ajaran baru."
+              action={
+                actor.role === "admin" ? (
+                  <Link href="/academic-years/new">Tambah tahun ajaran</Link>
+                ) : (
+                  <Link href="/academic-years">Reset filter</Link>
+                )
+              }
+            />
+          )}
+        </DataCardContent>
+        <DataCardFooter>
+          <DataTablePagination {...years} pathname="/academic-years" query={query} />
+        </DataCardFooter>
+      </DataCard>
     </AppShell>
   );
 }
