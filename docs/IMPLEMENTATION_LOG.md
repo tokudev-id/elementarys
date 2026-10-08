@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | S3-03 selesai; S3-04 mulai; S1-07 cloud menunggu H-02 |
+| Status saat ini | S3-04 selesai; persiapan lokal S3-05 berjalan; S1-07 cloud menunggu H-02 |
 | Task berikutnya | S3-01 sampai S3-06 sesuai permintaan sesi; checkpoint lapangan tetap pending |
 
 ## 1. Aturan pencatatan
@@ -41,8 +41,8 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [S3-01](IMPLEMENTATION_PLAN.md#s3-01-lifecycle-siswa-dan-riwayat-penempatan) | Inti | S2-B3, S2-D1 | done | d20e60f; main integration88, lifecycle+students e2e2 lulus |
 | [S3-02](IMPLEMENTATION_PLAN.md#s3-02-operasi-tahun-ajaran-dan-arsip) | Inti | S3-01 | done | d731e9e; integration91, year+lifecycle+school-master e2e3 lulus |
 | [S3-03](IMPLEMENTATION_PLAN.md#s3-03-audit-administratif-dan-kebersihan-log) | Audit | S2-A2, S2-A3, S2-B3, S2-C1, S2-D1 | done | e2478c7; main domain9/integration95/e2e audit+auth+teachers6 lulus |
-| [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | in_progress | Matriks izin, states, semua viewport dan dataset60 |
-| [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | not_started | Menunggu S3-04 |
+| [S3-04](IMPLEMENTATION_PLAN.md#s3-04-hardening-akses-ketahanan-dan-mobile) | Inti | S3-02, S3-03, S2-E1 | done | ea5ec57; main domain9/integration100/e2e49 lulus; dataset6kelas60 dan p95lokal80.18ms |
+| [S3-05](IMPLEMENTATION_PLAN.md#s3-05-kesiapan-rilis-teknis) | Ops | S3-04, S1-07 | in_progress | Persiapan CI/runbook lokal sesuai permintaan; dependency preview S1-07 tetap pending H-02 |
 | [S3-06](IMPLEMENTATION_PLAN.md#s3-06-panduan-pengguna-dan-bahan-handover) | Docs | S3-04 | not_started | Menunggu S3-04 |
 
 | FIX-01 | Tooling | S1-01 | done | ac60cbb; build membersihkan .next, CSS generated transparent terverifikasi |
@@ -343,3 +343,11 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
 - Ganti password pribadi kini memakai adapter Better Auth terikat client transaksi, revalidasi actor, flag/revoke/audit commit bersama. SQL trigger menggagalkan audit membuktikan credential/session/flag rollback. Bootstrap lokal diserialkan, akun/tautan/audit satu transaksi dan output kegagalan generik; kondisi react-server diteruskan langsung via node --import tsx, karena CLI tsx subprocess menghilangkan flag pada percobaan awal.
 - Task/main: frozen install, format:check, lint, typecheck, domain9, integration95, build/start serta audit+auth+teachers e2e6 lulus. Test43 audit dengan timestamp mikrodetik sama tidak hilang/duplikat saat pagination; range mengikuti timezone dan before/after/actor/export nyata. Dua request paralel mempunyai metadata terisolasi, payload sensitif sintetis tidak tercetak. Browser filter, next/first page, details, empty, role dan360/768/1024 lulus.
 - Setelah jeda sesi Docker daemon belum aktif (ECONNREFUSED seluruh suite, tidak ada test yang dijalankan). Docker Desktop diaktifkan hidden dan Compose PostgreSQL18 healthy; seluruh checks diulang lulus. Anti-slop empat gate PASS pada scope audit: JSON diagnostik untuk keputusan admin, data actual, kontrol aktif, log bukan klaim keamanan produksi. H-02/H-03/H-06/H-07 tetap pending.
+
+### S3-04: 8 Oktober 2026
+
+- Commit ea5ec57 di-merge --no-ff. Matriks role/session mencakup setiap method API yang diekspor (inventory file dibandingkan test), anonim/guru/admin/password sementara/nonaktif/banned/expired, unduhan/print receipt/history/audit serta plugin auth terlarang. Root loading/error dengan retry/kembali, timeout client20detik, preview receipt lengkap, touch44 termasuk links dan checkboxaccent hijau. Fixture pilot6kelas60siswa, tiga kelas utama per guru, sequence tidak memotong digit di atas9999.
+- Task/main: frozen install, format:check, lint, typecheck, domain9, integration100, build/start dan seluruh e2e49 lulus. Uji nyata transfer→submit menghasilkan ROSTER_CHANGED, submit→transfer HISTORICAL_ROSTER_CHANGE, calendar/transfer/submit serial menolak draft tanpa records. Retry deadlock SQL nyata sukses setelah retry atau berhenti pada attempt ketiga; callback test hanya DI internal, tidak dapat dikirim lewat schema HTTP.
+- Sweep17halaman ×6viewport/orientasi, target44, viewportkeyboard360×340, states/error boundary/retry/kembali, serta dialog/tab/escape/rotasi/draft/retry lulus. Suite penuh pertama kehabisan180detik karena ukuran ribuan elemen dibaca RPC satu per satu setelah fixture bertambah; helper dibatch evaluateAll tanpa mengurangi assertion. Task ulang49lulus2.8menit, main49lulus3.7menit; sweep28.5/42.7detik. Lima capture360 tambahan diperiksa langsung; field/tombol tidak terpotong dan halaman tidak overflow.
+- pnpm measure:attendance: fixture6kelas60,10siswa per simpan,10status-changing samples; login page682.22ms, login354.62ms, first attendance359.14ms, warm p95 80.18ms. VALIDATION.md memuat seluruh sampel/kondisi. Ini proses Next baru dengan PostgreSQL tetap aktif, bukan provider cold start, waktu guru atau bukti jaringan/perangkat sekolah.
+- Anti-slop empat gate PASS untuk scope hardening; M2 otomasi teknis terpenuhi, penerimaan lapangan H-03/H-06 tetap pending. Pemeriksaan alat S3-05: Neon/Vercel/gh CLI tidak ditemukan, .vercel/project.json tidak ada, tidak ada MCP Neon/Vercel; remote origin ada tetapi tidak ada izin push. Dokumen resmi provider dibaca untuk menyiapkan runbook, tanpa mengakses akun/data produksi. S3-05 dipersiapkan lokal sesuai permintaan eksplisit, sementara dependency preview S1-07 tetap needs_human.
