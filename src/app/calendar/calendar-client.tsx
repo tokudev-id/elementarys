@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import type {
@@ -9,6 +8,8 @@ import type {
   AcademicYearView,
   CalendarAbsenceRecord,
 } from "@/contracts/school-master";
+import { monthDates } from "@/domain/report";
+import { resolveSchoolDay } from "@/domain/calendar";
 import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
@@ -101,6 +102,20 @@ export function CalendarClient({
   const [overrideReason, setOverrideReason] = useState("");
   const [overrideError, setOverrideError] = useState<string | null>(null);
 
+  // Track version from mutation responses in ref (only accessed inside event handlers)
+  const savedVersionRef = useRef<number | null>(null);
+
+  const [currentWeekdays, setCurrentWeekdays] = useState(calendar.weekdays);
+  const [currentOverrides, setCurrentOverrides] = useState(calendar.overrides);
+
+  // Active month state for instant navigation without full-page server reloads
+  const [activeMonth, setActiveMonth] = useState(calendar.month);
+  const [absencesCache, setAbsencesCache] = useState<Record<string, CalendarAbsenceRecord[]>>(
+    () => ({
+      [calendar.month]: absences,
+    }),
+  );
+
   // Selected weekdays for editing
   const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(calendar.weekdays);
 
@@ -109,33 +124,95 @@ export function CalendarClient({
   const pageSize = 10;
 
   const currentTodayMonth = (todayDate ?? new Date().toISOString().slice(0, 10)).slice(0, 7);
-  const prevMonth = getAdjacentMonth(calendar.month, -1);
-  const nextMonth = getAdjacentMonth(calendar.month, 1);
+  const prevMonth = getAdjacentMonth(activeMonth, -1);
+  const nextMonth = getAdjacentMonth(activeMonth, 1);
+
+  // Calculate days for active month (instant in client)
+  const activeDays = useMemo(() => {
+    if (activeMonth === calendar.month) {
+      return calendar.days;
+    }
+    const dates = monthDates(activeMonth);
+    return dates.map((date) => {
+      const info = resolveSchoolDay(date, {
+        startsOn: calendar.year.startsOn,
+        endsOnExclusive: calendar.year.endsOnExclusive,
+        weekdays: currentWeekdays,
+        overrides: currentOverrides,
+      });
+      return {
+        date,
+        inYear: info.inYear,
+        isSchoolDay: info.isSchoolDay,
+        reason: info.reason,
+      };
+    });
+  }, [
+    activeMonth,
+    calendar.month,
+    calendar.days,
+    calendar.year.startsOn,
+    calendar.year.endsOnExclusive,
+    currentWeekdays,
+    currentOverrides,
+  ]);
+
+  const activeAbsences = useMemo(
+    () => absencesCache[activeMonth] ?? (activeMonth === calendar.month ? absences : []),
+    [absencesCache, activeMonth, calendar.month, absences],
+  );
 
   // Group absences by date
   const absencesByDate = useMemo(() => {
     const map = new Map<string, CalendarAbsenceRecord[]>();
-    for (const record of absences) {
+    for (const record of activeAbsences) {
       const list = map.get(record.date) ?? [];
       list.push(record);
       map.set(record.date, list);
     }
     return map;
-  }, [absences]);
+  }, [activeAbsences]);
 
-  const selectedDayInfo = calendar.days.find((d) => d.date === selectedDate);
-  const selectedOverride = calendar.overrides.find((o) => o.date === selectedDate);
+  const selectedDayInfo = activeDays.find((d) => d.date === selectedDate);
+  const selectedOverride = currentOverrides.find((o) => o.date === selectedDate);
   const selectedDateAbsences = absencesByDate.get(selectedDate) ?? [];
 
   const schoolDaysCount = useMemo(
-    () => calendar.days.filter((d) => d.inYear && d.isSchoolDay).length,
-    [calendar.days],
+    () => activeDays.filter((d) => d.inYear && d.isSchoolDay).length,
+    [activeDays],
   );
   const holidayDaysCount = useMemo(
-    () => calendar.days.filter((d) => d.inYear && !d.isSchoolDay).length,
-    [calendar.days],
+    () => activeDays.filter((d) => d.inYear && !d.isSchoolDay).length,
+    [activeDays],
   );
-  const totalMonthAbsences = absences.length;
+  const totalMonthAbsences = activeAbsences.length;
+
+  const navigateToMonth = useCallback(
+    (targetMonth: string) => {
+      setActiveMonth(targetMonth);
+      if (todayDate && todayDate.startsWith(targetMonth)) {
+        setSelectedDate(todayDate);
+      } else {
+        setSelectedDate(`${targetMonth}-01`);
+      }
+      if (!absencesCache[targetMonth]) {
+        fetch(`/api/calendar/absences?yearId=${calendar.year.id}&month=${targetMonth}`)
+          .then((res) => (res.ok ? res.json() : []))
+          .then((data: CalendarAbsenceRecord[]) => {
+            setAbsencesCache((prev) => ({ ...prev, [targetMonth]: data }));
+          })
+          .catch(() => {});
+      }
+      if (typeof window !== "undefined") {
+        window.history.replaceState(
+          null,
+          "",
+          `/calendar?yearId=${selectedYearId}&month=${targetMonth}`,
+        );
+      }
+    },
+    [calendar.year.id, selectedYearId, todayDate, absencesCache],
+  );
 
   function handleYearChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const yearId = event.currentTarget.value;
@@ -153,22 +230,39 @@ export function CalendarClient({
     );
   }
 
+  function handleGoToToday() {
+    navigateToMonth(currentTodayMonth);
+  }
+
+  function handleGoToPrevMonth() {
+    navigateToMonth(prevMonth);
+  }
+
+  function handleGoToNextMonth() {
+    navigateToMonth(nextMonth);
+  }
+
   async function handleSaveWeekdays(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (selectedWeekdays.length === 0) return;
+    const expectedVersion = savedVersionRef.current ?? calendar.year.version;
     const ok = await mutation.mutate({
-      expectedVersion: calendar.year.version,
+      expectedVersion,
       weekdays: selectedWeekdays,
-      overrides: calendar.overrides,
+      overrides: currentOverrides,
     });
     if (ok) {
+      if (typeof (ok as { version?: number }).version === "number") {
+        savedVersionRef.current = (ok as { version: number }).version;
+      }
+      setCurrentWeekdays(selectedWeekdays);
       setWeekdaysOpen(false);
     }
   }
 
   function openAddOverride(defaultDate?: string) {
-    const target = defaultDate ?? calendar.days[0]?.date ?? calendar.year.startsOn;
-    const existing = calendar.overrides.find((o) => o.date === target);
+    const target = defaultDate ?? activeDays[0]?.date ?? calendar.year.startsOn;
+    const existing = currentOverrides.find((o) => o.date === target);
     setOverrideDate(target);
     setOverrideIsSchoolDay(existing ? existing.isSchoolDay : false);
     setOverrideReason(existing ? existing.reason : "");
@@ -188,7 +282,7 @@ export function CalendarClient({
     }
 
     const nextOverrides = [
-      ...calendar.overrides.filter((o) => o.date !== overrideDate),
+      ...currentOverrides.filter((o) => o.date !== overrideDate),
       {
         date: overrideDate,
         isSchoolDay: overrideIsSchoolDay,
@@ -196,31 +290,40 @@ export function CalendarClient({
       },
     ].sort((a, b) => a.date.localeCompare(b.date));
 
+    const expectedVersion = savedVersionRef.current ?? calendar.year.version;
     const ok = await mutation.mutate({
-      expectedVersion: calendar.year.version,
-      weekdays: calendar.weekdays,
+      expectedVersion,
+      weekdays: currentWeekdays,
       overrides: nextOverrides,
     });
     if (ok) {
+      if (typeof (ok as { version?: number }).version === "number") {
+        savedVersionRef.current = (ok as { version: number }).version;
+      }
+      setCurrentOverrides(nextOverrides);
       setOverrideOpen(false);
     }
   }
 
   async function handleConfirmDelete() {
     if (!deleteDate) return;
-    const nextOverrides = calendar.overrides.filter((o) => o.date !== deleteDate);
+    const nextOverrides = currentOverrides.filter((o) => o.date !== deleteDate);
+    const expectedVersion = savedVersionRef.current ?? calendar.year.version;
     const ok = await mutation.mutate({
-      expectedVersion: calendar.year.version,
-      weekdays: calendar.weekdays,
+      expectedVersion,
+      weekdays: currentWeekdays,
       overrides: nextOverrides,
     });
     if (ok) {
+      if (typeof (ok as { version?: number }).version === "number") {
+        savedVersionRef.current = (ok as { version: number }).version;
+      }
+      setCurrentOverrides(nextOverrides);
       setDeleteDate(null);
     }
   }
 
   // Overrides in this calendar
-  const currentOverrides = calendar.overrides;
   const totalPages = Math.max(1, Math.ceil(currentOverrides.length / pageSize));
   function handlePrevPage() {
     setPage((p) => Math.max(1, p - 1));
@@ -309,29 +412,28 @@ export function CalendarClient({
           <DataCard className="calendar-month-card">
             <DataCardHeader>
               <div className="calendar-header-row">
-                <h2 className="calendar-month-title">{formatMonthLabel(calendar.month)}</h2>
+                <h2 className="calendar-month-title">{formatMonthLabel(activeMonth)}</h2>
                 <div className="calendar-month-actions">
-                  <Link
-                    href={`/calendar?yearId=${selectedYearId}&month=${currentTodayMonth}`}
-                    className="calendar-today-btn"
-                  >
+                  <button type="button" onClick={handleGoToToday} className="calendar-today-btn">
                     Hari ini
-                  </Link>
+                  </button>
                   <div className="calendar-arrow-group">
-                    <Link
-                      href={`/calendar?yearId=${selectedYearId}&month=${prevMonth}`}
+                    <button
+                      type="button"
+                      onClick={handleGoToPrevMonth}
                       className="calendar-nav-btn"
                       aria-label="Bulan sebelumnya"
                     >
                       <ChevronLeft size={18} aria-hidden="true" />
-                    </Link>
-                    <Link
-                      href={`/calendar?yearId=${selectedYearId}&month=${nextMonth}`}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleGoToNextMonth}
                       className="calendar-nav-btn"
                       aria-label="Bulan berikutnya"
                     >
                       <ChevronRight size={18} aria-hidden="true" />
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -350,16 +452,16 @@ export function CalendarClient({
                 {Array.from(
                   {
                     length: new Date(
-                      `${calendar.days[0]?.date ?? "2026-01-01"}T12:00:00Z`,
+                      `${activeDays[0]?.date ?? `${activeMonth}-01`}T12:00:00Z`,
                     ).getUTCDay(),
                   },
                   (_, index) => (
                     <li key={`blank-${index}`} className="calendar-blank" aria-hidden="true" />
                   ),
                 )}
-                {calendar.days.map((day) => {
+                {activeDays.map((day) => {
                   const dayNum = Number(day.date.slice(-2));
-                  const override = calendar.overrides.find((o) => o.date === day.date);
+                  const override = currentOverrides.find((o) => o.date === day.date);
                   const isSelected = day.date === selectedDate;
                   const isToday = day.date === todayDate;
                   const dayAbsences = absencesByDate.get(day.date) ?? [];
@@ -497,27 +599,33 @@ export function CalendarClient({
                       : "Hari libur sekolah."}
                   </p>
                 ) : (
-                  <div className="data-table calendar-info-table">
-                    <table>
+                  <div className="calendar-info-table-wrapper">
+                    <table className="calendar-info-table">
                       <thead>
                         <tr>
                           <th scope="col" className="col-idx">
                             #
                           </th>
-                          <th scope="col">Nama</th>
-                          <th scope="col">Kelas</th>
-                          <th scope="col">Keterangan</th>
+                          <th scope="col" className="col-name">
+                            Nama
+                          </th>
+                          <th scope="col" className="col-class">
+                            Kelas
+                          </th>
+                          <th scope="col" className="col-status">
+                            Keterangan
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedDateAbsences.map((rec: CalendarAbsenceRecord, index: number) => (
                           <tr key={`${rec.studentName}-${rec.className}-${index}`}>
-                            <td className="col-idx">{index + 1}.</td>
-                            <td>
+                            <td className="col-idx">{index + 1}</td>
+                            <td className="col-name" title={rec.studentName}>
                               <strong>{rec.studentName}</strong>
                             </td>
-                            <td>{rec.className}</td>
-                            <td>
+                            <td className="col-class">{rec.className}</td>
+                            <td className="col-status">
                               <StatusBadge
                                 tone={
                                   rec.status === "S"
@@ -586,11 +694,12 @@ export function CalendarClient({
             ) : undefined
           }
         />
-        <DataCardContent>
+        <DataCardContent className="calendar-weekdays-content">
           <div className="weekday-chips">
             {calendar.weekdays.length > 0 ? (
               calendar.weekdays.map((d) => (
                 <span key={d} className="weekday-chip">
+                  <span className="weekday-chip-dot" aria-hidden="true" />
                   {dayNames[d]}
                 </span>
               ))
@@ -600,6 +709,13 @@ export function CalendarClient({
               </p>
             )}
           </div>
+          {calendar.weekdays.length > 0 && (
+            <p className="calendar-weekdays-help">
+              {calendar.weekdays.length} hari belajar per minggu (
+              {calendar.weekdays.map((d) => dayNames[d]).join(", ")}). Hari lainnya otomatis
+              diperlakukan sebagai libur mingguan.
+            </p>
+          )}
         </DataCardContent>
       </DataCard>
 

@@ -8,10 +8,7 @@ import type {
   ClassInput,
   ClassPatchInput,
 } from "@/contracts/school-master";
-import {
-  classInputSchema,
-  classPatchSchema,
-} from "@/contracts/school-master";
+import { classInputSchema, classPatchSchema } from "@/contracts/school-master";
 import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
 import { SwitchField } from "@/components/switch-field";
@@ -67,7 +64,9 @@ export function ClassForm({
     [years],
   );
 
-  const schema = (current ? classPatchSchema : classInputSchema) as ZodLikeSchema<ClassPatchInput | ClassInput>;
+  const schema = (current ? classPatchSchema : classInputSchema) as ZodLikeSchema<
+    ClassPatchInput | ClassInput
+  >;
 
   const form = useZodForm<ClassPatchInput | ClassInput, ClassFormValues>(schema, {
     defaultValues: current
@@ -134,13 +133,23 @@ export function ClassForm({
     >
       <FormErrorSummary errors={form.errorSummary} />
       <fieldset disabled={mutation.pending} key={current?.version ?? "create"}>
-        <FormSection title="Data kelas">
-          <Field
-            label="Nama kelas"
-            required
-            maxLength={100}
-            {...form.register("name")}
-          />
+        <FormSection
+          title="Data kelas"
+          actions={
+            redirect ? (
+              <FormActions
+                cancelHref={current ? `/classes/${current.id}` : "/classes"}
+                pending={mutation.pending}
+                label={current ? "Simpan kelas" : "Tambah kelas"}
+              />
+            ) : (
+              <Button type="submit" pending={mutation.pending}>
+                {current ? "Simpan kelas" : "Tambah kelas"}
+              </Button>
+            )
+          }
+        >
+          <Field label="Nama kelas" required maxLength={100} {...form.register("name")} />
           <SelectField
             label="Tingkat kelas"
             required
@@ -174,8 +183,7 @@ export function ClassForm({
           </SelectField>
           {current?.hasEnrollment && (
             <p>
-              Tingkat dan tahun ajaran dikunci karena kelas sudah memiliki riwayat
-              penempatan siswa.
+              Tingkat dan tahun ajaran dikunci karena kelas sudah memiliki riwayat penempatan siswa.
             </p>
           )}
           {current && (
@@ -187,17 +195,6 @@ export function ClassForm({
             />
           )}
         </FormSection>
-        {redirect ? (
-          <FormActions
-            cancelHref={current ? `/classes/${current.id}` : "/classes"}
-            pending={mutation.pending}
-            label={current ? "Simpan kelas" : "Tambah kelas"}
-          />
-        ) : (
-          <Button type="submit" pending={mutation.pending}>
-            {current ? "Simpan kelas" : "Tambah kelas"}
-          </Button>
-        )}
       </fieldset>
       <MutationFeedback mutation={mutation} />
       <ConfirmDialog
@@ -210,8 +207,8 @@ export function ClassForm({
         label="Arsipkan kelas"
       >
         <p>
-          Kelas yang diarsipkan tidak dapat menerima penempatan siswa baru atau
-          pencatatan absensi baru. Riwayat dan rekap tetap dapat dibaca.
+          Kelas yang diarsipkan tidak dapat menerima penempatan siswa baru atau pencatatan absensi
+          baru. Riwayat dan rekap tetap dapat dibaca.
         </p>
       </ConfirmDialog>
     </form>

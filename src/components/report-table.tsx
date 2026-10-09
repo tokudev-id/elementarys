@@ -79,8 +79,10 @@ export function ReportTable({
               const dayInitial = dayNames[d.getUTCDay()];
               return (
                 <th key={date} scope="col" className="col-date">
-                  <span className="text-muted block text-xs">{dayInitial}</span>
-                  <span>{Number(date.slice(-2))}</span>
+                  <span className="col-date__day text-muted-foreground block text-xs">
+                    {dayInitial}
+                  </span>
+                  <span className="col-date__num">{Number(date.slice(-2))}</span>
                 </th>
               );
             })}
@@ -90,8 +92,10 @@ export function ReportTable({
           {report.students.map((student) => (
             <tr key={student.studentId}>
               <th scope="row" className="col-student">
-                {student.fullName}
-                <small className="text-muted">{student.studentCode}</small>
+                <span className="col-student__name">{student.fullName}</span>
+                <small className="col-student__code text-muted-foreground block text-xs">
+                  {student.studentCode}
+                </small>
               </th>
               <td className="col-total cell-status-h">{student.totals.H}</td>
               <td className="col-total cell-status-s">{student.totals.S}</td>
@@ -119,51 +123,48 @@ export function ReportTable({
   );
 }
 
-export function ReportClassView({
-  report,
-  dates,
-}: {
-  report: ClassReport;
-  dates: string[];
-}) {
+export function ReportClassView({ report, dates }: { report: ClassReport; dates: string[] }) {
   return (
     <div className="report-class-view">
       {/* Mobile totals card list */}
       <div className="report-mobile-totals mb-4">
         <ul className="report-totals-list">
-            {report.students.map((student) => (
-              <li key={student.studentId}>
-                <div className="report-mobile-card">
-                  <div className="report-mobile-card__header">
-                    <strong>{student.fullName}</strong>
-                    <small className="text-muted">{student.studentCode}</small>
-                  </div>
-                  <div className="report-mobile-card__totals">
-                    <span className="report-mobile-badge bg-emerald-100 text-emerald-800">
-                      {student.totals.H} Hadir
-                    </span>
-                    <span className="report-mobile-badge bg-amber-100 text-amber-800">
-                      {student.totals.S} Sakit
-                    </span>
-                    <span className="report-mobile-badge bg-sky-100 text-sky-800">
-                      {student.totals.I} Izin
-                    </span>
-                    <span className="report-mobile-badge bg-rose-100 text-rose-800">
-                      {student.totals.A} Alpa
-                    </span>
-                  </div>
-                  {student.missingDays > 0 ? (
-                    <small className="text-destructive">
-                      {student.missingDays} belum dicatat dari {student.expectedDaysToDate} hari wajib.
-                    </small>
-                  ) : (
-                    <small className="text-muted">Semua hari wajib tercatat lengkap.</small>
-                  )}
+          {report.students.map((student) => (
+            <li key={student.studentId}>
+              <div className="report-mobile-card">
+                <div className="report-mobile-card__header">
+                  <strong>{student.fullName}</strong>
+                  <small className="text-muted-foreground">{student.studentCode}</small>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+                <div className="report-mobile-card__totals">
+                  <span className="report-mobile-badge bg-emerald-100 text-emerald-800">
+                    {student.totals.H} Hadir
+                  </span>
+                  <span className="report-mobile-badge bg-amber-100 text-amber-800">
+                    {student.totals.S} Sakit
+                  </span>
+                  <span className="report-mobile-badge bg-sky-100 text-sky-800">
+                    {student.totals.I} Izin
+                  </span>
+                  <span className="report-mobile-badge bg-rose-100 text-rose-800">
+                    {student.totals.A} Alpa
+                  </span>
+                </div>
+                {student.missingDays > 0 ? (
+                  <small className="text-destructive">
+                    {student.missingDays} belum dicatat dari {student.expectedDaysToDate} hari
+                    wajib.
+                  </small>
+                ) : (
+                  <small className="text-muted-foreground">
+                    Semua hari wajib tercatat lengkap.
+                  </small>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {/* Grid table (horizontal scrollable on mobile, sticky columns on desktop) */}
       <ReportTable report={report} dates={dates} />

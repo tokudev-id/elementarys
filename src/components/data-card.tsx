@@ -5,13 +5,20 @@ export function DataCard({
   children,
   className,
   id,
+  "aria-label": ariaLabel,
 }: {
   children: ReactNode;
   className?: string;
   id?: string;
+  "aria-label"?: string;
 }) {
   return (
-    <section id={id} className={cn("data-card", className)} data-slot="data-card">
+    <section
+      id={id}
+      className={cn("data-card", className)}
+      aria-label={ariaLabel}
+      data-slot="data-card"
+    >
       {children}
     </section>
   );
@@ -19,12 +26,14 @@ export function DataCard({
 
 export function DataCardHeader({
   title,
+  description,
   count,
   actions,
   children,
   className,
 }: {
   title?: string;
+  description?: ReactNode;
   count?: number;
   actions?: ReactNode;
   children?: ReactNode;
@@ -41,6 +50,7 @@ export function DataCardHeader({
               {title}
               {count !== undefined && <span className="data-card__count"> · {count}</span>}
             </h2>
+            {description && <p className="data-card__description">{description}</p>}
           </div>
           {actions && <div className="data-card__actions">{actions}</div>}
         </>

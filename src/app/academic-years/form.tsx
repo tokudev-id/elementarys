@@ -115,7 +115,16 @@ export function AcademicYearForm({
     >
       <FormErrorSummary errors={form.errorSummary} />
       <fieldset disabled={mutation.pending} key={current?.version ?? "create"}>
-        <FormSection title="Periode tahun ajaran">
+        <FormSection
+          title="Periode tahun ajaran"
+          actions={
+            <FormActions
+              cancelHref="/academic-years"
+              pending={mutation.pending}
+              label={current ? "Simpan tahun ajaran" : "Tambah tahun ajaran"}
+            />
+          }
+        >
           <Field
             label="Nama tahun ajaran"
             required
@@ -123,12 +132,7 @@ export function AcademicYearForm({
             placeholder="contoh: 2026/2027"
             {...form.register("label")}
           />
-          <Field
-            label="Tanggal mulai"
-            type="date"
-            required
-            {...form.register("startsOn")}
-          />
+          <Field label="Tanggal mulai" type="date" required {...form.register("startsOn")} />
           <Field
             label="Berakhir sebelum tanggal"
             type="date"
@@ -151,11 +155,6 @@ export function AcademicYearForm({
             />
           )}
         </FormSection>
-        <FormActions
-          cancelHref="/academic-years"
-          pending={mutation.pending}
-          label={current ? "Simpan tahun ajaran" : "Tambah tahun ajaran"}
-        />
       </fieldset>
       <MutationFeedback mutation={mutation} />
     </form>
