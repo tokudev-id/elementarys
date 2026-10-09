@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
-import type { CalendarView, AcademicYearView } from "@/contracts/school-master";
+import type {
+  CalendarView,
+  AcademicYearView,
+  CalendarAbsenceRecord,
+} from "@/contracts/school-master";
 import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
@@ -34,19 +38,57 @@ function getAdjacentMonth(monthStr: string, offset: number) {
   return date.toISOString().slice(0, 7);
 }
 
+function formatFullDate(dateStr: string) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
+function statusLabel(status: "S" | "I" | "A") {
+  switch (status) {
+    case "S":
+      return "Sakit";
+    case "I":
+      return "Izin";
+    case "A":
+      return "Alpa";
+    default:
+      return status;
+  }
+}
+
 export function CalendarClient({
   calendar,
   isAdmin,
   years,
   selectedYearId,
+  absences = [],
+  todayDate,
 }: {
   calendar: CalendarView;
   isAdmin: boolean;
   years: AcademicYearView[];
   selectedYearId: string;
+  absences?: CalendarAbsenceRecord[];
+  todayDate?: string;
 }) {
   const router = useRouter();
   const mutation = useMutation(`/api/academic-years/${calendar.year.id}/calendar`, "PUT");
+
+  // Selected date for Information panel
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    if (todayDate && todayDate.startsWith(calendar.month)) {
+      return todayDate;
+    }
+    return calendar.days[0]?.date ?? "";
+  });
 
   // Dialog states
   const [weekdaysOpen, setWeekdaysOpen] = useState(false);
@@ -66,8 +108,34 @@ export function CalendarClient({
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  const currentTodayMonth = (todayDate ?? new Date().toISOString().slice(0, 10)).slice(0, 7);
   const prevMonth = getAdjacentMonth(calendar.month, -1);
   const nextMonth = getAdjacentMonth(calendar.month, 1);
+
+  // Group absences by date
+  const absencesByDate = useMemo(() => {
+    const map = new Map<string, CalendarAbsenceRecord[]>();
+    for (const record of absences) {
+      const list = map.get(record.date) ?? [];
+      list.push(record);
+      map.set(record.date, list);
+    }
+    return map;
+  }, [absences]);
+
+  const selectedDayInfo = calendar.days.find((d) => d.date === selectedDate);
+  const selectedOverride = calendar.overrides.find((o) => o.date === selectedDate);
+  const selectedDateAbsences = absencesByDate.get(selectedDate) ?? [];
+
+  const schoolDaysCount = useMemo(
+    () => calendar.days.filter((d) => d.inYear && d.isSchoolDay).length,
+    [calendar.days],
+  );
+  const holidayDaysCount = useMemo(
+    () => calendar.days.filter((d) => d.inYear && !d.isSchoolDay).length,
+    [calendar.days],
+  );
+  const totalMonthAbsences = absences.length;
 
   function handleYearChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const yearId = event.currentTarget.value;
@@ -164,12 +232,16 @@ export function CalendarClient({
   function handleDayClick(event: React.MouseEvent<HTMLButtonElement>) {
     const targetDate = event.currentTarget.getAttribute("data-date");
     if (targetDate) {
-      openAddOverride(targetDate);
+      setSelectedDate(targetDate);
     }
   }
 
   function handleOpenAddOverride() {
     openAddOverride();
+  }
+
+  function handleOpenOverrideForSelectedDate() {
+    openAddOverride(selectedDate);
   }
 
   function handleDeleteClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -230,154 +302,277 @@ export function CalendarClient({
 
       <MutationFeedback mutation={mutation} />
 
-      {/* Card 1: Grid Bulan */}
-      <DataCard className="calendar-month-card">
-        <DataCardHeader>
-          <div className="calendar-header-row">
-            <div className="calendar-month-stepper">
-              <Link
-                href={`/calendar?yearId=${selectedYearId}&month=${prevMonth}`}
-                className="calendar-stepper-btn"
-                aria-label="Bulan sebelumnya"
-              >
-                <ChevronLeft size={18} aria-hidden="true" />
-              </Link>
-              <h2 className="calendar-stepper-label">{formatMonthLabel(calendar.month)}</h2>
-              <Link
-                href={`/calendar?yearId=${selectedYearId}&month=${nextMonth}`}
-                className="calendar-stepper-btn"
-                aria-label="Bulan berikutnya"
-              >
-                <ChevronRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
+      {/* Split Section: Kalender di Kiri, Informasi di Kanan */}
+      <div className="calendar-split-layout">
+        {/* Kolom Kiri: Grid Kalender */}
+        <div className="calendar-split-main">
+          <DataCard className="calendar-month-card">
+            <DataCardHeader>
+              <div className="calendar-header-row">
+                <h2 className="calendar-month-title">{formatMonthLabel(calendar.month)}</h2>
+                <div className="calendar-month-actions">
+                  <Link
+                    href={`/calendar?yearId=${selectedYearId}&month=${currentTodayMonth}`}
+                    className="calendar-today-btn"
+                  >
+                    Hari ini
+                  </Link>
+                  <div className="calendar-arrow-group">
+                    <Link
+                      href={`/calendar?yearId=${selectedYearId}&month=${prevMonth}`}
+                      className="calendar-nav-btn"
+                      aria-label="Bulan sebelumnya"
+                    >
+                      <ChevronLeft size={18} aria-hidden="true" />
+                    </Link>
+                    <Link
+                      href={`/calendar?yearId=${selectedYearId}&month=${nextMonth}`}
+                      className="calendar-nav-btn"
+                      aria-label="Bulan berikutnya"
+                    >
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </DataCardHeader>
+            <DataCardContent className="calendar-card-content">
+              <ol className="calendar-grid">
+                {dayNames.map((day, idx) => (
+                  <li
+                    key={day}
+                    className={`calendar-weekday ${idx === 0 ? "calendar-weekday--sunday" : ""}`}
+                  >
+                    <span className="weekday-full">{day}</span>
+                    <span className="weekday-short">{dayShortNames[idx]}</span>
+                  </li>
+                ))}
+                {Array.from(
+                  {
+                    length: new Date(
+                      `${calendar.days[0]?.date ?? "2026-01-01"}T12:00:00Z`,
+                    ).getUTCDay(),
+                  },
+                  (_, index) => (
+                    <li key={`blank-${index}`} className="calendar-blank" aria-hidden="true" />
+                  ),
+                )}
+                {calendar.days.map((day) => {
+                  const dayNum = Number(day.date.slice(-2));
+                  const override = calendar.overrides.find((o) => o.date === day.date);
+                  const isSelected = day.date === selectedDate;
+                  const isToday = day.date === todayDate;
+                  const dayAbsences = absencesByDate.get(day.date) ?? [];
 
-            <div className="calendar-legend" aria-label="Keterangan warna kalender">
-              <span className="calendar-legend-item">
-                <span className="calendar-legend-swatch calendar-legend-swatch--school" />
-                <span>Hari belajar</span>
-              </span>
-              <span className="calendar-legend-item">
-                <span className="calendar-legend-swatch calendar-legend-swatch--holiday" />
-                <span>Hari libur</span>
-              </span>
-              <span className="calendar-legend-item">
-                <span className="calendar-legend-swatch calendar-legend-swatch--override" />
-                <span>Pengecualian</span>
-              </span>
-            </div>
-          </div>
-        </DataCardHeader>
-        <DataCardContent className="calendar-card-content">
-          <ol className="calendar-grid">
-            {dayNames.map((day, idx) => (
-              <li
-                key={day}
-                className={`calendar-weekday ${idx === 0 ? "calendar-weekday--sunday" : ""}`}
-              >
-                <span className="weekday-full">{day}</span>
-                <span className="weekday-short">{dayShortNames[idx]}</span>
-              </li>
-            ))}
-            {Array.from(
-              {
-                length: new Date(`${calendar.days[0]?.date ?? "2026-01-01"}T12:00:00Z`).getUTCDay(),
-              },
-              (_, index) => (
-                <li key={`blank-${index}`} className="calendar-blank" aria-hidden="true" />
-              ),
-            )}
-            {calendar.days.map((day) => {
-              const dayNum = Number(day.date.slice(-2));
-              const override = calendar.overrides.find((o) => o.date === day.date);
-              const cellStatusText = !day.inYear
-                ? "Di luar tahun ajaran"
-                : day.isSchoolDay
-                  ? "Hari belajar"
-                  : "Hari libur";
-              const titleText = `${day.date} (${cellStatusText})${
-                override ? ` - ${override.reason}` : ""
-              }${isAdmin ? " · Klik untuk atur pengecualian" : ""}`;
+                  const cellStatusText = !day.inYear
+                    ? "Di luar tahun ajaran"
+                    : day.isSchoolDay
+                      ? "Hari belajar"
+                      : "Hari libur";
+                  const titleText = `${day.date} (${cellStatusText})${
+                    override ? ` - ${override.reason}` : ""
+                  }${dayAbsences.length > 0 ? ` · ${dayAbsences.length} siswa tidak hadir` : ""}`;
 
-              return (
-                <li
-                  key={day.date}
-                  className={`calendar-day-cell ${
-                    !day.inYear
-                      ? "is-out-of-year"
-                      : day.isSchoolDay
-                        ? "is-school-day"
-                        : "is-holiday"
-                  }${override ? " has-override" : ""}`}
+                  return (
+                    <li
+                      key={day.date}
+                      className={`calendar-day-cell ${
+                        !day.inYear
+                          ? "is-out-of-year"
+                          : day.isSchoolDay
+                            ? "is-school-day"
+                            : "is-holiday"
+                      }${override ? " has-override" : ""}${isSelected ? " is-selected" : ""}${
+                        isToday ? " is-today" : ""
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="calendar-day-btn"
+                        data-date={day.date}
+                        onClick={handleDayClick}
+                        title={titleText}
+                        aria-label={`${day.date}, ${cellStatusText}${
+                          override ? `, ${override.reason}` : ""
+                        }${dayAbsences.length > 0 ? `, ${dayAbsences.length} siswa tidak hadir` : ""}`}
+                      >
+                        <time dateTime={day.date} className="calendar-day-num">
+                          {dayNum}
+                        </time>
+                        <div className="calendar-day-chips-area">
+                          {dayAbsences.length > 0 && (
+                            <span
+                              className="calendar-absence-chip"
+                              title={`${dayAbsences.length} siswa tidak hadir`}
+                            >
+                              {dayAbsences.length} siswa
+                            </span>
+                          )}
+                          {override && dayAbsences.length === 0 && (
+                            <span
+                              className={`calendar-override-chip calendar-override-chip--${
+                                override.isSchoolDay ? "school" : "holiday"
+                              }`}
+                              title={override.reason}
+                            >
+                              {override.reason}
+                            </span>
+                          )}
+                        </div>
+                        <span className="sr-only">{cellStatusText}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+
+              {/* Legend di bawah kalender sesuai referensi */}
+              <div className="calendar-legend" aria-label="Keterangan warna kalender">
+                <span className="calendar-legend-item">
+                  <span className="calendar-legend-dot calendar-legend-dot--holiday" />
+                  <span>Hari libur</span>
+                </span>
+                <span className="calendar-legend-item">
+                  <span className="calendar-legend-dot calendar-legend-dot--absence" />
+                  <span>Siswa tidak hadir</span>
+                </span>
+                <span className="calendar-legend-item">
+                  <span className="calendar-legend-dot calendar-legend-dot--today" />
+                  <span>Hari ini</span>
+                </span>
+                <span className="calendar-legend-item">
+                  <span className="calendar-legend-dot calendar-legend-dot--selected" />
+                  <span>Terpilih</span>
+                </span>
+              </div>
+            </DataCardContent>
+          </DataCard>
+        </div>
+
+        {/* Kolom Kanan: Card Informasi sesuai referensi */}
+        <div className="calendar-split-side">
+          <DataCard className="calendar-info-card">
+            <DataCardHeader>
+              <div className="data-card__title-group">
+                <h2 className="data-card__title">Informasi</h2>
+                {selectedDate && (
+                  <p className="calendar-info-date-sub">{formatFullDate(selectedDate)}</p>
+                )}
+              </div>
+            </DataCardHeader>
+            <DataCardContent className="calendar-info-content">
+              {/* Status Banner Hari */}
+              {selectedDayInfo && (
+                <div
+                  className={`calendar-info-status-banner ${
+                    selectedDayInfo.isSchoolDay ? "is-school" : "is-holiday"
+                  }`}
                 >
-                  {isAdmin ? (
-                    <button
-                      type="button"
-                      className="calendar-day-btn"
-                      data-date={day.date}
-                      onClick={handleDayClick}
-                      title={titleText}
-                      aria-label={`${day.date}, ${cellStatusText}${override ? `, ${override.reason}` : ""}`}
-                    >
-                      <time dateTime={day.date} className="calendar-day-num">
-                        {dayNum}
-                      </time>
-                      {override && (
-                        <>
-                          <span
-                            className={`calendar-day-dot calendar-day-dot--${
-                              override.isSchoolDay ? "school" : "holiday"
-                            }`}
-                            aria-hidden="true"
-                          />
-                          <span
-                            className={`calendar-day-chip calendar-day-chip--${
-                              override.isSchoolDay ? "school" : "holiday"
-                            }`}
-                            title={override.reason}
-                          >
-                            {override.reason}
-                          </span>
-                        </>
-                      )}
-                      <span className="sr-only">{cellStatusText}</span>
-                    </button>
-                  ) : (
-                    <div
-                      className="calendar-day-content"
-                      title={titleText}
-                      aria-label={`${day.date}, ${cellStatusText}${override ? `, ${override.reason}` : ""}`}
-                    >
-                      <time dateTime={day.date} className="calendar-day-num">
-                        {dayNum}
-                      </time>
-                      {override && (
-                        <>
-                          <span
-                            className={`calendar-day-dot calendar-day-dot--${
-                              override.isSchoolDay ? "school" : "holiday"
-                            }`}
-                            aria-hidden="true"
-                          />
-                          <span
-                            className={`calendar-day-chip calendar-day-chip--${
-                              override.isSchoolDay ? "school" : "holiday"
-                            }`}
-                            title={override.reason}
-                          >
-                            {override.reason}
-                          </span>
-                        </>
-                      )}
-                      <span className="sr-only">{cellStatusText}</span>
-                    </div>
+                  <div className="calendar-info-status-title">
+                    {selectedDayInfo.isSchoolDay ? "Hari Belajar" : "Hari Libur"}
+                  </div>
+                  {selectedOverride && (
+                    <div className="calendar-info-status-reason">{selectedOverride.reason}</div>
                   )}
-                </li>
-              );
-            })}
-          </ol>
-        </DataCardContent>
-      </DataCard>
+                </div>
+              )}
+
+              {/* Tabel Siswa Tidak Hadir */}
+              <div className="calendar-info-section">
+                <div className="calendar-info-section-header">
+                  <h3 className="calendar-info-subtitle">
+                    Siswa Tidak Hadir
+                    {selectedDateAbsences.length > 0 && (
+                      <span className="calendar-info-count-badge">
+                        {selectedDateAbsences.length}
+                      </span>
+                    )}
+                  </h3>
+                </div>
+
+                {selectedDateAbsences.length === 0 ? (
+                  <p className="calendar-info-empty">
+                    {selectedDayInfo?.isSchoolDay
+                      ? "Semua siswa hadir (nihil catatan izin/sakit/alpa)."
+                      : "Hari libur sekolah."}
+                  </p>
+                ) : (
+                  <div className="data-table calendar-info-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th scope="col" className="col-idx">
+                            #
+                          </th>
+                          <th scope="col">Nama</th>
+                          <th scope="col">Kelas</th>
+                          <th scope="col">Keterangan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedDateAbsences.map((rec: CalendarAbsenceRecord, index: number) => (
+                          <tr key={`${rec.studentName}-${rec.className}-${index}`}>
+                            <td className="col-idx">{index + 1}.</td>
+                            <td>
+                              <strong>{rec.studentName}</strong>
+                            </td>
+                            <td>{rec.className}</td>
+                            <td>
+                              <StatusBadge
+                                tone={
+                                  rec.status === "S"
+                                    ? "warning"
+                                    : rec.status === "I"
+                                      ? "neutral"
+                                      : "danger"
+                                }
+                              >
+                                {statusLabel(rec.status)}
+                              </StatusBadge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Admin Action untuk Tanggal Terpilih */}
+              {isAdmin && (
+                <div className="calendar-info-actions">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleOpenOverrideForSelectedDate}
+                  >
+                    Atur pengecualian tanggal ini
+                  </Button>
+                </div>
+              )}
+
+              {/* Ringkasan Bulan Ini */}
+              <div className="calendar-month-summary">
+                <h4 className="calendar-summary-title">Ringkasan Bulan Ini</h4>
+                <div className="calendar-summary-grid">
+                  <div className="calendar-summary-item">
+                    <span className="calendar-summary-value">{schoolDaysCount}</span>
+                    <span className="calendar-summary-label">Hari Belajar</span>
+                  </div>
+                  <div className="calendar-summary-item">
+                    <span className="calendar-summary-value">{holidayDaysCount}</span>
+                    <span className="calendar-summary-label">Hari Libur</span>
+                  </div>
+                  <div className="calendar-summary-item">
+                    <span className="calendar-summary-value">{totalMonthAbsences}</span>
+                    <span className="calendar-summary-label">Tidak Hadir</span>
+                  </div>
+                </div>
+              </div>
+            </DataCardContent>
+          </DataCard>
+        </div>
+      </div>
 
       {/* Card 2: Hari Belajar Rutin */}
       <DataCard className="calendar-weekdays-card">

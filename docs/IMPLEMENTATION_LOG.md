@@ -547,32 +547,33 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - `pnpm test:integration`: 111 passed (100%).
   - Playwright E2E: `mobile-sweep.spec.ts` (28 rute × 6 viewport), `shell.spec.ts`, `audit.spec.ts`, `settings.spec.ts`, `redesign-f3.spec.ts`, `redesign-f4.spec.ts`, `attendance-redesign.spec.ts`, `reports.spec.ts`, `auth.spec.ts`, `print.spec.ts` seluruhnya lulus 100%.
 
-### FIX-06: Redesign Tampilan Kalender Akademik (Aspect Ratio 1:1, Warna Hari Libur/Belajar, dan Legend Terpadu)
+### FIX-06: Redesign Tampilan Kalender Akademik Sesuai Referensi Dua Kolom (Aspect Ratio 1:1, Panel Informasi, & Chip Ketidakhadiran Siswa)
 - **Masalah & Permintaan Pengguna**:
-  1. Tampilan kalender (`/calendar`) membingungkan dan padat karena setiap sel tanggal mencetak teks panjang "Hari belajar", "Libur", atau alasan pengecualian yang bertumpuk dan menempel ke angka.
-  2. Mengganti keterangan status menjadi warna yang intuitif: Hari Libur berwarna merah (latar merah lembut dan angka merah bold), Hari Belajar berwarna putih bersih.
-  3. Keterangan hari belajar rutin dihilangkan dari dalam cell dan diganti dengan legend ringkas serta dot/chip penanda pengecualian khusus.
-  4. Kolom tanggal dibuat dengan proporsi 1:1 (persegi sempurna) di semua viewport tanpa overflow horizontal.
-  5. Memperbaiki tampilan chip hari belajar rutin agar tidak menempel satu sama lain.
+  1. Tampilan kalender (`/calendar`) membingungkan dan padat karena setiap sel tanggal mencetak teks panjang status yang bertumpuk.
+  2. Mengganti keterangan status menjadi warna yang intuitif: Hari Libur berwarna merah lembut, Hari Belajar berwarna putih bersih.
+  3. Kolom tanggal dibuat dengan proporsi 1:1 (persegi sempurna) di semua viewport tanpa overflow horizontal.
+  4. Pengguna memberikan gambar referensi `sample-calendar.png` karena ukuran desktop sebelumnya masih terlalu besar. Layout dirombak menyerupai referensi:
+     - Layout dua kolom: Kalender interaktif di sisi kiri (~60% lebar desktop), Card "Informasi" di sisi kanan.
+     - Header kalender kiri: Judul bulan tebal, tombol "Hari ini" (Today), dan tombol panah `<` / `>` bernuansa biru primer.
+     - Sel tanggal kompak dengan badge pill hijau `{count} siswa` jika ada catatan siswa tidak hadir (sakit/izin/alpa) pada tanggal tersebut (mengadaptasi `employee` pada referensi menjadi konteks absensi sekolah).
+     - Legend di bawah kalender persis seperti referensi: `• Hari libur  • Siswa tidak hadir  • Hari ini  • Terpilih`.
+     - Panel Informasi di sisi kanan: Menampilkan tanggal terpilih, banner status hari (Hari Belajar / Hari Libur beserta alasan), tabel daftar siswa tidak hadir (`# | Nama | Kelas | Keterangan`), tombol admin "Atur pengecualian tanggal ini", dan widget ringkasan bulan ini (Total Hari Belajar, Hari Libur, Tidak Hadir).
 - **Implementasi**:
-  1. **Kolom Tanggal 1:1 & Grid Modern (`src/app/calendar/calendar-client.tsx`, `src/styles/components.css`)**:
-     - Setiap sel tanggal (`.calendar-day-cell`, `.calendar-blank`, tombol `.calendar-day-btn`, dan `.calendar-day-content`) diatur dengan `aspect-ratio: 1 / 1`.
-     - Layout grid 7 kolom responsif dengan gap terukur (`gap: 6px` desktop / `gap: 2-3px` mobile) yang menjamin `width >= 44px` dan `height >= 44px` pada viewport terkecil (360px portrait) untuk kepatuhan penuh touch target.
-  2. **Skema Warna Intuitif Kalender**:
-     - **Hari Belajar**: Latar putih bersih (`var(--surface)`), border netral halus (`var(--border)`), angka tanggal berwana kontras gelap (`var(--foreground)`).
-     - **Hari Libur (termasuk hari Minggu)**: Latar merah muda lembut (`#fef2f2`), border halus (`#fecaca`), angka tanggal merah tegas (`#dc2626`).
-     - **Di Luar Tahun Ajaran**: Latar abu-abu pudar (`#f8fafc`), border putus-putus (`dashed`), opasitas 0.55.
-     - **Pengecualian Khusus**: Border penegas aksen dengan dot indikator (di mobile) atau chip ringkas (di desktop/tablet).
-  3. **Header Hari & Legend Kalender**:
-     - Singkatan nama hari untuk mobile ("Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab") agar tidak terpotong atau wrap sembarangan, dengan hari Minggu bertuliskan merah.
-     - Legend terpadu di samping/bawah stepper bulan: Hari belajar (putih), Hari libur (merah), Pengecualian (oranye/aksen).
-     - Stepper bulan (`< Bulan Tahun >`) diperbarui dengan tombol touch target 44×44px yang rapi.
-  4. **Pembersihan CSS Legacy (`src/app/globals.css`)**:
-     - Menghapus blok legacy `.calendar-grid` dari `globals.css` yang sebelumnya menumpuk tombol biru generic di atas sel tanggal.
-     - Merapikan chip hari belajar rutin di Card 2 dengan `.weekday-chips` dan `.weekday-chip` pill berbentuk bulat terpisah.
+  1. **Query & Kontrak Data Baru (`src/contracts/school-master.ts`, `src/server/queries/calendar-absences.ts`, `src/app/calendar/page.tsx`)**:
+     - Menambahkan tipe `CalendarAbsenceRecord` (`date`, `studentName`, `className`, `status: "S" | "I" | "A"`).
+     - Menambahkan query `getMonthStudentAbsences` untuk mengambil data ketidakhadiran siswa aktual dari tabel absensi dan sesi submit pada bulan yang aktif.
+  2. **Dua Kolom Kalender & Interaktivitas (`src/app/calendar/calendar-client.tsx`, `src/styles/components.css`)**:
+     - Layout split grid responsif `.calendar-split-layout`: desktop 2 kolom, mobile single column stack vertikal.
+     - Header navigasi bulan dengan tombol "Hari ini" yang melompat ke tanggal hari ini jika dalam bulan aktif, atau mengarahkan ke bulan berjalan.
+     - Pemilihan tanggal interaktif (`selectedDate`) untuk memperbarui isi Card Informasi secara real-time.
+     - Badge hijau kompak `.calendar-absence-chip` di dalam sel tanggal dengan tooltip dan teks `{count} siswa`.
+     - Card Informasi lengkap dengan tabel siswa tidak hadir terformat badge status dan tombol tindakan cepat untuk admin.
+  3. **Penyesuaian Touch Target Mobile & CSS**:
+     - Kalender tetap 100% responsif di layar mobile (< 640px) dengan touch target minimal 44×44px, aspect ratio 1:1, dan tanpa overflow horizontal.
 - **Hasil Verifikasi**:
   - `pnpm lint`: 0 errors, 0 warnings.
   - `pnpm typecheck`: 0 errors.
+  - `pnpm build`: Berhasil tanpa error.
   - `pnpm test:domain`: 18 passed (100%).
   - `pnpm test:integration`: 111 passed (100%).
-  - Playwright E2E: `tests/e2e/school-master.spec.ts` (lulus), `tests/e2e/redesign-f4.spec.ts` (lulus + tangkapan layar `calendar-desktop.png` dan `calendar-mobile.png` terverifikasi 1:1 square dan warna merah/putih), `tests/e2e/mobile-sweep.spec.ts` (28 rute × 6 viewport lulus 100% tanpa overflow).
+  - Playwright E2E: `tests/e2e/school-master.spec.ts` (lulus), `tests/e2e/redesign-f4.spec.ts` (lulus + tangkapan layar `calendar-desktop.png` dan `calendar-mobile.png` terverifikasi akurat menyerupai referensi), `tests/e2e/mobile-sweep.spec.ts` (28 rute × 6 viewport lulus 100% tanpa touch target overflow).

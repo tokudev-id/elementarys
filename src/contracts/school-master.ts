@@ -48,11 +48,7 @@ export const yearPatchSchema = yearFields
 export const classInputSchema = z
   .object({
     yearId: z.uuid("Pilih tahun ajaran."),
-    name: z
-      .string()
-      .trim()
-      .min(1, "Isi nama kelas.")
-      .max(100, "Nama kelas maksimal 100 karakter."),
+    name: z.string().trim().min(1, "Isi nama kelas.").max(100, "Nama kelas maksimal 100 karakter."),
     grade: z
       .number({ message: "Pilih tingkat 1 sampai 6." })
       .int("Pilih tingkat 1 sampai 6.")
@@ -96,8 +92,7 @@ export const calendarInputSchema = z
   .refine(
     (value) =>
       new Set(value.weekdays).size === value.weekdays.length &&
-      new Set(value.overrides.map((item) => item.date)).size ===
-        value.overrides.length,
+      new Set(value.overrides.map((item) => item.date)).size === value.overrides.length,
     "Hari/tanggal pengecualian tidak boleh ganda.",
   );
 
@@ -140,4 +135,11 @@ export type CalendarView = {
     isSchoolDay: boolean;
     reason: string | null;
   }[];
+};
+
+export type CalendarAbsenceRecord = {
+  date: string;
+  studentName: string;
+  className: string;
+  status: "S" | "I" | "A";
 };

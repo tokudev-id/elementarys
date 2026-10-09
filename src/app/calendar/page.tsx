@@ -8,6 +8,7 @@ import { schoolIdentity } from "@/components/school-identity";
 import { StateBanner } from "@/components/state-banner";
 import { PageHeader } from "@/components/page-header";
 import type { CalendarView } from "@/contracts/school-master";
+import { getMonthStudentAbsences } from "@/server/queries/calendar-absences";
 import { CalendarClient } from "./calendar-client";
 
 export default async function Calendar({
@@ -30,16 +31,15 @@ export default async function Calendar({
         breadcrumbs={[{ label: "Kalender" }]}
       >
         <PageHeader title="Kalender akademik" />
-        <StateBanner state="empty">
-          Tambahkan tahun ajaran sebelum mengatur kalender.
-        </StateBanner>
+        <StateBanner state="empty">Tambahkan tahun ajaran sebelum mengatur kalender.</StateBanner>
       </AppShell>
     );
   }
 
-  const todayMonth = schoolToday(
+  const todayDate = schoolToday(
     isTimezone(settings.timezone) ? settings.timezone : "Asia/Kuala_Lumpur",
-  ).slice(0, 7);
+  );
+  const todayMonth = todayDate.slice(0, 7);
 
   const month =
     selected.month ??
@@ -53,10 +53,10 @@ export default async function Calendar({
     calendar = await getCalendar(selected.yearId ?? year.id, month);
   } catch (error) {
     message =
-      error instanceof DomainError
-        ? error.message
-        : "Belum dapat memuat kalender. Coba kembali.";
+      error instanceof DomainError ? error.message : "Belum dapat memuat kalender. Coba kembali.";
   }
+
+  const absences = await getMonthStudentAbsences(selected.yearId ?? year.id, month);
 
   return (
     <AppShell
@@ -78,6 +78,8 @@ export default async function Calendar({
           isAdmin={actor.role === "admin"}
           years={years}
           selectedYearId={selected.yearId ?? year.id}
+          absences={absences}
+          todayDate={todayDate}
         />
       )}
     </AppShell>
