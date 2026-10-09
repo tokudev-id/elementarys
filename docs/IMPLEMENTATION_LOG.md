@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done; FIX-06 done |
 | Task berikutnya | Handover & checkpoint manusia (H-01–H-09) |
 
 ## 1. Aturan pencatatan
@@ -56,6 +56,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | [UI-R3](docs/redesign/IMPLEMENTATION.md) | Redesign rekap/beranda | UI-F3, UI-F4 | done | Dashboard admin, single-class report, KPI, chip legend; domain 18/integration 111/e2e 20 lulus |
 | [UI-R4](docs/redesign/IMPLEMENTATION.md) | Polish & verifikasi akhir | UI-R3 | done | 97eab30 → 72df382; audit CSS lama, WCAG contrast 19 passed, benchmark 600 siswa 108.65ms, kriteria penerimaan bagian 8 lulus, sweep e2e 28 rute × 6 viewport lulus; domain 18/integration 111/e2e lengkap lulus |
 | FIX-05 | Layout & UI Polish | UI-R4 | done | 97405c3 → 9ecee4d; shell persisten di RootLayout, circular spinner, padding konten audit & settings rapi, sizing input/search 38px dan button 44px compact/elegant; domain 18/integration 111/e2e mobile-sweep 28 rute lulus |
+| FIX-06 | Redesign Kalender | FIX-05 | done | Kolom tanggal 1:1 square, warna hari libur merah / hari belajar putih, eliminasi teks status di dalam cell, dot/chip pengecualian, weekday chips, legend warna; domain 18/integration 111/e2e mobile-sweep & calendar lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -545,3 +546,33 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - `pnpm test:domain`: 18 passed (100%).
   - `pnpm test:integration`: 111 passed (100%).
   - Playwright E2E: `mobile-sweep.spec.ts` (28 rute × 6 viewport), `shell.spec.ts`, `audit.spec.ts`, `settings.spec.ts`, `redesign-f3.spec.ts`, `redesign-f4.spec.ts`, `attendance-redesign.spec.ts`, `reports.spec.ts`, `auth.spec.ts`, `print.spec.ts` seluruhnya lulus 100%.
+
+### FIX-06: Redesign Tampilan Kalender Akademik (Aspect Ratio 1:1, Warna Hari Libur/Belajar, dan Legend Terpadu)
+- **Masalah & Permintaan Pengguna**:
+  1. Tampilan kalender (`/calendar`) membingungkan dan padat karena setiap sel tanggal mencetak teks panjang "Hari belajar", "Libur", atau alasan pengecualian yang bertumpuk dan menempel ke angka.
+  2. Mengganti keterangan status menjadi warna yang intuitif: Hari Libur berwarna merah (latar merah lembut dan angka merah bold), Hari Belajar berwarna putih bersih.
+  3. Keterangan hari belajar rutin dihilangkan dari dalam cell dan diganti dengan legend ringkas serta dot/chip penanda pengecualian khusus.
+  4. Kolom tanggal dibuat dengan proporsi 1:1 (persegi sempurna) di semua viewport tanpa overflow horizontal.
+  5. Memperbaiki tampilan chip hari belajar rutin agar tidak menempel satu sama lain.
+- **Implementasi**:
+  1. **Kolom Tanggal 1:1 & Grid Modern (`src/app/calendar/calendar-client.tsx`, `src/styles/components.css`)**:
+     - Setiap sel tanggal (`.calendar-day-cell`, `.calendar-blank`, tombol `.calendar-day-btn`, dan `.calendar-day-content`) diatur dengan `aspect-ratio: 1 / 1`.
+     - Layout grid 7 kolom responsif dengan gap terukur (`gap: 6px` desktop / `gap: 2-3px` mobile) yang menjamin `width >= 44px` dan `height >= 44px` pada viewport terkecil (360px portrait) untuk kepatuhan penuh touch target.
+  2. **Skema Warna Intuitif Kalender**:
+     - **Hari Belajar**: Latar putih bersih (`var(--surface)`), border netral halus (`var(--border)`), angka tanggal berwana kontras gelap (`var(--foreground)`).
+     - **Hari Libur (termasuk hari Minggu)**: Latar merah muda lembut (`#fef2f2`), border halus (`#fecaca`), angka tanggal merah tegas (`#dc2626`).
+     - **Di Luar Tahun Ajaran**: Latar abu-abu pudar (`#f8fafc`), border putus-putus (`dashed`), opasitas 0.55.
+     - **Pengecualian Khusus**: Border penegas aksen dengan dot indikator (di mobile) atau chip ringkas (di desktop/tablet).
+  3. **Header Hari & Legend Kalender**:
+     - Singkatan nama hari untuk mobile ("Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab") agar tidak terpotong atau wrap sembarangan, dengan hari Minggu bertuliskan merah.
+     - Legend terpadu di samping/bawah stepper bulan: Hari belajar (putih), Hari libur (merah), Pengecualian (oranye/aksen).
+     - Stepper bulan (`< Bulan Tahun >`) diperbarui dengan tombol touch target 44×44px yang rapi.
+  4. **Pembersihan CSS Legacy (`src/app/globals.css`)**:
+     - Menghapus blok legacy `.calendar-grid` dari `globals.css` yang sebelumnya menumpuk tombol biru generic di atas sel tanggal.
+     - Merapikan chip hari belajar rutin di Card 2 dengan `.weekday-chips` dan `.weekday-chip` pill berbentuk bulat terpisah.
+- **Hasil Verifikasi**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm typecheck`: 0 errors.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - Playwright E2E: `tests/e2e/school-master.spec.ts` (lulus), `tests/e2e/redesign-f4.spec.ts` (lulus + tangkapan layar `calendar-desktop.png` dan `calendar-mobile.png` terverifikasi 1:1 square dan warna merah/putih), `tests/e2e/mobile-sweep.spec.ts` (28 rute × 6 viewport lulus 100% tanpa overflow).
