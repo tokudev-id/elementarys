@@ -39,35 +39,6 @@
   flex-shrink: 0;
   padding: 0;
 }
-.calendar-grid {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.25rem;
-}
-.calendar-grid li {
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.25rem;
-  min-width: 0;
-}
-.calendar-grid time,
-.calendar-grid strong,
-.calendar-grid small {
-  display: block;
-}
-.calendar-grid strong,
-.calendar-grid small {
-  font-size: 0.75rem;
-}
-.calendar-grid .calendar-weekday {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding-block: 0.5rem;
-}
-.calendar-grid .calendar-blank {
-  border: 0;
-}
 
 .print-controls {
   display: flex;

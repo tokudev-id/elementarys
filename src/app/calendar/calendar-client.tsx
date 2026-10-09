@@ -5,12 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import type { CalendarView, AcademicYearView } from "@/contracts/school-master";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -20,15 +15,8 @@ import { StatusBadge } from "@/components/status-badge";
 import { useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
 
-const dayNames = [
-  "Minggu",
-  "Senin",
-  "Selasa",
-  "Rabu",
-  "Kamis",
-  "Jumat",
-  "Sabtu",
-];
+const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const dayShortNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 function formatMonthLabel(monthStr: string) {
   const [y, m] = monthStr.split("-").map(Number);
@@ -58,10 +46,7 @@ export function CalendarClient({
   selectedYearId: string;
 }) {
   const router = useRouter();
-  const mutation = useMutation(
-    `/api/academic-years/${calendar.year.id}/calendar`,
-    "PUT",
-  );
+  const mutation = useMutation(`/api/academic-years/${calendar.year.id}/calendar`, "PUT");
 
   // Dialog states
   const [weekdaysOpen, setWeekdaysOpen] = useState(false);
@@ -75,9 +60,7 @@ export function CalendarClient({
   const [overrideError, setOverrideError] = useState<string | null>(null);
 
   // Selected weekdays for editing
-  const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(
-    calendar.weekdays,
-  );
+  const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(calendar.weekdays);
 
   // Pagination for overrides
   const [page, setPage] = useState(1);
@@ -98,9 +81,7 @@ export function CalendarClient({
 
   function handleWeekdayToggle(weekday: number) {
     setSelectedWeekdays((prev) =>
-      prev.includes(weekday)
-        ? prev.filter((d) => d !== weekday)
-        : [...prev, weekday].sort(),
+      prev.includes(weekday) ? prev.filter((d) => d !== weekday) : [...prev, weekday].sort(),
     );
   }
 
@@ -118,8 +99,7 @@ export function CalendarClient({
   }
 
   function openAddOverride(defaultDate?: string) {
-    const target =
-      defaultDate ?? calendar.days[0]?.date ?? calendar.year.startsOn;
+    const target = defaultDate ?? calendar.days[0]?.date ?? calendar.year.startsOn;
     const existing = calendar.overrides.find((o) => o.date === target);
     setOverrideDate(target);
     setOverrideIsSchoolDay(existing ? existing.isSchoolDay : false);
@@ -160,9 +140,7 @@ export function CalendarClient({
 
   async function handleConfirmDelete() {
     if (!deleteDate) return;
-    const nextOverrides = calendar.overrides.filter(
-      (o) => o.date !== deleteDate,
-    );
+    const nextOverrides = calendar.overrides.filter((o) => o.date !== deleteDate);
     const ok = await mutation.mutate({
       expectedVersion: calendar.year.version,
       weekdays: calendar.weekdays,
@@ -232,21 +210,14 @@ export function CalendarClient({
     setDeleteDate(null);
   }
 
-  const paginatedOverrides = currentOverrides.slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
+  const paginatedOverrides = currentOverrides.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="calendar-page-layout">
       {/* Toolbar / Year Switcher */}
       <div className="calendar-toolbar-row">
         <div className="calendar-year-select">
-          <SelectField
-            label="Tahun ajaran"
-            value={selectedYearId}
-            onChange={handleYearChange}
-          >
+          <SelectField label="Tahun ajaran" value={selectedYearId} onChange={handleYearChange}>
             {years.map((y) => (
               <option key={y.id} value={y.id}>
                 {y.label}
@@ -262,7 +233,7 @@ export function CalendarClient({
       {/* Card 1: Grid Bulan */}
       <DataCard className="calendar-month-card">
         <DataCardHeader>
-          <div className="data-card__title-group">
+          <div className="calendar-header-row">
             <div className="calendar-month-stepper">
               <Link
                 href={`/calendar?yearId=${selectedYearId}&month=${prevMonth}`}
@@ -271,9 +242,7 @@ export function CalendarClient({
               >
                 <ChevronLeft size={18} aria-hidden="true" />
               </Link>
-              <span className="calendar-stepper-label">
-                {formatMonthLabel(calendar.month)}
-              </span>
+              <h2 className="calendar-stepper-label">{formatMonthLabel(calendar.month)}</h2>
               <Link
                 href={`/calendar?yearId=${selectedYearId}&month=${nextMonth}`}
                 className="calendar-stepper-btn"
@@ -282,34 +251,54 @@ export function CalendarClient({
                 <ChevronRight size={18} aria-hidden="true" />
               </Link>
             </div>
+
+            <div className="calendar-legend" aria-label="Keterangan warna kalender">
+              <span className="calendar-legend-item">
+                <span className="calendar-legend-swatch calendar-legend-swatch--school" />
+                <span>Hari belajar</span>
+              </span>
+              <span className="calendar-legend-item">
+                <span className="calendar-legend-swatch calendar-legend-swatch--holiday" />
+                <span>Hari libur</span>
+              </span>
+              <span className="calendar-legend-item">
+                <span className="calendar-legend-swatch calendar-legend-swatch--override" />
+                <span>Pengecualian</span>
+              </span>
+            </div>
           </div>
         </DataCardHeader>
-        <DataCardContent>
+        <DataCardContent className="calendar-card-content">
           <ol className="calendar-grid">
-            {dayNames.map((day) => (
-              <li key={day} className="calendar-weekday">
-                {day}
+            {dayNames.map((day, idx) => (
+              <li
+                key={day}
+                className={`calendar-weekday ${idx === 0 ? "calendar-weekday--sunday" : ""}`}
+              >
+                <span className="weekday-full">{day}</span>
+                <span className="weekday-short">{dayShortNames[idx]}</span>
               </li>
             ))}
             {Array.from(
               {
-                length: new Date(
-                  `${calendar.days[0]?.date ?? "2026-01-01"}T12:00:00Z`,
-                ).getUTCDay(),
+                length: new Date(`${calendar.days[0]?.date ?? "2026-01-01"}T12:00:00Z`).getUTCDay(),
               },
               (_, index) => (
-                <li
-                  key={`blank-${index}`}
-                  className="calendar-blank"
-                  aria-hidden="true"
-                />
+                <li key={`blank-${index}`} className="calendar-blank" aria-hidden="true" />
               ),
             )}
             {calendar.days.map((day) => {
               const dayNum = Number(day.date.slice(-2));
-              const override = calendar.overrides.find(
-                (o) => o.date === day.date,
-              );
+              const override = calendar.overrides.find((o) => o.date === day.date);
+              const cellStatusText = !day.inYear
+                ? "Di luar tahun ajaran"
+                : day.isSchoolDay
+                  ? "Hari belajar"
+                  : "Hari libur";
+              const titleText = `${day.date} (${cellStatusText})${
+                override ? ` - ${override.reason}` : ""
+              }${isAdmin ? " · Klik untuk atur pengecualian" : ""}`;
+
               return (
                 <li
                   key={day.date}
@@ -319,7 +308,7 @@ export function CalendarClient({
                       : day.isSchoolDay
                         ? "is-school-day"
                         : "is-holiday"
-                  }`}
+                  }${override ? " has-override" : ""}`}
                 >
                   {isAdmin ? (
                     <button
@@ -327,37 +316,60 @@ export function CalendarClient({
                       className="calendar-day-btn"
                       data-date={day.date}
                       onClick={handleDayClick}
-                      title={`Klik untuk atur pengecualian: ${day.date}`}
+                      title={titleText}
+                      aria-label={`${day.date}, ${cellStatusText}${override ? `, ${override.reason}` : ""}`}
                     >
-                      <time dateTime={day.date}>{dayNum}</time>
-                      <span className="calendar-day-status">
-                        {!day.inYear
-                          ? "Di luar tahun"
-                          : day.isSchoolDay
-                            ? "Hari belajar"
-                            : "Libur"}
-                      </span>
+                      <time dateTime={day.date} className="calendar-day-num">
+                        {dayNum}
+                      </time>
                       {override && (
-                        <small className="calendar-day-reason">
-                          {override.reason}
-                        </small>
+                        <>
+                          <span
+                            className={`calendar-day-dot calendar-day-dot--${
+                              override.isSchoolDay ? "school" : "holiday"
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span
+                            className={`calendar-day-chip calendar-day-chip--${
+                              override.isSchoolDay ? "school" : "holiday"
+                            }`}
+                            title={override.reason}
+                          >
+                            {override.reason}
+                          </span>
+                        </>
                       )}
+                      <span className="sr-only">{cellStatusText}</span>
                     </button>
                   ) : (
-                    <div className="calendar-day-content">
-                      <time dateTime={day.date}>{dayNum}</time>
-                      <span className="calendar-day-status">
-                        {!day.inYear
-                          ? "Di luar tahun"
-                          : day.isSchoolDay
-                            ? "Hari belajar"
-                            : "Libur"}
-                      </span>
+                    <div
+                      className="calendar-day-content"
+                      title={titleText}
+                      aria-label={`${day.date}, ${cellStatusText}${override ? `, ${override.reason}` : ""}`}
+                    >
+                      <time dateTime={day.date} className="calendar-day-num">
+                        {dayNum}
+                      </time>
                       {override && (
-                        <small className="calendar-day-reason">
-                          {override.reason}
-                        </small>
+                        <>
+                          <span
+                            className={`calendar-day-dot calendar-day-dot--${
+                              override.isSchoolDay ? "school" : "holiday"
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span
+                            className={`calendar-day-chip calendar-day-chip--${
+                              override.isSchoolDay ? "school" : "holiday"
+                            }`}
+                            title={override.reason}
+                          >
+                            {override.reason}
+                          </span>
+                        </>
                       )}
+                      <span className="sr-only">{cellStatusText}</span>
                     </div>
                   )}
                 </li>
@@ -373,10 +385,7 @@ export function CalendarClient({
           title="Hari belajar rutin"
           actions={
             isAdmin ? (
-              <Button
-                variant="secondary"
-                onClick={openEditWeekdays}
-              >
+              <Button variant="secondary" onClick={openEditWeekdays}>
                 Ubah
               </Button>
             ) : undefined
@@ -406,10 +415,7 @@ export function CalendarClient({
           count={currentOverrides.length}
           actions={
             isAdmin ? (
-              <Button
-                variant="secondary"
-                onClick={handleOpenAddOverride}
-              >
+              <Button variant="secondary" onClick={handleOpenAddOverride}>
                 <Plus size={16} aria-hidden="true" />
                 Tambah pengecualian
               </Button>
@@ -473,8 +479,7 @@ export function CalendarClient({
             <div className="data-pagination calendar-overrides-pagination">
               <span className="text-sm text-muted-foreground">
                 Menampilkan {(page - 1) * pageSize + 1}–
-                {Math.min(page * pageSize, currentOverrides.length)} dari{" "}
-                {currentOverrides.length}
+                {Math.min(page * pageSize, currentOverrides.length)} dari {currentOverrides.length}
               </span>
               <div className="calendar-pagination-buttons">
                 <Button
@@ -506,11 +511,7 @@ export function CalendarClient({
         title="Ubah hari belajar rutin"
         variant="sheet"
       >
-        <form
-          className="resource-form redesigned-form"
-          noValidate
-          onSubmit={handleSaveWeekdays}
-        >
+        <form className="resource-form redesigned-form" noValidate onSubmit={handleSaveWeekdays}>
           <fieldset disabled={mutation.pending}>
             <p>Pilih hari di mana kegiatan belajar rutin sekolah berlangsung:</p>
             <div className="checkbox-group calendar-weekdays-grid">
@@ -529,11 +530,7 @@ export function CalendarClient({
               ))}
             </div>
             <div className="button-row">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleCloseWeekdays}
-              >
+              <Button type="button" variant="secondary" onClick={handleCloseWeekdays}>
                 Batal
               </Button>
               <Button type="submit" pending={mutation.pending}>
@@ -551,11 +548,7 @@ export function CalendarClient({
         title="Atur pengecualian tanggal"
         variant="sheet"
       >
-        <form
-          className="resource-form redesigned-form"
-          noValidate
-          onSubmit={handleSaveOverride}
-        >
+        <form className="resource-form redesigned-form" noValidate onSubmit={handleSaveOverride}>
           <fieldset disabled={mutation.pending}>
             <Field
               label="Tanggal pengecualian"
@@ -587,11 +580,7 @@ export function CalendarClient({
               hint="Contoh: Libur Hari Raya, Cuti Bersama, dll."
             />
             <div className="button-row">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleCloseOverride}
-              >
+              <Button type="button" variant="secondary" onClick={handleCloseOverride}>
                 Batal
               </Button>
               <Button type="submit" pending={mutation.pending}>
@@ -612,9 +601,7 @@ export function CalendarClient({
         destructive
         label={`Hapus pengecualian ${deleteDate}`}
       >
-        <p>
-          Tanggal ini akan kembali mengikuti pola hari belajar rutin sekolah.
-        </p>
+        <p>Tanggal ini akan kembali mengikuti pola hari belajar rutin sekolah.</p>
       </ConfirmDialog>
     </div>
   );
