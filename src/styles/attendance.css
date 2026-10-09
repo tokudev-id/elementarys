@@ -320,7 +320,7 @@
   margin-top: 8px;
   accent-color: var(--primary);
 }
-@media (max-width: 359px) {
+@media (max-width: 389px) {
   .roster-row .status-choice-label {
     position: absolute;
     width: 1px;
@@ -329,7 +329,7 @@
     clip-path: inset(50%);
   }
 }
-@media (min-width: 360px) {
+@media (min-width: 390px) {
   .roster-scroll .roster-row {
     grid-template-columns: 20px minmax(0, 1fr) auto;
     min-height: 48px;
