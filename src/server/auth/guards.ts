@@ -58,6 +58,20 @@ export async function requireActor(
 }
 
 export function requireOrigin(request: Request, baseURL = process.env.BETTER_AUTH_URL) {
-  if (!baseURL || request.headers.get("origin") !== new URL(baseURL).origin)
+  const effectiveBaseURL =
+    baseURL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+  const requestOrigin = request.headers.get("origin");
+  const trustedOrigins = (process.env.TRUSTED_ORIGINS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const baseOrigin = effectiveBaseURL ? new URL(effectiveBaseURL).origin : null;
+
+  const isAllowed =
+    (baseOrigin && requestOrigin === baseOrigin) ||
+    (requestOrigin && trustedOrigins.includes(requestOrigin));
+
+  if (!isAllowed) {
     throw new DomainError("ACCESS_DENIED", "Asal permintaan tidak diizinkan.", 403);
+  }
 }
