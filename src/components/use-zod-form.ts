@@ -197,6 +197,24 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
     [handleChange],
   );
 
+  const unsetValue = useCallback((name: string) => {
+    setIsDirty(true);
+    const nextRef = { ...valuesRef.current };
+    delete nextRef[name];
+    valuesRef.current = nextRef;
+    setValues((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+    setErrors((prev) => {
+      if (!prev[name]) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  }, []);
+
   const setError = useCallback((name: string, message: string) => {
     setErrors((prev) => ({ ...prev, [name]: message }));
   }, []);
@@ -267,6 +285,7 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
     errorSummary,
     register,
     setValue,
+    unsetValue,
     setError,
     clearErrors,
     reset,

@@ -74,12 +74,6 @@
 .roster-info-btn:hover {
   background: var(--muted, #f1f5f9);
 }
-.roster-help {
-  color: var(--muted-foreground);
-  display: block;
-  margin-bottom: 8px;
-  font-size: 12px;
-}
 .roster-scroll {
   position: relative;
   border: 1px solid var(--border);

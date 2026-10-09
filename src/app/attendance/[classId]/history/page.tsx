@@ -128,8 +128,9 @@ export default async function AttendanceHistoryPage({
           <Link
             className="button-link button-link--secondary"
             href={`/attendance/${classId}?date=${history.date}`}
+            aria-label="Kembali ke catatan kelas"
           >
-            Kembali ke catatan
+            Kembali ke catatan kelas
           </Link>
         }
       />

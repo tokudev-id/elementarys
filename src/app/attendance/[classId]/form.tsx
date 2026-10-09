@@ -208,7 +208,11 @@ export function AttendanceForm({
                 <AttendanceSummary view={view} />
               </StateBanner>
               <div className="button-row">
-                <Link href="/attendance" className="button-link button-link--secondary">
+                <Link
+                  href="/attendance"
+                  className="button-link button-link--secondary"
+                  aria-label="Kembali ke hari ini"
+                >
                   Kembali ke daftar kelas
                 </Link>
                 {nextClassHref && (
@@ -311,14 +315,6 @@ export function AttendanceForm({
           </Button>
         </div>
       )}
-      <Link
-        href="/attendance"
-        prefetch={false}
-        className="attendance-back-link sr-only"
-        aria-label="Kembali ke hari ini"
-      >
-        Kembali ke daftar kelas
-      </Link>
       <Dialog
         open={form.confirm}
         closeDisabled={pending}

@@ -1016,11 +1016,12 @@
 }
 @media (max-width: 767px) {
   .audit-desktop-filters {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
   .audit-mobile-filters-trigger {
-    display: flex;
-    justify-content: flex-end;
+    display: none;
   }
 }
 
@@ -1505,46 +1506,6 @@
   color: var(--muted-foreground);
 }
 
-.dashboard-teacher-card {
-  background: var(--surface);
-  border: 1px solid var(--brand-sky);
-  border-radius: var(--radius-lg, 12px);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.dashboard-teacher-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.dashboard-teacher-card__title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.dashboard-teacher-card__meta {
-  font-size: 13px;
-  color: var(--muted-foreground);
-  margin: 4px 0 0;
-}
-
-.dashboard-teacher-card__actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 .dashboard-all-recorded {
   display: flex;
   align-items: center;
@@ -1555,10 +1516,6 @@
 }
 
 /* Rekap / Reports Redesign (UI-R3) */
-.report-toolbar-card {
-  margin-top: 16px;
-}
-
 .report-filter-bar {
   display: flex;
   flex-wrap: wrap;

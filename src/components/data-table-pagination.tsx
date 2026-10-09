@@ -70,7 +70,7 @@ export function DataTablePagination({
           <Link
             href={href(page - 1)}
             className="data-pagination__arrow"
-            aria-label="Halaman sebelumnya"
+            aria-label="Sebelumnya"
           >
             <ChevronLeft size={18} aria-hidden="true" />
             <span className="sr-only">Sebelumnya</span>
@@ -79,7 +79,7 @@ export function DataTablePagination({
           <span
             className="data-pagination__arrow"
             aria-disabled="true"
-            aria-label="Halaman sebelumnya"
+            aria-label="Sebelumnya"
           >
             <ChevronLeft size={18} aria-hidden="true" />
             <span className="sr-only">Sebelumnya</span>
@@ -110,7 +110,7 @@ export function DataTablePagination({
           <Link
             href={href(page + 1)}
             className="data-pagination__arrow"
-            aria-label="Halaman berikutnya"
+            aria-label="Berikutnya"
           >
             <ChevronRight size={18} aria-hidden="true" />
             <span className="sr-only">Berikutnya</span>
@@ -119,7 +119,7 @@ export function DataTablePagination({
           <span
             className="data-pagination__arrow"
             aria-disabled="true"
-            aria-label="Halaman berikutnya"
+            aria-label="Berikutnya"
           >
             <ChevronRight size={18} aria-hidden="true" />
             <span className="sr-only">Berikutnya</span>

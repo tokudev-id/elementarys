@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Filter } from "lucide-react";
 import type { AuditEvent } from "@/contracts/audit";
@@ -225,16 +225,6 @@ export function AuditClient({
 }) {
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    function checkMobile() {
-      setIsMobile(window.innerWidth < 768);
-    }
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   function openEvent(event: AuditEvent) {
     setSelected(event);
@@ -278,6 +268,13 @@ export function AuditClient({
             </option>
           ))}
         </SelectField>
+        <Field
+          label="ID entitas (opsional)"
+          name="entityId"
+          defaultValue={values.entityId}
+          maxLength={128}
+          disabled={disabled}
+        />
         <SelectField
           label="Pelaku perubahan"
           name="actorId"
@@ -323,9 +320,9 @@ export function AuditClient({
     <>
       <div className="audit-toolbar-wrapper">
         <form className="audit-desktop-filters" action="/audit">
-          {renderFilterFields(isMobile)}
-          <Button type="submit" variant="secondary" disabled={isMobile}>
-            Terapkan filter
+          {renderFilterFields(false)}
+          <Button type="submit" variant="secondary">
+            Tampilkan audit
           </Button>
           {activeFilterCount > 0 && (
             <Link href="/audit" className="button button--ghost">
@@ -363,34 +360,47 @@ export function AuditClient({
 
       {!events.length ? (
         <EmptyState
-          title="Tidak ada catatan audit"
+          title="Tidak ada catatan yang cocok dengan filter ini."
           description="Tidak ada aktivitas yang cocok dengan kriteria filter saat ini."
           action={<Link href="/audit">Reset filter</Link>}
         />
       ) : (
-        <div className="data-table">
-          <table className="audit-table">
-            <thead>
-              <tr>
-                <th scope="col">Waktu</th>
-                <th scope="col">Pelaku</th>
-                <th scope="col">Aksi</th>
-                <th scope="col">Entitas</th>
-                <th scope="col">Alasan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((event) => (
-                <AuditRowItem
-                  key={event.id}
-                  event={event}
-                  timezone={timezone}
-                  onSelect={openEvent}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <ul className="resource-list audit-list">
+            {events.map((event) => (
+              <li key={`legacy-${event.id}`}>
+                <details>
+                  <summary>{event.action}</summary>
+                  <div className="audit-json">{JSON.stringify(event.before)}</div>
+                  <div className="audit-json">{JSON.stringify(event.after)}</div>
+                </details>
+              </li>
+            ))}
+          </ul>
+          <div className="data-table">
+            <table className="audit-table">
+              <thead>
+                <tr>
+                  <th scope="col">Waktu</th>
+                  <th scope="col">Pelaku</th>
+                  <th scope="col">Aksi</th>
+                  <th scope="col">Entitas</th>
+                  <th scope="col">Alasan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((event) => (
+                  <AuditRowItem
+                    key={event.id}
+                    event={event}
+                    timezone={timezone}
+                    onSelect={openEvent}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       <Sheet open={selected !== null} onOpenChange={handleSheetOpenChange}>

@@ -53,15 +53,16 @@ export function SettingsForm({ initial }: { initial: SchoolSettings }) {
       : initial.timezone;
   const isTimezoneChanged = selectedTimezone !== initial.timezone;
 
+  const resetForm = form.reset;
   useEffect(() => {
-    form.reset({
+    resetForm({
       expectedVersion: initial.version,
       name: initial.name,
       location: initial.location ?? "",
       timezone: initial.timezone,
       reason: "",
     });
-  }, [form, initial.version, initial.name, initial.location, initial.timezone]);
+  }, [resetForm, initial.version, initial.name, initial.location, initial.timezone]);
 
   // Build complete list of IANA timezones
   const ianaTimezones = useMemo(() => {

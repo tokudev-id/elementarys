@@ -69,7 +69,7 @@ export default async function Audit({
                   href={`/audit?${resetQuery}`}
                   className="data-table-pagination__reset"
                 >
-                  Kembali ke awal
+                  Kembali ke halaman pertama
                 </Link>
               ) : (
                 <span>Menampilkan {result.events.length} catatan</span>
@@ -80,7 +80,7 @@ export default async function Audit({
                 <Link
                   href={`/audit?${prevQuery}`}
                   className="pagination-btn pagination-btn--prev"
-                  aria-label="Halaman sebelumnya"
+                  aria-label="Catatan sebelumnya"
                 >
                   ‹ Sebelumnya
                 </Link>
@@ -93,13 +93,13 @@ export default async function Audit({
                 <Link
                   href={`/audit?${nextQuery}`}
                   className="pagination-btn pagination-btn--next"
-                  aria-label="Halaman berikutnya"
+                  aria-label="Catatan berikutnya"
                 >
-                  Berikutnya ›
+                  Catatan berikutnya ›
                 </Link>
               ) : (
                 <span className="pagination-btn pagination-btn--disabled" aria-disabled="true">
-                  Berikutnya ›
+                  Catatan berikutnya ›
                 </span>
               )}
             </div>

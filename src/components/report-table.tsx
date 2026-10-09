@@ -1,3 +1,5 @@
+"use client";
+
 import type { ClassReport } from "@/contracts/reports";
 
 const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
@@ -88,7 +90,7 @@ export function ReportTable({
           {report.students.map((student) => (
             <tr key={student.studentId}>
               <th scope="row" className="col-student">
-                <strong>{student.fullName}</strong>
+                {student.fullName}
                 <small className="text-muted">{student.studentCode}</small>
               </th>
               <td className="col-total cell-status-h">{student.totals.H}</td>
@@ -127,41 +129,41 @@ export function ReportClassView({
   return (
     <div className="report-class-view">
       {/* Mobile totals card list */}
-      <div className="report-mobile-totals block md:hidden mb-4">
+      <div className="report-mobile-totals mb-4">
         <ul className="report-totals-list">
-          {report.students.map((student) => (
-            <li key={student.studentId}>
-              <div className="report-mobile-card">
-                <div className="report-mobile-card__header">
-                  <strong>{student.fullName}</strong>
-                  <small className="text-muted">{student.studentCode}</small>
+            {report.students.map((student) => (
+              <li key={student.studentId}>
+                <div className="report-mobile-card">
+                  <div className="report-mobile-card__header">
+                    <strong>{student.fullName}</strong>
+                    <small className="text-muted">{student.studentCode}</small>
+                  </div>
+                  <div className="report-mobile-card__totals">
+                    <span className="report-mobile-badge bg-emerald-100 text-emerald-800">
+                      {student.totals.H} Hadir
+                    </span>
+                    <span className="report-mobile-badge bg-amber-100 text-amber-800">
+                      {student.totals.S} Sakit
+                    </span>
+                    <span className="report-mobile-badge bg-sky-100 text-sky-800">
+                      {student.totals.I} Izin
+                    </span>
+                    <span className="report-mobile-badge bg-rose-100 text-rose-800">
+                      {student.totals.A} Alpa
+                    </span>
+                  </div>
+                  {student.missingDays > 0 ? (
+                    <small className="text-destructive">
+                      {student.missingDays} belum dicatat dari {student.expectedDaysToDate} hari wajib.
+                    </small>
+                  ) : (
+                    <small className="text-muted">Semua hari wajib tercatat lengkap.</small>
+                  )}
                 </div>
-                <div className="report-mobile-card__totals">
-                  <span className="report-mobile-badge bg-emerald-100 text-emerald-800">
-                    {student.totals.H} Hadir
-                  </span>
-                  <span className="report-mobile-badge bg-amber-100 text-amber-800">
-                    {student.totals.S} Sakit
-                  </span>
-                  <span className="report-mobile-badge bg-sky-100 text-sky-800">
-                    {student.totals.I} Izin
-                  </span>
-                  <span className="report-mobile-badge bg-rose-100 text-rose-800">
-                    {student.totals.A} Alpa
-                  </span>
-                </div>
-                {student.missingDays > 0 ? (
-                  <small className="text-destructive">
-                    {student.missingDays} belum dicatat dari {student.expectedDaysToDate} hari wajib.
-                  </small>
-                ) : (
-                  <small className="text-muted">Semua hari wajib tercatat lengkap.</small>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
       {/* Grid table (horizontal scrollable on mobile, sticky columns on desktop) */}
       <ReportTable report={report} dates={dates} />

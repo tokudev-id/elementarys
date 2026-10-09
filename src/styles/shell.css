@@ -283,26 +283,6 @@
   color: var(--primary-foreground);
   background: var(--foreground);
 }
-.ui-button--ghost {
-  background: transparent;
-  color: var(--muted-foreground);
-  border: 0;
-}
-.ui-button--ghost:hover {
-  background: var(--surface-muted);
-  color: var(--foreground);
-}
-.ui-button--destructive {
-  background: var(--destructive);
-  color: var(--primary-foreground);
-}
-.ui-button--destructive:hover {
-  background: var(--destructive);
-}
-.ui-button--link {
-  background: transparent;
-  color: var(--primary);
-}
 .loading-spinner {
   width: 16px;
   height: 16px;

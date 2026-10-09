@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { Pool, PoolClient } from "pg";
 import {
   yearInputSchema,
+  yearLabelSchema,
   yearPatchSchema,
   classInputSchema,
   classPatchSchema,
@@ -134,12 +135,34 @@ export async function updateAcademicYear(
           409,
         );
     }
-    const input = parseInput(yearInputSchema, {
-      label: data.label ?? before.label,
-      startsOn: data.startsOn ?? before.startsOn,
-      endsOnExclusive: data.endsOnExclusive ?? before.endsOnExclusive,
+    const effectiveLabel =
+      data.label !== undefined
+        ? parseInput(yearLabelSchema, data.label)
+        : before.label;
+    const effectiveStartsOn = data.startsOn ?? before.startsOn;
+    const effectiveEndsOn = data.endsOnExclusive ?? before.endsOnExclusive;
+    if (effectiveEndsOn <= effectiveStartsOn) {
+      throw new DomainError(
+        "INVALID_INPUT",
+        "Tanggal akhir harus setelah tanggal mulai.",
+        400,
+      );
+    }
+    const startMs = new Date(effectiveStartsOn).getTime();
+    const endMs = new Date(effectiveEndsOn).getTime();
+    if ((endMs - startMs) / (1000 * 60 * 60 * 24) > 400) {
+      throw new DomainError(
+        "INVALID_INPUT",
+        "Satu tahun ajaran maksimal 400 hari.",
+        400,
+      );
+    }
+    const input = {
+      label: effectiveLabel,
+      startsOn: effectiveStartsOn,
+      endsOnExclusive: effectiveEndsOn,
       isCurrent: data.isCurrent ?? before.isCurrent,
-    });
+    };
     if (input.startsOn !== before.startsOn || input.endsOnExclusive !== before.endsOnExclusive) {
       const used = (
         await client.query<{ exists: boolean }>(

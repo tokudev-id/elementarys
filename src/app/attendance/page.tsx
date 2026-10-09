@@ -50,7 +50,7 @@ export default async function Today({
   );
 
   const totalClasses = data.classes.length;
-  const pageSize = 12;
+  const pageSize = 24;
   const page = Math.max(1, Math.min(Number(selected.page ?? 1) || 1, Math.ceil(totalClasses / pageSize) || 1));
   const paginatedClasses =
     totalClasses > pageSize
