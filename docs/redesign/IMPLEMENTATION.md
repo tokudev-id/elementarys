@@ -10,7 +10,7 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 | UI-F1 | done | a147c1a; DataCard master/detail, sticky topbar (y===0), mobile filter sheet, pagination footer |
 | UI-F2 | done | useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary (>=3), skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
 | UI-F3 | done | DataCard & pagination tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; 111 integration, 18 domain, e2e redesign-f3 lulus |
-| UI-F4 | in_progress | Form inline → dialog/page dan perbaikan absensi |
+| UI-F4 | done | Form inline → dialog/page dan perbaikan absensi; 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
 | UI-R3 | not_started | Beranda dan rekap |
 | UI-R4 | not_started | Polish redesign, audit CSS, penerimaan akhir |
 
@@ -116,5 +116,37 @@ Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh ber
   - E2E: `tests/e2e/redesign-f3.spec.ts` memverifikasi seluruh fungsionalitas UI-F3 (pagination tahun ajaran, halaman form baru, audit cursor pagination & sheet diff visual, history absensi, rollover card, promote wizard multi-page selection, dan attendance card).
   - Screenshot bukti tersimpan di `docs/redesign/after/UI-F3/`: `tahun-ajaran-list.png`, `tahun-ajaran-new.png`, `audit-list-diff.png`, `attendance-history.png`, dan `promote-wizard.png`.
 
+## Form Inline → Dialog/Halaman dan Perbaikan Absensi UI-F4
 
+- **Detail Guru** (`/teachers/[teacherId]`):
+  - Seluruh form inline di dalam `TabsContent` (`TeacherClassesForm`, `AccountAccessForm`, `TeacherAccountForm`, `PasswordResetForm`) telah dihapus.
+  - Tab "Profil", "Kelas utama", dan "Akun & akses" diubah menjadi kartu ringkasan read-only yang bersih.
+  - Tombol aksi kontekstual membuka Dialog sheet: "Ubah kelas utama", "Hubungkan akun guru", "Buat akun guru", "Ubah akses", dan "Reset password". Penonaktifan akun menggunakan `ConfirmDialog`.
+- **Kalender** (`/calendar`):
+  - Direfaktor ke `CalendarClient`.
+  - Card 1: Grid bulan interaktif dengan stepper `‹ Bulan YYYY ›` (lokalisasi Indonesia, misal "‹ Oktober 2026 ›"). Klik tanggal libur/rutin bagi admin membuka dialog pengaturan pengecualian tanggal tersebut.
+  - Card 2: Hari belajar rutin ditampilkan dalam chip read-only plus tombol "Ubah" yang membuka dialog multiselect hari.
+  - Card 3: Pengecualian bulan ini dibungkus tabel paginasi `DataCard` dengan tombol "Tambah pengecualian" (dialog) dan konfirmasi hapus via `ConfirmDialog`. Form inline checkbox dan isian pengecualian di bawah grid dihilangkan total.
+- **Pengaturan & Persiapan** (`/settings`, `/setup`):
+  - `/settings`: Dibungkus dalam `DataCard`, dilengkapi banner info data uji `<StateBanner state="info" title="Data uji">`, pemilih zona waktu dengan quick chip (WIB, WITA, WIT) serta datalist IANA lengkap, dan input alasan hanya wajib bila zona waktu berubah.
+  - `/setup`: Checklist kesiapan sekolah dibungkus `DataCard` dengan badge status per langkah dan tautan navigasi langsung.
+- **Rollover** (`/academic-years/rollover`):
+  - Checklist persiapan tahun ajaran berikutnya dibungkus `DataCard`, tombol aksi aktivasi memicu dialog konfirmasi sebelum eksekusi rollover.
+- **Absensi** (`/attendance/[classId]`):
+  - Mobile bottom navigation disembunyikan (`hideBottomNav` pada shell layout) khusus di halaman input absensi mobile untuk memaksimalkan viewport kerja.
+  - Nested scroll dihilangkan: daftar siswa mengalir secara wajar di scroll utama halaman dengan sticky bar aksi di safe area bawah.
+  - Stepper tanggal disatukan ke kontrol ringkas `‹ Hari, Tanggal ›` dengan label accessible `aria-label="Buka kalender tanggal"`.
+  - Header disederhanakan: judul dan badge status berdampingan, tombol riwayat berupa ikon tombol accessible di header.
+  - Breakpoint mobile 360px memastikan ≥ 6 baris siswa tampak langsung di layar HP (390×844) tanpa perlu scroll.
+- **Login & Ganti Password** (`/login`, `/change-password`):
+  - Tampilan auth card terpusat dengan branding "Absensi Sekolah".
+  - Toggle tampilkan/sembunyikan password (Eye/EyeOff) yang accessible dengan `aria-label`.
+- **Pengujian & Bukti**:
+  - `pnpm lint`: 0 error, 0 warning.
+  - `pnpm typecheck`: 0 error.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - `pnpm playwright test`: 12 tests passed (termasuk `attendance-redesign.spec.ts`, `auth.spec.ts`, `school-master.spec.ts`, `settings.spec.ts`, `teachers.spec.ts`, dan `redesign-f4.spec.ts`).
+  - 13 screenshot bukti tersimpan di `docs/redesign/after/UI-F4/`:
+    `login-desktop.png`, `login-mobile.png`, `settings-desktop.png`, `settings-mobile.png`, `setup-desktop.png`, `calendar-desktop.png`, `calendar-mobile.png`, `calendar-dialog-mobile.png`, `rollover-desktop.png`, `teacher-detail-desktop.png`, `teacher-classes-dialog.png`, `teacher-account-tab.png`, `attendance-mobile.png`.
 

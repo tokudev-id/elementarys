@@ -1,6 +1,6 @@
 "use client";
 import { useState, type ChangeEvent, type MouseEvent } from "react";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { CalendarView } from "@/contracts/school-master";
 import { resolveSchoolDay } from "@/domain/calendar";
 import { monthDates } from "@/domain/report";
@@ -59,16 +59,43 @@ export function DateStepper({
     }
   }
   const dates = monthDates(month);
+  const formattedDate = new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
+
   return (
     <>
-      <div className="date-stepper">
+      <div className="date-stepper unified-date-stepper">
         <Button
           variant="ghost"
           onClick={previous}
           disabled={disabled}
           aria-label="Tanggal sebelumnya"
+          className="date-stepper-btn"
         >
-          <ChevronLeft aria-hidden="true" />
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Button>
+        <button
+          type="button"
+          onClick={openCalendar}
+          disabled={disabled}
+          className="date-stepper-label-btn"
+          aria-label="Buka kalender tanggal"
+        >
+          {formattedDate}
+        </button>
+        <Button
+          variant="ghost"
+          onClick={next}
+          disabled={disabled || date >= max}
+          aria-label="Tanggal berikutnya"
+          className="date-stepper-btn"
+        >
+          <ChevronRight aria-hidden="true" size={18} />
         </Button>
         <Field
           label="Tanggal absensi"
@@ -77,25 +104,8 @@ export function DateStepper({
           max={max}
           disabled={disabled}
           onChange={onChange}
+          className="sr-only"
         />
-        <Button
-          variant="ghost"
-          onClick={next}
-          disabled={disabled || date >= max}
-          aria-label="Tanggal berikutnya"
-        >
-          <ChevronRight aria-hidden="true" />
-        </Button>
-        {calendar && (
-          <Button
-            variant="ghost"
-            onClick={openCalendar}
-            disabled={disabled}
-            aria-label="Buka kalender tanggal"
-          >
-            <CalendarDays aria-hidden="true" />
-          </Button>
-        )}
       </div>
       {calendar && (
         <Dialog open={open} onClose={closeCalendar} title="Pilih tanggal absensi" variant="sheet">

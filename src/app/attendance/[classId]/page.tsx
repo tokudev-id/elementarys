@@ -47,6 +47,7 @@ export default async function ClassAttendance({
       actor={actor}
       currentPath="/attendance"
       breadcrumbs={[{ label: "Absensi", href: "/attendance" }, { label: data.className }]}
+      hideBottomNav={true}
     >
       <AttendanceForm
         key={`${data.classId}:${data.date}:${data.timezone}:${data.sessionVersion}`}

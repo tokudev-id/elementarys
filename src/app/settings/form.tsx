@@ -1,89 +1,188 @@
 "use client";
-import { useState, type FormEvent, type ChangeEvent } from "react";
-import type { SchoolSettings } from "@/contracts/settings";
+
+import { useMemo, useEffect } from "react";
+import type { SchoolSettings, SettingsInput } from "@/contracts/settings";
+import { settingsInputSchema } from "@/contracts/settings";
 import { isTimezone } from "@/domain/calendar";
 import { formatSchoolTime } from "@/domain/format";
 import { Field } from "@/components/field";
 import { Button } from "@/components/button";
 import { useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
+import { useZodForm } from "@/components/use-zod-form";
+import { FormErrorSummary } from "@/components/form-error-summary";
+import {
+  DataCard,
+  DataCardHeader,
+  DataCardContent,
+} from "@/components/data-card";
+
+const primaryIndonesianZones = [
+  { value: "Asia/Jakarta", label: "WIB (Asia/Jakarta · UTC+7)" },
+  { value: "Asia/Makassar", label: "WITA (Asia/Makassar · UTC+8)" },
+  { value: "Asia/Jayapura", label: "WIT (Asia/Jayapura · UTC+9)" },
+];
 
 export function SettingsForm({ initial }: { initial: SchoolSettings }) {
-  const [timezone, setTimezone] = useState<string | null>(null);
-  const selectedTimezone = timezone ?? initial.timezone;
-  function resetDraft() {
-    setTimezone(null);
-  }
-  const mutation = useMutation("/api/settings", "PATCH", resetDraft);
-  function changeTimezone(event: ChangeEvent<HTMLInputElement>) {
-    setTimezone(event.currentTarget.value);
-  }
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    await mutation.mutate({
+  const mutation = useMutation("/api/settings", "PATCH");
+
+  const form = useZodForm<SettingsInput>(settingsInputSchema, {
+    defaultValues: {
       expectedVersion: initial.version,
-      name: data.get("name"),
-      location: data.get("location") || null,
-      timezone: data.get("timezone"),
-      reason: data.get("reason") || null,
+      name: initial.name,
+      location: initial.location ?? "",
+      timezone: initial.timezone,
+      reason: "",
+    },
+    serverErrors: mutation.errors,
+    onSubmit: async (data: SettingsInput) => {
+      const isTimezoneChanged = data.timezone !== initial.timezone;
+      await mutation.mutate({
+        expectedVersion: initial.version,
+        name: data.name,
+        location: data.location || null,
+        timezone: data.timezone,
+        reason: isTimezoneChanged ? (data.reason || null) : null,
+      });
+    },
+  });
+
+  const selectedTimezone =
+    typeof form.values.timezone === "string"
+      ? form.values.timezone
+      : initial.timezone;
+  const isTimezoneChanged = selectedTimezone !== initial.timezone;
+
+  useEffect(() => {
+    form.reset({
+      expectedVersion: initial.version,
+      name: initial.name,
+      location: initial.location ?? "",
+      timezone: initial.timezone,
+      reason: "",
     });
+  }, [form, initial.version, initial.name, initial.location, initial.timezone]);
+
+  // Build complete list of IANA timezones
+  const ianaTimezones = useMemo(() => {
+    try {
+      if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
+        return (Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf("timeZone");
+      }
+    } catch {
+      // fallback
+    }
+    return [
+      "Asia/Jakarta",
+      "Asia/Makassar",
+      "Asia/Jayapura",
+      "Asia/Kuala_Lumpur",
+      "Asia/Singapore",
+      "Asia/Bangkok",
+      "UTC",
+    ];
+  }, []);
+
+  function handleSelectZone(event: React.MouseEvent<HTMLButtonElement>) {
+    const zone = event.currentTarget.getAttribute("data-zone");
+    if (zone) {
+      form.setValue("timezone", zone);
+    }
   }
+
   return (
-    <form className="resource-form" onSubmit={submit}>
-      <fieldset disabled={mutation.pending}>
-        <Field
-          key={`name:${initial.version}`}
-          label="Nama sekolah"
-          name="name"
-          defaultValue={initial.name}
-          required
-          maxLength={200}
-        />
-        <Field
-          key={`location:${initial.version}`}
-          label="Lokasi sekolah"
-          name="location"
-          defaultValue={initial.location ?? ""}
-          maxLength={300}
-        />
-        <Field
-          label="Zona waktu"
-          name="timezone"
-          value={selectedTimezone}
-          onChange={changeTimezone}
-          required
-          hint="Contoh: Asia/Jakarta atau Asia/Kuala_Lumpur."
-          error={mutation.errors.timezone?.join(" ")}
-        />
-        <p>
-          Waktu sekolah saat ini:{" "}
-          {isTimezone(initial.timezone)
-            ? formatSchoolTime(initial.serverNow, initial.timezone)
-            : "Zona waktu belum valid"}
-          . Setelah perubahan:{" "}
-          {isTimezone(selectedTimezone)
-            ? formatSchoolTime(initial.serverNow, selectedTimezone)
-            : "Zona waktu belum valid"}
-          .
-        </p>
-        <Field
-          label="Alasan perubahan zona waktu"
-          key={`reason:${initial.version}`}
-          name="reason"
-          error={mutation.errors.reason?.join(" ")}
-          maxLength={1000}
-          hint={
-            initial.hasAttendance
-              ? "Wajib bila zona waktu berubah. Tanggal absensi lama tetap sama."
-              : "Isi bila perlu menjelaskan perubahan."
-          }
-        />
-        <Button type="submit" pending={mutation.pending}>
-          Simpan identitas sekolah
-        </Button>
-      </fieldset>
-      <MutationFeedback mutation={mutation} />
-    </form>
+    <DataCard className="settings-form-card">
+      <DataCardHeader title="Identitas sekolah" />
+      <DataCardContent>
+        <form
+          className="resource-form redesigned-form"
+          {...form.formProps}
+        >
+          <FormErrorSummary errors={form.errorSummary} />
+          <fieldset disabled={mutation.pending} key={initial.version ?? "initial"}>
+            <Field
+              label="Nama sekolah"
+              required
+              maxLength={200}
+              {...form.register("name")}
+            />
+            <Field
+              label="Lokasi sekolah"
+              maxLength={300}
+              {...form.register("location")}
+            />
+
+            <div className="timezone-selection-group">
+              <div className="timezone-quick-buttons">
+                {primaryIndonesianZones.map((z) => (
+                  <Button
+                    key={z.value}
+                    type="button"
+                    variant={selectedTimezone === z.value ? "secondary" : "ghost"}
+                    data-zone={z.value}
+                    onClick={handleSelectZone}
+                  >
+                    {z.label}
+                  </Button>
+                ))}
+              </div>
+
+              <Field
+                label="Zona waktu"
+                required
+                list="iana-timezones"
+                hint="Pilih salah satu zona waktu Indonesia di atas atau cari zona IANA lainnya."
+                {...form.register("timezone")}
+              />
+              <datalist id="iana-timezones">
+                {primaryIndonesianZones.map((z) => (
+                  <option key={z.value} value={z.value}>
+                    {z.label}
+                  </option>
+                ))}
+                {ianaTimezones.map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz}
+                  </option>
+                ))}
+              </datalist>
+            </div>
+
+            <p className="timezone-preview-note">
+              Waktu sekolah saat ini:{" "}
+              {isTimezone(initial.timezone)
+                ? formatSchoolTime(initial.serverNow, initial.timezone)
+                : "Zona waktu belum valid"}
+              . Setelah perubahan:{" "}
+              {isTimezone(selectedTimezone)
+                ? formatSchoolTime(initial.serverNow, selectedTimezone)
+                : "Zona waktu belum valid"}
+              .
+            </p>
+
+            {isTimezoneChanged && (
+              <Field
+                label="Alasan perubahan zona waktu"
+                required={initial.hasAttendance}
+                maxLength={1000}
+                hint={
+                  initial.hasAttendance
+                    ? "Wajib bila zona waktu berubah. Tanggal absensi lama tetap sama."
+                    : "Isi bila perlu menjelaskan perubahan."
+                }
+                {...form.register("reason")}
+              />
+            )}
+
+            <div className="button-row">
+              <Button type="submit" pending={mutation.pending}>
+                Simpan identitas sekolah
+              </Button>
+            </div>
+          </fieldset>
+          <MutationFeedback mutation={mutation} />
+        </form>
+      </DataCardContent>
+    </DataCard>
   );
 }

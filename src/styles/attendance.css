@@ -56,6 +56,24 @@
   background: var(--primary-soft);
   color: var(--primary);
 }
+.roster-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.roster-info-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+}
+.roster-info-btn:hover {
+  background: var(--muted, #f1f5f9);
+}
 .roster-help {
   color: var(--muted-foreground);
   display: block;
@@ -64,10 +82,6 @@
 }
 .roster-scroll {
   position: relative;
-  max-height: clamp(220px, calc(100dvh - 340px), 560px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-padding-block: 8px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -306,7 +320,7 @@
   margin-top: 8px;
   accent-color: var(--primary);
 }
-@media (max-width: 399px) {
+@media (max-width: 359px) {
   .roster-row .status-choice-label {
     position: absolute;
     width: 1px;
@@ -315,10 +329,10 @@
     clip-path: inset(50%);
   }
 }
-@media (min-width: 400px) {
+@media (min-width: 360px) {
   .roster-scroll .roster-row {
-    grid-template-columns: 20px minmax(0, 1fr) 192px;
-    min-height: 64px;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    min-height: 48px;
   }
   .roster-row > .status-choices,
   .roster-row > .status-badge {

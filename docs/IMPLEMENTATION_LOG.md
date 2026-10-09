@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 mulai |
-| Task berikutnya | UI-F4 → UI-R3 → UI-R4 |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done |
+| Task berikutnya | UI-R3 → UI-R4 |
 
 ## 1. Aturan pencatatan
 
@@ -54,7 +54,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-F1 | Shell, card, kit tabel | UI-R2 | done | a147c1a; DataCard master/detail, sticky topbar 1440/768/390 (y===0), pagination card, mobile filter sheet; domain 18/integration 109/e2e redesign-f1+enrollments+students+mobile-sweep+shell lulus |
 | UI-F2 | Fondasi validasi form | UI-F1 | done | 0dc5e84; useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary, skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
 | UI-F3 | Daftar & pagination | UI-F2 | done | DataCard tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; integration 111, domain 18, e2e redesign-f3 lulus |
-| UI-F4 | Dialog/page form & absensi | UI-F2 | in_progress | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi) |
+| UI-F4 | Dialog/page form & absensi | UI-F2 | done | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi); 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
 | UI-R3 | Redesign rekap/beranda | UI-F3, UI-F4 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin (/) |
 | UI-R4 | Polish & verifikasi akhir | UI-R3 | not_started | Lighthouse, audit CSS lama, kriteria penerimaan brief bagian 8 |
 
@@ -429,6 +429,23 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - Integration tests: 111 passed (100%).
   - E2E: `tests/e2e/redesign-f3.spec.ts` lulus 100% (pagination tahun ajaran, halaman form terpisah, sheet diff audit visual & JSON mentah, riwayat absensi, rollover card, promote wizard multi-page selection, dan attendance card).
   - Bukti screenshot tersimpan di `docs/redesign/after/UI-F3/`: `tahun-ajaran-list.png`, `tahun-ajaran-new.png`, `audit-list-diff.png`, `attendance-history.png`, dan `promote-wizard.png`.
+
+### UI-F4: 9 Oktober 2026
+
+- Migrasi Form & Utility Sub-pages:
+  - **Detail Guru** (`/teachers/[teacherId]`): Tab Profil, Kelas utama, dan Akun & akses dijadikan read-only summary card. Aksi "Ubah kelas utama" membuka Dialog sheet (`TeacherClassesForm`), aksi "Hubungkan akun guru" membuka Dialog sheet (`TeacherAccountForm`). Pada `AccountPanel`, aksi "Ubah akses" membuka Dialog sheet (`AccountAccessForm`), "Reset password akun" membuka Dialog sheet (`PasswordResetForm`), dan "Nonaktifkan/Aktifkan akses" membuka `ConfirmDialog`. Seluruh form inline di dalam `TabsContent` resmi dihilangkan (Finding A15).
+  - **Kalender Sekolah** (`/calendar`): Direfaktor ke `CalendarClient`. Card 1 menyajikan grid bulan dengan stepper bulan "‹ Bulan YYYY ›", klik tanggal membuka Dialog sheet pengecualian tanggal. Card 2 menyajikan hari belajar rutin sebagai read-only chip dengan tombol "Ubah" membuka Dialog sheet. Card 3 menyajikan pengecualian kalender dalam tabel `DataCard` dengan pagination, tombol "Tambah pengecualian" membuka Dialog sheet, dan aksi hapus dikonfirmasi via `ConfirmDialog`. Form inline dihilangkan (Finding A8).
+  - **Konfigurasi Sekolah & Persiapan** (`/settings`, `/setup`): Form identitas sekolah dibungkus `DataCard`, dilengkapi quick selection chips (WIB, WITA, WIT) serta datalist IANA lengkap. Field alasan perubahan zona waktu kondisional hanya muncul saat zona waktu berubah dan wajib bila telah ada catatan absensi. Banner info "Data uji" menggunakan `<StateBanner state="info" title="Data uji">`. Checklist kesiapan sekolah dibungkus `DataCard` dengan status badge pada setiap item.
+  - **Rollover Tahun Ajaran** (`/academic-years/rollover`): Checklist persiapan tahun ajaran dibungkus `DataCard`, aktivasi tahun ajaran baru via `ActivateYearForm` dengan dialog konfirmasi.
+  - **Pencatatan Absensi** (`/attendance/[classId]`): Navigasi bawah (bottom navigation) disembunyikan di HP dengan prop `hideBottomNav` pada `AppShell` dan sticky action bar menempel di `bottom: env(safe-area-inset-bottom, 0px)`. Nested scrolling pada roster dihilangkan (`.roster-scroll` mengalir alami mengikuti scroll halaman). `DateStepper` disatukan menjadi kontrol tunggal "‹ Hari, Tanggal ›" dengan klik tanggal membuka dialog pemilih kalender. Header halaman dirampingkan (judul + badge 1 baris, deskripsi dihapus, teks bantu dipindah ke tooltip). Breakpoint mobile disesuaikan ke 360px sehingga minimal 6 baris siswa terlihat langsung pada viewport HP 390×844 tanpa scrolling (Finding A16).
+  - **Login & Ganti Password** (`/login`, `/change-password`): Form dibungkus dalam centered card layout (`.auth-card`) dengan latar belakang subtle, icon dan brand aplikasi "Absensi Sekolah", serta tombol toggle lihat/sembunyikan password (icon eye / eye-off) yang dapat diakses pembaca layar dengan `aria-label`.
+- Pengujian & Verifikasi Kualitas:
+  - ESLint: 0 errors, 0 warnings (`pnpm lint` passed).
+  - TypeScript: 0 errors (`pnpm typecheck` passed).
+  - Domain tests: 18 passed (`pnpm test:domain`).
+  - Integration tests: 111 passed (`pnpm test:integration`).
+  - Playwright E2E: `attendance-redesign.spec.ts` (100% passed), `auth.spec.ts` (100% passed), `school-master.spec.ts` (100% passed), `settings.spec.ts` (100% passed), `teachers.spec.ts` (100% passed), dan `redesign-f4.spec.ts` (100% passed).
+  - Bukti screenshot lengkap tersimpan di `docs/redesign/after/UI-F4/`: `login-desktop.png`, `login-mobile.png`, `settings-desktop.png`, `settings-mobile.png`, `setup-desktop.png`, `calendar-desktop.png`, `calendar-mobile.png`, `calendar-dialog-mobile.png`, `rollover-desktop.png`, `teacher-detail-desktop.png`, `teacher-classes-dialog.png`, `teacher-account-tab.png`, dan `attendance-mobile.png`.
 
 
 

@@ -68,17 +68,19 @@ test("30 pupils and three absences take five taps with a complete named confirma
     for (const [index, status] of ["S", "I", "A"].entries())
       await rows.nth(index).locator(`label[data-status="${status}"]`).tap();
     await expectNoPageOverflow(page);
-    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(
-      844 * 2,
-    );
     const heights = await rows.evaluateAll((elements) =>
       elements.map((element) => element.getBoundingClientRect().height),
     );
     expect(Math.max(...heights)).toBeLessThanOrEqual(96);
+    // UI-F4 (A16): No nested scroll - roster flows naturally with page
     const scroller = await page
       .getByRole("region", { name: "Daftar siswa dan status kehadiran" })
       .evaluate((element) => ({ client: element.clientHeight, scroll: element.scrollHeight }));
-    expect(scroller.scroll).toBeGreaterThan(scroller.client);
+    expect(scroller.scroll).toBe(scroller.client);
+    // UI-F4 (A16): At least 6 pupil rows visible in 390x844 without scrolling
+    for (let i = 0; i < 6; i++) {
+      await expect(rows.nth(i)).toBeInViewport();
+    }
     await page.getByRole("button", { name: "Simpan absensi", exact: true }).tap();
     const confirmation = page.getByRole("dialog");
     for (const name of ["Nama siswa 01", "Nama siswa 02", "Nama siswa 03"])

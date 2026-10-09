@@ -1209,3 +1209,179 @@
   overflow-x: auto;
   max-height: 200px;
 }
+
+/* Auth Centered Card Layout */
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  background: var(--surface-muted, #f8fafc);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.auth-card__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-card__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius, 8px);
+  background: var(--primary-soft, #eff6ff);
+  color: var(--primary, #2563eb);
+}
+
+.auth-card__brand-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground, #0f172a);
+}
+
+.auth-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.auth-card__title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--foreground, #0f172a);
+}
+
+.auth-card__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground, #64748b);
+}
+
+.auth-card .account-form {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  gap: 1rem;
+}
+
+.auth-card__footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+
+/* Password field control */
+.ui-field__control {
+  position: relative;
+  width: 100%;
+}
+
+.ui-field__control--password input {
+  padding-right: 2.75rem;
+}
+
+.field-password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground, #64748b);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.field-password-toggle:hover {
+  background: var(--muted, #f1f5f9);
+  color: var(--foreground, #0f172a);
+}
+
+.field-password-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.page-stack {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.timezone-quick-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.timezone-preview-note {
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.empty-text--padded {
+  padding: 16px;
+}
+
+.cell-actions-header {
+  width: 80px;
+  text-align: right;
+}
+
+.cell-actions {
+  text-align: right;
+}
+
+.calendar-overrides-pagination {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-pagination-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.calendar-weekdays-grid {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.calendar-override-school-day {
+  margin: 12px 0;
+}
+
+
+
