@@ -175,8 +175,35 @@ Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh ber
   - `pnpm typecheck`: 0 error.
   - `pnpm test:domain`: 18 passed (100%).
   - `pnpm test:integration`: 111 passed (100%).
-  - Playwright E2E: Seluruh 20 test suite lulus (termasuk `redesign-r3.spec.ts`, `reports.spec.ts`, `auth.spec.ts`, `mobile-sweep.spec.ts`, `shell.spec.ts`, `attendance-redesign.spec.ts`, `permissions.spec.ts`, `redesign-f1.spec.ts`, `redesign-f2.spec.ts`, `redesign-f3.spec.ts`, `redesign-f4.spec.ts`).
   - 6 screenshot bukti tersimpan di `docs/redesign/after/UI-R3/`:
     `dashboard-admin-desktop.png`, `dashboard-admin-mobile.png`, `dashboard-teacher-desktop.png`, `reports-single-class-desktop.png`, `reports-mobile-totals.png`, `reports-mobile-table.png`.
+
+## Polish dan Verifikasi Akhir UI-R4
+
+- **Audit & Pembersihan CSS Lama**:
+  - Dihapus: Kelas-kelas legacy yang sudah tidak digunakan pasca-redesign pada `src/app/globals.css`, `src/styles/components.css`, `src/styles/shell.css`, dan `src/styles/attendance.css` (`.app-header`, `.app-nav`, `.ui-dialog` lama, `.class-list`, `.class-row`, `.attendance-links`, `.attendance-toolbar`, `.dashboard-teacher-card`, `.report-toolbar-card`, `.roster-help`, `.ui-button--ghost`, `.ui-button--destructive`, `.ui-button--link`).
+  - `@media print` diperbarui untuk menyembunyikan shell modern (`.shell-topbar`, `.shell-sidebar`, `.shell-rail`, `.shell-bottom-nav`) dan mengompakkan `.report-legend-chips` & `.print-signature` sehingga laporan cetak A4 landscape pas 1 halaman per kelas 10 siswa.
+- **Audit Kontras Warna WCAG**:
+  - `scripts/redesign/contrast.ts` dijalankan pada seluruh 19 pasangan warna/token.
+  - Hasil: Seluruh 19 pasangan warna berstatus **PASS** (memenuhi kriteria WCAG AA 4.5:1 untuk teks normal dan 3:1 untuk kontrol UI & teks tebal/besar). Bukti lengkap tercatat di `docs/redesign/CONTRAST.md`.
+- **Benchmark Pagination 600 Siswa**:
+  - Pengukuran waktu render menggunakan `scripts/redesign/measure-students.ts` diulang secara mandiri pada build produksi lokal:
+    - **Before (UI-R2 baseline)**: 600 baris dirender langsung ke DOM, median **128.07ms**, rerata 135.24ms.
+    - **After (UI-R4 paginasi)**: 25 baris per halaman, median **108.65ms**, rerata 110.12ms (pengurangan latensi ~15.2% dan pengurangan elemen DOM drastis dari 600 menjadi 25 baris).
+    - Hasil pengukuran tersimpan di `docs/redesign/students-after.json`.
+- **Verifikasi Kriteria Penerimaan Brief Bagian 8**:
+  - Seluruh form menggunakan `noValidate: true` dan inline Indonesian validation via `useZodForm`.
+  - Tidak ada form yang dirender langsung di halaman list (Siswa, Guru, Kelas, Tahun Ajaran) maupun di dalam `TabsContent` detail.
+  - Tidak ada style inline dan tidak ada inline JSX handler (`onClick={() => ...}`), seluruh handler didefinisikan secara bernama.
+  - Sticky topbar terverifikasi di semua resolusi (1440, 768, 390).
+  - Alur 5 ketukan absensi 30 siswa terverifikasi di `attendance-redesign.spec.ts`.
+  - Seluruh 28 rute aplikasi bebas overflow horizontal pada 6 variasi viewport (portrait, landscape, keyboard 360x340) di `mobile-sweep.spec.ts`.
+- **Pengujian & Verifikasi Akhir**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm typecheck`: 0 errors.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - Playwright E2E: Seluruh 26 test suite lulus tanpa kegagalan (100%).
+
 
 

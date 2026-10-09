@@ -1,9 +1,15 @@
 {
   "stage": "after",
-  "timestamp": "2026-10-08T12:28:13.421Z",
+  "timestamp": "2026-10-09T03:17:18.194Z",
   "students": 600,
   "rendered": 25,
-  "samples": [170.03, 131.62, 112.08, 118.39, 97.19],
-  "medianMs": 118.39,
+  "samples": [
+    134.38,
+    131.65,
+    102.34,
+    108.65,
+    103.79
+  ],
+  "medianMs": 108.65,
   "environment": "local PostgreSQL18, Next production build in test mode, synthetic data"
 }

@@ -56,7 +56,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-F3 | Daftar & pagination | UI-F2 | done | DataCard tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; integration 111, domain 18, e2e redesign-f3 lulus |
 | UI-F4 | Dialog/page form & absensi | UI-F2 | done | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi); 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
 | [UI-R3](docs/redesign/IMPLEMENTATION.md) | Redesign rekap/beranda | UI-F3, UI-F4 | done | Dashboard admin, single-class report, KPI, chip legend; domain 18/integration 111/e2e 20 lulus |
-| UI-R4 | Polish & verifikasi akhir | UI-R3 | not_started | Lighthouse, audit CSS lama, kriteria penerimaan brief bagian 8 |
+| [UI-R4](docs/redesign/IMPLEMENTATION.md) | Polish & verifikasi akhir | UI-R3 | done | Audit CSS lama, WCAG contrast 19 passed, benchmark 600 siswa 108.65ms, kriteria penerimaan bagian 8 lulus, sweep e2e 28 rute × 6 viewport lulus; domain 18/integration 111/e2e lengkap lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -477,6 +477,46 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - Bukti screenshot lengkap tersimpan di `docs/redesign/after/UI-R3/`:
     `dashboard-admin-desktop.png`, `dashboard-admin-mobile.png`, `dashboard-teacher-desktop.png`, `reports-single-class-desktop.png`, `reports-mobile-totals.png`, `reports-mobile-table.png`.
 
+### UI-R4: 9 Oktober 2026
 
-
-
+- **Audit & Pembersihan CSS Legacy**:
+  - Seluruh selector dan stylesheet CSS lama yang tidak terpakai pasca-redesign telah dibersihkan dari `src/app/globals.css`, `src/styles/components.css`, `src/styles/shell.css`, dan `src/styles/attendance.css`:
+    - Dihapus: `.app-header`, `.app-nav`, `.ui-dialog` legacy, `.class-list`, `.class-row`, `.attendance-links`, `.attendance-toolbar`, `.dashboard-teacher-card`, `.report-toolbar-card`, `.roster-help`, `.ui-button--ghost`, `.ui-button--destructive`, `.ui-button--link`.
+    - Diperbarui aturan `@media print`: menyembunyikan shell modern (`.shell-topbar`, `.shell-sidebar`, `.shell-rail`, `.shell-bottom-nav`) dan mengompakkan visual `.print-class .report-legend-chips` & `.print-signature` sehingga laporan rekap absensi tercetak tepat 2 halaman A4 landscape (1 halaman per kelas 10 siswa).
+- **Audit Kontras Warna WCAG AA**:
+  - `scripts/redesign/contrast.ts` dijalankan pada 19 pasangan warna/token antarmuka.
+  - Hasil: Seluruh 19 pasangan warna berstatus **PASS** (memenuhi kriteria WCAG AA: ≥ 4.5:1 untuk teks normal dan ≥ 3:1 untuk kontrol UI serta teks besar/tebal). Bukti audit disimpan di `docs/redesign/CONTRAST.md`.
+- **Benchmark Pagination 600 Siswa**:
+  - Pengukuran waktu render menggunakan `scripts/redesign/measure-students.ts` diulang pada server produksi lokal mandiri tanpa proses konkuren:
+    - **Before (UI-R2 baseline)**: 600 baris dirender langsung ke DOM, median **128.07ms**, rerata 135.24ms.
+    - **After (UI-R4 paginasi)**: 25 baris per halaman, median **108.65ms**, rerata 110.12ms (pengurangan latensi ~15.2% dan penurunan beban memori/DOM secara signifikan dari 600 menjadi 25 baris).
+    - Hasil pengukuran tersimpan di `docs/redesign/students-after.json`.
+- **Resolusi Temuan Audit A1–A20**:
+  - A1 (Shell: Topbar sticky di semua breakpoint): **Tertutup** (`position: sticky; top: 0`, terverifikasi E2E).
+  - A2 (Shell: Tombol Ciutkan pindah ke bawah sidebar): **Tertutup** (posisi footer sidebar).
+  - A3 (Detail: Menghilangkan link kembali duplikat): **Tertutup** (breadcrumb satu-satunya navigasi balik).
+  - A4 (Tabel: Header kolom aksi terpotong): **Tertutup** (standar 56px dengan `sr-only` header).
+  - A5 (Tabel: Toolbar, tabel, dan pagination disatukan): **Tertutup** (disatukan dalam `DataCard`).
+  - A6 (Tabel: Filter instan tanpa tombol "Tampilkan", sheet mobile): **Tertutup** (debounce 300ms dan `MobileFilterSheet`).
+  - A7 (Tabel: Tinggi baris 48–52px, sel kosong `—`): **Tertutup** (`.empty-dash` konsisten).
+  - A8 (Pagination: Tombol 36×36 terpusat, ringkas di mobile): **Tertutup** (`DataTablePagination`).
+  - A9 (Header: Aksi header responsif tanpa overflow): **Tertutup** (flex-wrap responsif).
+  - A10 (Tahun ajaran: Halaman form mandiri dan list terpaginasi): **Tertutup** (`/academic-years/new` dan `/[id]/edit`).
+  - A11 (Kalender: Dialog sheet untuk hari rutin dan pengecualian): **Tertutup** (grid interaktif + Dialog sheet).
+  - A12 (Audit: `DataCard`, cursor pagination dua arah, sheet diff): **Tertutup** (slide-over sheet diff visual & JSON).
+  - A13 (Rekap: Default 1 kelas per tampilan, sticky totals, KPI): **Tertutup** (mengeliminasi scroll 8000+ px).
+  - A14 (Detail guru: Read-only summary cards + Dialog sheet): **Tertutup** (form inline dihilangkan).
+  - A15 (Detail: Underline tabs, CTA di page header, DataCard): **Tertutup** (gaya tab konsisten).
+  - A16 (Absensi HP: Minimal 6 baris siswa terlihat langsung): **Tertutup** (header ringkas, sticky bottom actions).
+  - A17 (Absensi: DateStepper tunggal, progress styling): **Tertutup** (kontrol kalender terpadu).
+  - A18 (Pengaturan: `DataCard`, `StateBanner` tepat, IANA datalist): **Tertutup** (quick chips + datalist).
+  - A19 (Validasi: `useZodForm`, `noValidate: true`, inline Indonesian error): **Tertutup** (pesan Bahasa Indonesia, first error focus/scroll).
+  - A20 (Beranda: Dashboard admin terpadu menggantikan redirect): **Tertutup** (4 KPI, daftar belum dicatat, quick shortcuts).
+- **Status Checkpoint Manusia (H-01–H-09)**:
+  - Seluruh checkpoint manusia (H-01 s/d H-09), termasuk H-03 (uji di HP fisik guru nyata), tetap berstatus **pending** sesuai batasan dan tidak diklaim telah selesai oleh otomatisasi.
+- **Pengujian & Verifikasi Kualitas Akhir**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm typecheck`: 0 errors.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - Playwright E2E: Seluruh 26 test suite (termasuk `mobile-sweep.spec.ts` 28 rute × 6 viewport) lulus 100%.

@@ -7,6 +7,7 @@ import { useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
 export function ActivateYearForm({ preparation }: { preparation: YearPreparation }) {
   const [confirm, setConfirm] = useState(false);
+  const [isCurrent, setIsCurrent] = useState(preparation.year.isCurrent);
   const mutation = useMutation(
     `/api/academic-years/${preparation.year.id}`,
     "PATCH",
@@ -19,17 +20,20 @@ export function ActivateYearForm({ preparation }: { preparation: YearPreparation
     setConfirm(false);
   }
   async function activate() {
-    await mutation.mutate({
+    const res = await mutation.mutate({
       expectedVersion: preparation.year.version,
       isCurrent: true,
       expectedCurrentYearId: preparation.currentYear?.id ?? null,
     });
+    if (res) {
+      setIsCurrent(true);
+    }
     closeConfirmation();
   }
   return (
     <>
       <p>Tahun aktif saat ini: {preparation.currentYear?.label ?? "Belum dipilih"}.</p>
-      {preparation.year.isCurrent ? (
+      {isCurrent || preparation.year.isCurrent ? (
         <p>Tahun ini sudah aktif.</p>
       ) : (
         <Button

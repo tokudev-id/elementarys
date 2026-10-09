@@ -40,11 +40,13 @@ export function PlacementForm({
   classes,
   years,
   today,
+  onSuccess,
 }: {
   student: StudentDetail;
   classes: ClassView[];
   years: AcademicYearView[];
   today: string;
+  onSuccess?: () => void;
 }) {
   const [mode, setMode] = useState<"transfer" | "placement">("transfer");
   const mutation = useMutation(
@@ -72,7 +74,13 @@ export function PlacementForm({
       },
       serverErrors: mutation.errors,
       onSubmit: async (data: PlacementFormData) => {
-        await mutation.mutate(data);
+        const res = await mutation.mutate({
+          ...data,
+          expectedVersion: student.version,
+        });
+        if (res) {
+          onSuccess?.();
+        }
       },
     },
   );
@@ -81,6 +89,11 @@ export function PlacementForm({
     const nextMode = event.currentTarget.value as "transfer" | "placement";
     setMode(nextMode);
     form.setValue("mode", nextMode);
+    if (nextMode === "placement") {
+      form.unsetValue("fromEnrollmentId");
+    } else {
+      form.setValue("fromEnrollmentId", activeEnrollments[0]?.id ?? "");
+    }
   }
 
   return (
@@ -163,10 +176,12 @@ export function EndEnrollmentForm({
   student,
   enrollment,
   today,
+  onSuccess,
 }: {
   student: StudentDetail;
   enrollment: StudentDetail["enrollments"][number];
   today: string;
+  onSuccess?: () => void;
 }) {
   const future = enrollment.startsOn > today;
   const mutation = useMutation(
@@ -184,11 +199,14 @@ export function EndEnrollmentForm({
       },
       serverErrors: mutation.errors,
       onSubmit: async (data: EndFormData) => {
-        await mutation.mutate({
+        const res = await mutation.mutate({
           expectedVersion: student.version,
           endsOnExclusive: future ? enrollment.startsOn : data.endsOnExclusive,
           reason: data.reason,
         });
+        if (res) {
+          onSuccess?.();
+        }
       },
     },
   );
@@ -242,7 +260,13 @@ type ArchiveFormData = {
   reason: string;
 };
 
-export function StudentArchiveForm({ student }: { student: StudentDetail }) {
+export function StudentArchiveForm({
+  student,
+  onSuccess,
+}: {
+  student: StudentDetail;
+  onSuccess?: () => void;
+}) {
   const mutation = useMutation(`/api/students/${student.id}`, "PATCH");
 
   const form = useZodForm(
@@ -255,7 +279,10 @@ export function StudentArchiveForm({ student }: { student: StudentDetail }) {
       },
       serverErrors: mutation.errors,
       onSubmit: async (data: ArchiveFormData) => {
-        await mutation.mutate(data);
+        const res = await mutation.mutate(data);
+        if (res) {
+          onSuccess?.();
+        }
       },
     },
   );

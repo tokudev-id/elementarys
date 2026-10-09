@@ -36,12 +36,15 @@ test("all pages reflow across portrait/landscape, touch targets and reduced keyb
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     const routes = [
+      "/",
       "/attendance",
       `/attendance/${classId}?date=${date}`,
       `/attendance/${classId}/history?date=${date}`,
       `/reports?${query}`,
       `/reports/print?${query}`,
       "/academic-years",
+      "/academic-years/new",
+      `/academic-years/${year}/edit`,
       `/academic-years/rollover?yearId=${year}`,
       `/classes?yearId=${year}`,
       "/classes/new",

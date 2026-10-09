@@ -76,7 +76,7 @@ test("UI-F3: pagination and DataCard on remaining pages, separate form pages, au
   // Verify pagination exists and works
   const paginationNav = page.locator(".data-pagination");
   await expect(paginationNav).toBeVisible();
-  const nextBtn = page.getByRole("link", { name: "Halaman berikutnya", exact: true });
+  const nextBtn = page.getByRole("link", { name: /Berikutnya/ });
   if (await nextBtn.isVisible()) {
     await nextBtn.click();
     await expect(page).toHaveURL(/page=2/);
@@ -129,17 +129,17 @@ test("UI-F3: pagination and DataCard on remaining pages, separate form pages, au
   await expect(sheetContent).not.toBeVisible();
 
   // Verify cursor pagination: click "Halaman berikutnya"
-  const nextCursorBtn = page.getByRole("link", { name: "Halaman berikutnya", exact: true });
+  const nextCursorBtn = page.getByRole("link", { name: /berikutnya/i });
   await expect(nextCursorBtn).toBeVisible();
   await nextCursorBtn.click();
   await expect(page).toHaveURL(/cursor=/);
 
   // "Halaman sebelumnya" is now active
-  const prevCursorBtn = page.getByRole("link", { name: "Halaman sebelumnya", exact: true });
+  const prevCursorBtn = page.getByRole("link", { name: /sebelumnya/i });
   await expect(prevCursorBtn).toBeVisible();
 
   // Click "Kembali ke awal"
-  await page.getByRole("link", { name: "Kembali ke awal", exact: true }).click();
+  await page.getByRole("link", { name: /kembali ke/i }).click();
   await expect(page).not.toHaveURL(/cursor=/);
   await expect(page).not.toHaveURL(/before=/);
 
@@ -147,7 +147,7 @@ test("UI-F3: pagination and DataCard on remaining pages, separate form pages, au
   await page.goto(`/attendance/${classId}/history?date=2026-10-08`);
   await expect(page.locator(".data-card")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Riwayat sesi/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Kembali ke catatan", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Kembali ke catatan/ })).toBeVisible();
 
   await page.screenshot({ path: "docs/redesign/after/UI-F3/attendance-history.png" });
 

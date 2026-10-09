@@ -166,7 +166,7 @@ export function StudentDetailView({
         </TabsContent>
         <TabsContent value="history">
           <DataCard id="riwayat-penempatan">
-            <DataCardHeader title="Riwayat penempatan" count={student.enrollments.length} />
+            <DataCardHeader title="Riwayat penempatan" />
             <DataCardContent>
               {student.enrollments.length ? (
                 <ol className="placement-timeline">
@@ -269,13 +269,26 @@ export function StudentDetailView({
             onClose={close}
             title="Pindah kelas / penempatan"
           >
-            <PlacementForm student={student} classes={classes} years={years} today={today} />
+            <PlacementForm
+              key={`placement-${student.version}`}
+              student={student}
+              classes={classes}
+              years={years}
+              today={today}
+              onSuccess={close}
+            />
           </Dialog>
           <Dialog open={dialog.action === "end"} onClose={close} title="Tutup penempatan">
             {openEnrollments.map((item) => (
               <section key={item.id}>
                 <h3>{item.className}</h3>
-                <EndEnrollmentForm student={student} enrollment={item} today={today} />
+                <EndEnrollmentForm
+                  key={`end-${item.id}-${student.version}`}
+                  student={student}
+                  enrollment={item}
+                  today={today}
+                  onSuccess={close}
+                />
               </section>
             ))}
           </Dialog>
@@ -284,7 +297,7 @@ export function StudentDetailView({
             onClose={close}
             title={student.archivedAt ? "Aktifkan kembali siswa?" : "Arsipkan siswa?"}
           >
-            <StudentArchiveForm student={student} />
+            <StudentArchiveForm key={`archive-${student.version}`} student={student} onSuccess={close} />
           </Dialog>
         </>
       )}
