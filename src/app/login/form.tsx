@@ -34,7 +34,7 @@ export function AccountForm({ change = false }: { change?: boolean }) {
                   "Belum berhasil. Periksa isian lalu coba kembali."),
           );
         } else {
-          router.push("/");
+          router.push("/attendance");
           router.refresh();
         }
       } catch {
@@ -70,7 +70,7 @@ export function AccountForm({ change = false }: { change?: boolean }) {
               "Belum berhasil. Periksa isian lalu coba kembali.",
           );
         } else {
-          router.push("/");
+          router.push("/attendance");
           router.refresh();
         }
       } catch {

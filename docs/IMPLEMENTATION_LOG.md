@@ -7,8 +7,8 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done |
-| Task berikutnya | UI-R3 → UI-R4 |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done |
+| Task berikutnya | UI-R4 |
 
 ## 1. Aturan pencatatan
 
@@ -55,7 +55,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-F2 | Fondasi validasi form | UI-F1 | done | 0dc5e84; useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary, skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
 | UI-F3 | Daftar & pagination | UI-F2 | done | DataCard tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; integration 111, domain 18, e2e redesign-f3 lulus |
 | UI-F4 | Dialog/page form & absensi | UI-F2 | done | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi); 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
-| UI-R3 | Redesign rekap/beranda | UI-F3, UI-F4 | not_started | KPI/proyeksi, rekap satu kelas, dashboard admin (/) |
+| [UI-R3](docs/redesign/IMPLEMENTATION.md) | Redesign rekap/beranda | UI-F3, UI-F4 | done | Dashboard admin, single-class report, KPI, chip legend; domain 18/integration 111/e2e 20 lulus |
 | UI-R4 | Polish & verifikasi akhir | UI-R3 | not_started | Lighthouse, audit CSS lama, kriteria penerimaan brief bagian 8 |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
@@ -446,6 +446,37 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - Integration tests: 111 passed (`pnpm test:integration`).
   - Playwright E2E: `attendance-redesign.spec.ts` (100% passed), `auth.spec.ts` (100% passed), `school-master.spec.ts` (100% passed), `settings.spec.ts` (100% passed), `teachers.spec.ts` (100% passed), dan `redesign-f4.spec.ts` (100% passed).
   - Bukti screenshot lengkap tersimpan di `docs/redesign/after/UI-F4/`: `login-desktop.png`, `login-mobile.png`, `settings-desktop.png`, `settings-mobile.png`, `setup-desktop.png`, `calendar-desktop.png`, `calendar-mobile.png`, `calendar-dialog-mobile.png`, `rollover-desktop.png`, `teacher-detail-desktop.png`, `teacher-classes-dialog.png`, `teacher-account-tab.png`, dan `attendance-mobile.png`.
+
+### UI-R3: 9 Oktober 2026
+
+- Redesign Beranda Admin (`/`) dan Rekap Bulanan (`/reports`):
+  - **Beranda Admin** (`/`):
+    - Menggantikan redirect instan: rute `/` difungsikan sebagai dashboard operasional terpadu bagi administrator sekolah (`roles: ["admin"]`). Pengguna guru otomatis diarahkan ke tugas utama pencatatan di `/attendance`.
+    - **4 Kartu KPI Sekolah**: Kehadiran hari ini (%), Kelas sudah dicatat (x/y kelas), Siswa aktif, dan Tidak hadir hari ini (Sakit/Izin/Alpa). Pada hari libur sekolah nilai kehadiran otomatis ditampilkan sebagai "—".
+    - **Card Belum Dicatat Hari Ini**: Dibungkus `DataCard` dengan daftar kelas yang belum tercatat presensinya hari ini, tombol aksi langsung "Catat", dan pagination 10 item per halaman (`DataTablePagination`). Menampilkan banner sukses bila seluruh kelas telah tercatat.
+    - **Card Pintasan Cepat**: Grid 5 tombol pintasan aksi operasional (Rekap bulan ini dengan style primer, Presensi harian, Kalender sekolah, Tambah siswa, Pengaturan sekolah).
+    - **Setup Checklist & Mode Data Uji**: Komponen `SetupChecklist` disematkan di posisi teratas saat persiapan sekolah belum lengkap, disertai banner informasi "Data uji" bila aplikasi menggunakan data simulasi/sintetis.
+  - **Rekap Bulanan** (`/reports`):
+    - **Pengecualian Satu Kelas (Menutup Temuan A13)**: Tampilan default merender 1 kelas terpilih (mengeliminasi scroll vertikal ekstrem 8000+ px dari penumpukan seluruh kelas). Pilihan "Seluruh kelas" tetap disediakan pada filter dropdown untuk keperluan ekspor multi-kelas atau cetak.
+    - **Card Filter Toolbar**: Dibungkus `DataCard` dengan form method GET beratribut `noValidate: true`: Tahun ajaran, Bulan (`type="month"`), dan Kelas dengan tombol submit "Tampilkan rekap". Aksi toolbar kanan memuat tombol "Unduh Excel" dan tautan ke halaman cetak.
+    - **Card KPI Kelas Terpilih**: 4 kartu ringkasan KPI (Rata-rata kehadiran %, Total Sakit, Total Izin, Total Alpa) serta status kelengkapan catatan (badge lengkap atau peringatan catatan siswa yang belum dicatat).
+    - **Pemberitahuan Perubahan Catatan**: `<ReportChangeNotice>` menampilkan banner peringatan bila ada pembaruan data absensi setelah ekspor Excel/cetak terakhir dilakukan.
+    - **Legend Status Chips**: Menggantikan teks paragraf dengan chips visual informatif (`.report-legend-chips`) bersudut membulat dengan token status warna (H Hadir hijau, S Sakit kuning, I Izin biru, A Alpa merah, ? Belum dicatat, L Libur abu-abu, - Luar penempatan, . Hari mendatang).
+    - **Tabel Responsif & Sticky Totals**:
+      - Kolom Siswa sticky di sebelah kiri.
+      - Kolom ringkasan total H, S, I, A ditempatkan di sisi kiri tabel (segera setelah nama siswa sebelum deretan tanggal harian) agar rekap angka langsung terbaca tanpa perlu menggeser horizontal.
+      - Header tanggal memuat angka tanggal dan singkatan hari (Sen, Sel, Rab, Kam, Jum, Sab, Min).
+      - Kolom hari libur diberi latar abu-abu netral (`--surface-muted`).
+      - Pada viewport mobile (< 768px), daftar kartu ringkasan siswa (`.report-mobile-totals`) ditampilkan dengan 4 angka status, sementara tabel grid tanggal harian terisolasi dalam scroll horizontal independen.
+- Pengujian & Verifikasi Kualitas:
+  - ESLint: 0 errors, 0 warnings (`pnpm lint`).
+  - TypeScript: 0 errors (`pnpm typecheck`).
+  - Domain tests: 18 passed (`pnpm test:domain`).
+  - Integration tests: 111 passed (`pnpm test:integration`).
+  - Playwright E2E: 20 tests passed di port 3104 (`attendance-redesign.spec.ts`, `auth.spec.ts`, `mobile-sweep.spec.ts`, `permissions.spec.ts`, `redesign-f1.spec.ts`, `redesign-f2.spec.ts`, `redesign-f3.spec.ts`, `redesign-f4.spec.ts`, `redesign-r3.spec.ts`, `reports.spec.ts`, `shell.spec.ts`).
+  - Bukti screenshot lengkap tersimpan di `docs/redesign/after/UI-R3/`:
+    `dashboard-admin-desktop.png`, `dashboard-admin-mobile.png`, `dashboard-teacher-desktop.png`, `reports-single-class-desktop.png`, `reports-mobile-totals.png`, `reports-mobile-table.png`.
+
 
 
 

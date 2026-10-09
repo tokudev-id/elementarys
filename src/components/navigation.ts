@@ -6,7 +6,7 @@ export type NavigationItem = {
   ready: boolean;
 };
 export const navigation: readonly NavigationItem[] = [
-  { id: "home", label: "Beranda", href: "/", roles: ["admin", "teacher"], ready: false },
+  { id: "home", label: "Beranda", href: "/", roles: ["admin"], ready: true },
   {
     id: "attendance",
     label: "Absensi",

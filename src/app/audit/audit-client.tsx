@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Filter } from "lucide-react";
 import type { AuditEvent } from "@/contracts/audit";
@@ -225,6 +225,16 @@ export function AuditClient({
 }) {
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function checkMobile() {
+      setIsMobile(window.innerWidth < 768);
+    }
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   function openEvent(event: AuditEvent) {
     setSelected(event);
@@ -252,40 +262,69 @@ export function AuditClient({
     (values.from ? 1 : 0) +
     (values.to ? 1 : 0);
 
-  const filterFormContent = (
-    <>
-      <SelectField label="Jenis entitas" name="entityType" defaultValue={values.entityType ?? ""}>
-        <option value="">Semua entitas</option>
-        {auditEntities.map((entity) => (
-          <option key={entity} value={entity}>
-            {auditEntityLabels[entity] ?? entity}
-          </option>
-        ))}
-      </SelectField>
-      <SelectField label="Pelaku perubahan" name="actorId" defaultValue={values.actorId ?? ""}>
-        <option value="">Semua pelaku</option>
-        {actors.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.name}
-          </option>
-        ))}
-      </SelectField>
-      <Field label="Dari tanggal" name="from" type="date" defaultValue={values.from} />
-      <Field label="Sampai tanggal" name="to" type="date" defaultValue={values.to} />
-      <SelectField label="Per halaman" name="limit" defaultValue={values.limit ?? "20"}>
-        <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-      </SelectField>
-    </>
-  );
+  function renderFilterFields(disabled = false) {
+    return (
+      <>
+        <SelectField
+          label="Jenis entitas"
+          name="entityType"
+          defaultValue={values.entityType ?? ""}
+          disabled={disabled}
+        >
+          <option value="">Semua entitas</option>
+          {auditEntities.map((entity) => (
+            <option key={entity} value={entity}>
+              {auditEntityLabels[entity] ?? entity}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField
+          label="Pelaku perubahan"
+          name="actorId"
+          defaultValue={values.actorId ?? ""}
+          disabled={disabled}
+        >
+          <option value="">Semua pelaku</option>
+          {actors.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </SelectField>
+        <Field
+          label="Dari tanggal"
+          name="from"
+          type="date"
+          defaultValue={values.from}
+          disabled={disabled}
+        />
+        <Field
+          label="Sampai tanggal"
+          name="to"
+          type="date"
+          defaultValue={values.to}
+          disabled={disabled}
+        />
+        <SelectField
+          label="Per halaman"
+          name="limit"
+          defaultValue={values.limit ?? "20"}
+          disabled={disabled}
+        >
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </SelectField>
+      </>
+    );
+  }
 
   return (
     <>
       <div className="audit-toolbar-wrapper">
         <form className="audit-desktop-filters" action="/audit">
-          {filterFormContent}
-          <Button type="submit" variant="secondary">
+          {renderFilterFields(isMobile)}
+          <Button type="submit" variant="secondary" disabled={isMobile}>
             Terapkan filter
           </Button>
           {activeFilterCount > 0 && (
@@ -309,7 +348,7 @@ export function AuditClient({
             <SheetDescription>Saring catatan perubahan sekolah</SheetDescription>
           </SheetHeader>
           <form className="mobile-filter-form" action="/audit" onSubmit={closeMobileFilter}>
-            {filterFormContent}
+            {renderFilterFields(false)}
             <div className="mobile-filter-actions">
               <Button type="submit">Terapkan filter</Button>
               {activeFilterCount > 0 && (

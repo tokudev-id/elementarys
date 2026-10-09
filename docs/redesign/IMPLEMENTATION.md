@@ -11,7 +11,7 @@ Acuan: [brief](../REDESIGN_BRIEF.md) dan [DESIGN.md](../../DESIGN.md). Data scre
 | UI-F2 | done | useZodForm, error inline Bahasa Indonesia, noValidate, first error focus/scroll, error summary (>=3), skema kontrak Zod, dialog persistence; domain 18/integration 111/e2e redesign-f2+auth+school-master+students+f1 lulus |
 | UI-F3 | done | DataCard & pagination tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; 111 integration, 18 domain, e2e redesign-f3 lulus |
 | UI-F4 | done | Form inline → dialog/page dan perbaikan absensi; 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
-| UI-R3 | not_started | Beranda dan rekap |
+| UI-R3 | done | Dashboard admin (/), rekap 1 kelas per tampilan, KPI cards, legend chips, sticky totals; 111 integration, 18 domain, 20 E2E tests lulus |
 | UI-R4 | not_started | Polish redesign, audit CSS, penerimaan akhir |
 
 ## Fondasi UI-R0
@@ -149,4 +149,34 @@ Toku mengonfirmasi batas dua layar berlaku pada scroll halaman; roster boleh ber
   - `pnpm playwright test`: 12 tests passed (termasuk `attendance-redesign.spec.ts`, `auth.spec.ts`, `school-master.spec.ts`, `settings.spec.ts`, `teachers.spec.ts`, dan `redesign-f4.spec.ts`).
   - 13 screenshot bukti tersimpan di `docs/redesign/after/UI-F4/`:
     `login-desktop.png`, `login-mobile.png`, `settings-desktop.png`, `settings-mobile.png`, `setup-desktop.png`, `calendar-desktop.png`, `calendar-mobile.png`, `calendar-dialog-mobile.png`, `rollover-desktop.png`, `teacher-detail-desktop.png`, `teacher-classes-dialog.png`, `teacher-account-tab.png`, `attendance-mobile.png`.
+
+## Beranda dan Rekap Bulanan UI-R3
+
+- **Beranda Admin (`/`)**:
+  - Menggantikan redirect lama: `/` kini menjadi dashboard operasional sekolah lengkap untuk Admin (`roles: ["admin"]`). Pengguna guru otomatis dialihkan ke tugas utama mereka di `/attendance`.
+  - **4 KPI Cards**: Kehadiran hari ini (%), Kelas sudah dicatat (x/y), Siswa aktif, Tidak hadir hari ini (S/I/A). Pada hari libur sekolah, nilai kehadiran berubah menjadi "—" dan subteks menampilkan status libur sekolah.
+  - **Card Belum Dicatat Hari Ini**: Dibungkus dalam `DataCard` dengan tabel kelas yang belum menyelesaikan absensi hari ini, tombol aksi langsung "Catat" mengarah ke rute absensi kelas terkait, dan pagination 10 item per halaman (`DataTablePagination`). Bila seluruh kelas telah selesai dicatat, menampilkan badge/banner sukses "Semua kelas sudah dicatat hari ini."
+  - **Card Pintasan Cepat**: Grid 5 pintasan aksi utama sekolah dengan ikon dan teks deskriptif: Rekap bulan ini (menonjol dengan aksen primer, mempermudah akses admin di HP tanpa tab Rekap), Presensi harian, Kalender sekolah, Tambah siswa baru, dan Pengaturan identitas sekolah.
+  - **Banner Kesiapan & Uji**: Menampilkan checklist persiapan sekolah paling atas bila konfigurasi setup belum lengkap, serta banner peringatan "Data uji" bila menggunakan data sintetis.
+- **Rekap Bulanan (`/reports`)**:
+  - **Pengecualian Satu Kelas (Menutup Temuan A13)**: Halaman rekap kini menampilkan satu kelas per tampilan secara default (bukan lagi menumpuk seluruh kelas yang mencapai 8000+ px). Pilihan "Seluruh kelas" tetap tersedia di select dropdown bila diinginkan untuk ekspor/cetak.
+  - **Card Filter Toolbar**: Dibungkus dalam `DataCard` dengan form filter method GET `noValidate: true`: Tahun ajaran, Bulan (`type="month"`), dan Kelas, dengan tombol submit "Tampilkan rekap". Aksi toolbar kanan menyediakan tombol "Unduh Excel" dan link ke halaman cetak khusus printer.
+  - **Card KPI Kelas Terpilih**: 4 indikator metrik kelas: Rata-rata kehadiran (%), Total Sakit (S), Total Izin (I), dan Total Alpa (A). Dilengkapi status kelengkapan catatan (badge "Catatan lengkap" atau peringatan jumlah catatan siswa yang belum dicatat).
+  - **Pemberitahuan Perubahan Ekspor**: Banner status otomatis bila ada data absensi yang mengalami revisi setelah tanggal ekspor terakhir oleh pelaku administrasi.
+  - **Legend Status Chips**: Menggantikan teks paragraf lama dengan chip visual bersudut bulat (`.report-legend-chips`) dengan pembeda warna token yang jelas (H Hadir hijau, S Sakit kuning, I Izin biru, A Alpa merah, ? Belum dicatat, L Libur, - Luar penempatan, . Hari mendatang).
+  - **Tabel Responsif & Sticky Totals**:
+    - Kolom Siswa sticky di sebelah kiri.
+    - Kolom total H, S, I, A diletakkan di sebelah kiri tepat setelah nama siswa sebelum deretan tanggal harian, memudahkan pembacaan tanpa perlu scroll horizontal jauh.
+    - Header tanggal memuat angka tanggal dan inisial hari (Sen, Sel, Rab, Kam, Jum, Sab, Min).
+    - Kolom hari libur berlatar abu (`--surface-muted`).
+    - Pada layar mobile (< 768px), daftar kartu siswa perorangan (`.report-mobile-totals`) ditampilkan dengan ringkasan status 4 angka, dan tabel tanggal horizontal tetap dapat diakses dengan scroll horizontal yang terisolasi.
+- **Pengujian & Bukti**:
+  - `pnpm lint`: 0 error, 0 warning.
+  - `pnpm typecheck`: 0 error.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - Playwright E2E: Seluruh 20 test suite lulus (termasuk `redesign-r3.spec.ts`, `reports.spec.ts`, `auth.spec.ts`, `mobile-sweep.spec.ts`, `shell.spec.ts`, `attendance-redesign.spec.ts`, `permissions.spec.ts`, `redesign-f1.spec.ts`, `redesign-f2.spec.ts`, `redesign-f3.spec.ts`, `redesign-f4.spec.ts`).
+  - 6 screenshot bukti tersimpan di `docs/redesign/after/UI-R3/`:
+    `dashboard-admin-desktop.png`, `dashboard-admin-mobile.png`, `dashboard-teacher-desktop.png`, `reports-single-class-desktop.png`, `reports-mobile-totals.png`, `reports-mobile-table.png`.
+
 

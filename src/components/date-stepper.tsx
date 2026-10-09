@@ -104,7 +104,7 @@ export function DateStepper({
           max={max}
           disabled={disabled}
           onChange={onChange}
-          className="sr-only"
+          className="date-stepper-hidden-input"
         />
       </div>
       {calendar && (
