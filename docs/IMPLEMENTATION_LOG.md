@@ -7,12 +7,10 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done |
-| Task berikutnya | UI-R4 |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done |
+| Task berikutnya | Handover & checkpoint manusia (H-01–H-09) |
 
 ## 1. Aturan pencatatan
-
-Log ini menyimpan status pelaksanaan dan menjadi state bagi agent yang berjalan lama. Scope, langkah, dependensi dan kriteria penerimaan dibaca pada plan melalui tautan task. Tidak menggunakan daftar status terpisah di TodoWrite.
 
 Hanya orchestrator yang menulis log ini. Worker melaporkan bukti melalui laporan akhir dan pesan commit; orchestrator memindahkannya ke bagian 7 setelah merge.
 
@@ -57,6 +55,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-F4 | Dialog/page form & absensi | UI-F2 | done | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi); 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
 | [UI-R3](docs/redesign/IMPLEMENTATION.md) | Redesign rekap/beranda | UI-F3, UI-F4 | done | Dashboard admin, single-class report, KPI, chip legend; domain 18/integration 111/e2e 20 lulus |
 | [UI-R4](docs/redesign/IMPLEMENTATION.md) | Polish & verifikasi akhir | UI-R3 | done | 97eab30 → 72df382; audit CSS lama, WCAG contrast 19 passed, benchmark 600 siswa 108.65ms, kriteria penerimaan bagian 8 lulus, sweep e2e 28 rute × 6 viewport lulus; domain 18/integration 111/e2e lengkap lulus |
+| FIX-05 | Layout & UI Polish | UI-R4 | done | Shell persisten di RootLayout (navbar/sidebar tidak hilang saat loading navigasi), circular spinner, padding konten audit & settings rapi, sizing input/search 38px dan button 44px compact/elegant; domain 18/integration 111/e2e mobile-sweep 28 rute lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
@@ -520,3 +519,29 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - `pnpm test:domain`: 18 passed (100%).
   - `pnpm test:integration`: 111 passed (100%).
   - Playwright E2E: Seluruh 26 test suite (termasuk `mobile-sweep.spec.ts` 28 rute × 6 viewport) lulus 100%.
+
+### FIX-05: Layout Shell Persisten, Circular Loading, Padding Konten, dan Compact Component Sizing
+- **Masalah & Permintaan Pengguna**:
+  1. Halaman `/audit` dan `/settings` kontennya tidak ber-padding (menempel ke pinggir card).
+  2. Navigasi halaman merender loading yang menghilangkan seluruh navbar dan sidebar. Diperbaiki agar navbar dan sidebar tetap persisten dan loading hanya terjadi di area main content.
+  3. Mengganti animasi loading skeleton/baris menjadi circular spinner.
+  4. Merampingkan tinggi elemen seperti search bar, input form, tombol, dan baris tabel agar terlihat lebih elegan dan proporsional tanpa merusak standar touch target mobile 44px.
+- **Implementasi**:
+  1. **Persistent AppShell di RootLayout (`src/app/layout.tsx` & `src/components/app-shell.tsx`)**:
+     - Membungkus children di `RootLayout` dengan `<AppShell>` persisten saat user terautentikasi dan konfigurasi sekolah tersedia.
+     - Menyediakan `ShellContext` dan sinkronisasi lightweight (`NestedShellSync`) sehingga pemanggilan `<AppShell>` di child route otomatis men-sync breadcrumbs dan `hideBottomNav` tanpa memicu re-render navbar/sidebar dari nol.
+     - Route tanpa shell (`/login`, `/change-password`, `/reports/print`) di-bypass secara otomatis.
+  2. **Circular Loading Spinner (`src/app/loading.tsx`, `src/app/reports/loading.tsx`, `src/components/master-loading.tsx`, `src/styles/components.css`)**:
+     - Mengganti skeleton baris master loading dengan komponen `.main-content-loading` dan `.circular-spinner` animasi CSS halus berputar di tengah konten dengan aksen warna `--primary`.
+  3. **Padding Konten `/audit` dan `/settings` (`src/styles/components.css`, `src/app/audit/audit-client.tsx`)**:
+     - Menambahkan padding konsisten 20px (16px mobile) pada `.settings-form-card .data-card__content`, `.setup-checklist-card .data-card__content`, dan `.card-box`.
+     - Merestrukturisasi tabel audit ke `.audit-table-wrapper.table-responsive` dengan padding toolbar `16px 20px` dan membersihkan list audit legacy.
+  4. **Perampingan Tinggi Elemen (Rich/Compact Typography & Sizing)**:
+     - Search bar dan input teks dioptimasi ke `height: 38px; min-height: 38px; font-size: 14px; padding: 0 12px;` agar tajam, ringkas, dan modern.
+     - Tombol aksi (`button`, `.button-link`) disetel rapi ke `height: 44px; min-height: 44px; min-width: 44px; font-size: 14px; font-weight: 500; padding: 0 16px;` untuk mempertahankan kepatuhan WCAG/Playwright `expectTouchTarget` (>= 44px) sekaligus menghilangkan kesan bloated/kegemukan dari padding vertikal lama.
+- **Hasil Verifikasi**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm typecheck`: 0 errors.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - Playwright E2E: `mobile-sweep.spec.ts` (28 rute × 6 viewport), `shell.spec.ts`, `audit.spec.ts`, `settings.spec.ts`, `redesign-f3.spec.ts`, `redesign-f4.spec.ts`, `attendance-redesign.spec.ts`, `reports.spec.ts`, `auth.spec.ts`, `print.spec.ts` seluruhnya lulus 100%.

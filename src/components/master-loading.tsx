@@ -1,12 +1,8 @@
-import { Skeleton } from "./ui/skeleton";
-
 export function MasterLoading() {
   return (
-    <div className="master-loading" role="status" aria-label="Memuat daftar">
-      <p>Memuat daftar…</p>
-      {Array.from({ length: 5 }, (_, index) => (
-        <Skeleton key={index} className="master-loading-row" />
-      ))}
+    <div className="main-content-loading" role="status" aria-label="Memuat daftar...">
+      <div className="circular-spinner" aria-hidden="true" />
+      <span className="sr-only">Memuat daftar...</span>
     </div>
   );
 }
