@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done; FIX-06 done; FIX-07 done |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done; FIX-06 done; FIX-07 done; CFG-01 done |
 | Task berikutnya | Handover & checkpoint manusia (H-01–H-09) |
 
 ## 1. Aturan pencatatan
@@ -613,3 +613,25 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - `pnpm test:integration`: 111 passed (100%).
   - Playwright E2E: `reports.spec.ts` (360px, 768px, 1024px), `year-operations.spec.ts`, `school-master.spec.ts`, `redesign-f4.spec.ts`, `redesign-r3.spec.ts`, `mobile-sweep.spec.ts` seluruhnya 100% lulus.
   - `pnpm build`: Berhasil tanpa error dalam 10.7 detik (38 rute).
+
+### CFG-01: Konfigurasi Deployment ke Vercel & Neon PostgreSQL
+- **Pekerjaan yang Diselesaikan**:
+  1. **Konfigurasi Vercel (`vercel.json`)**:
+     - Menentukan preset framework Next.js.
+     - Mengarahkan region serverless ke `sin1` (Singapore) yang berdekatan dengan database Neon (`ap-southeast-1`) dan pengguna sekolah di Indonesia.
+     - Menyertakan build command `pnpm build`.
+     - Mengonfigurasi security headers global (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`).
+  2. **Penguatan Keamanan & Header Next.js (`next.config.ts`)**:
+     - Menambahkan metode `headers()` untuk menyuntikkan security headers bawaan pada lingkungan produksi maupun pengujian lokal.
+  3. **Fleksibilitas Autentikasi Serverless (`src/server/auth/runtime.ts`, `src/server/auth/factory.ts`, `src/server/services/teachers.ts`, `src/server/auth/guards.ts`)**:
+     - Menambahkan fallback otomatis `process.env.VERCEL_URL` jika `BETTER_AUTH_URL` belum disetel atau saat mengakses deployment preview dinamis Vercel.
+     - Membaca `TRUSTED_ORIGINS` untuk memvalidasi origin CORS pada formulir dan endpoint autentikasi.
+  4. **Panduan Deployment Lengkap (`docs/DEPLOYMENT_VERCEL.md`)**:
+     - Panduan berbahasa Indonesia mencakup arsitektur, langkah migrasi Neon DDL (`pnpm release:migrate`), konfigurasi Environment Variables Vercel Dashboard, deployment via Vercel CLI, bootstrap admin pertama (`pnpm release:bootstrap`), dan smoke test pasca-deployment.
+  5. **Dokumentasi Variabel Lingkungan (`.env.example`)**:
+     - Menambahkan blok panduan variabel lingkungan khusus produksi Vercel (`DATABASE_URL` pooled, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `TRUSTED_ORIGINS`, `APP_ENV`).
+- **Hasil Verifikasi**:
+  - `pnpm lint`: 0 error, 0 warning.
+  - `pnpm typecheck`: 0 error.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm build`: Sukses penuh (Turbopack, 38 rute, kompilasi 34.3s).

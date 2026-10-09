@@ -97,7 +97,10 @@ async function protectLastAdmin(
 }
 function transactionAuth(client: PoolClient, options: TeacherOptions) {
   const secret = options.authConfig?.secret ?? process.env.BETTER_AUTH_SECRET;
-  const baseURL = options.authConfig?.baseURL ?? process.env.BETTER_AUTH_URL;
+  const baseURL =
+    options.authConfig?.baseURL ??
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
   if (!secret || !baseURL) throw new Error("Konfigurasi auth belum lengkap.");
   return createAuth(client, secret, baseURL);
 }

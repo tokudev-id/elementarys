@@ -7,12 +7,18 @@ import type { Pool, PoolClient } from "pg";
 import * as schema from "../db/auth-schema";
 
 export function createAuth(source: Pool | PoolClient, secret: string, baseURL: string) {
+  const envOrigins = (process.env.TRUSTED_ORIGINS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const trustedOrigins = [...new Set([baseURL, ...envOrigins])];
+
   return betterAuth({
     secret,
     baseURL,
     logger: { disabled: true },
     database: drizzleAdapter(drizzle(source), { provider: "pg", schema, transaction: false }),
-    trustedOrigins: [baseURL],
+    trustedOrigins,
     session: { cookieCache: { enabled: false } },
     advanced: { useSecureCookies: baseURL.startsWith("https://") },
     rateLimit: {
