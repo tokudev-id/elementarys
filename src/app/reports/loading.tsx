@@ -1,8 +1,8 @@
-import { StateBanner } from "@/components/state-banner";
 export default function LoadingReports() {
   return (
-    <main>
-      <StateBanner state="loading">Sedang mengambil rekap bulanan.</StateBanner>
-    </main>
+    <div className="main-content-loading" role="status" aria-label="Sedang mengambil rekap...">
+      <div className="circular-spinner" aria-hidden="true" />
+      <span className="sr-only">Sedang mengambil rekap...</span>
+    </div>
   );
 }

@@ -217,12 +217,24 @@
 select,
 textarea {
   width: 100%;
-  min-height: 44px;
-  padding: 0.75rem;
+}
+select {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 28px 0 10px;
   font: inherit;
-  color: inherit;
-  background: white;
-  border: 1px solid var(--border);
+  font-size: 14px;
+  background: var(--surface, white);
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+}
+textarea {
+  min-height: 80px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--surface, white);
+  border: 1px solid var(--control-border);
   border-radius: 6px;
 }
 .filter-form {
@@ -299,13 +311,6 @@ body {
   font-size: 0.9375rem;
   line-height: 1.5;
 }
-a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  min-width: 44px;
-  max-width: 100%;
-}
 * {
   box-sizing: border-box;
 }
@@ -328,6 +333,11 @@ p {
   outline-offset: 2px;
 }
 a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  max-width: 100%;
   color: var(--accent);
   text-underline-offset: 3px;
 }
@@ -344,25 +354,40 @@ a {
 }
 input {
   width: 100%;
-  min-height: 44px;
-  padding: 0.75rem;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 12px;
   font: inherit;
+  font-size: 14px;
+  line-height: 20px;
   color: inherit;
-  background: white;
+  background: var(--surface, white);
   border: 1px solid var(--control-border);
   border-radius: 6px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  padding: 0.75rem 1.25rem;
+  height: 44px;
+  padding: 0 16px;
   font: inherit;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   border: 0;
   border-radius: 6px;
   background: var(--accent);
   color: white;
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 button:hover {
   background: var(--primary-hover);
@@ -434,7 +459,9 @@ button[aria-busy="true"] {
   gap: 0.375rem;
 }
 .ui-field label {
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
 }
 .ui-field input[aria-invalid="true"] {
   border: 2px solid var(--destructive);
@@ -535,13 +562,21 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
   min-height: 44px;
-  padding: 0.75rem 1rem;
-  background: var(--accent);
+  height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--primary);
   color: white;
   border-radius: 6px;
   text-decoration: none;
   flex-shrink: 0;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 .attendance-form {
   padding-bottom: 7rem;

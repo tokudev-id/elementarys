@@ -106,13 +106,16 @@
   flex-direction: column;
   gap: 2px;
   justify-content: center;
+  align-items: center;
   padding: 4px;
   font-size: 12px;
   border-radius: 6px;
   color: var(--muted-foreground);
   background: transparent;
   font-weight: 500;
-  min-width: 0;
+  min-width: 44px;
+  min-height: 44px;
+  height: 100%;
 }
 .shell-menu-link {
   display: flex;
@@ -162,7 +165,10 @@
   margin-right: 8px;
   color: var(--muted-foreground);
 }
+.shell-topbar button,
 .user-menu-trigger {
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   flex-shrink: 0;
 }

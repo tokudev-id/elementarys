@@ -125,9 +125,7 @@ function DiffView({ before, after }: { before: unknown; after: unknown }) {
     const bObj = before as Record<string, unknown>;
     const aObj = after as Record<string, unknown>;
     const allKeys = Array.from(new Set([...Object.keys(bObj), ...Object.keys(aObj)]));
-    const changed = allKeys.filter(
-      (k) => JSON.stringify(bObj[k]) !== JSON.stringify(aObj[k]),
-    );
+    const changed = allKeys.filter((k) => JSON.stringify(bObj[k]) !== JSON.stringify(aObj[k]));
     if (changed.length === 0) {
       return <p className="text-muted-foreground text-sm">Tidak ada perbedaan field.</p>;
     }
@@ -193,9 +191,7 @@ function AuditRowItem({
       onKeyDown={handleKeyDown}
     >
       <td className="audit-col--time">
-        <time dateTime={event.occurredAt}>
-          {formatSchoolTime(event.occurredAt, timezone)}
-        </time>
+        <time dateTime={event.occurredAt}>{formatSchoolTime(event.occurredAt, timezone)}</time>
       </td>
       <td className="audit-col--actor">{event.actor.name}</td>
       <td className="audit-col--action">
@@ -349,7 +345,11 @@ export function AuditClient({
             <div className="mobile-filter-actions">
               <Button type="submit">Terapkan filter</Button>
               {activeFilterCount > 0 && (
-                <Link href="/audit" className="button button--secondary" onClick={closeMobileFilter}>
+                <Link
+                  href="/audit"
+                  className="button button--secondary"
+                  onClick={closeMobileFilter}
+                >
                   Reset filter
                 </Link>
               )}
@@ -365,42 +365,39 @@ export function AuditClient({
           action={<Link href="/audit">Reset filter</Link>}
         />
       ) : (
-        <>
-          <ul className="resource-list audit-list">
-            {events.map((event) => (
-              <li key={`legacy-${event.id}`}>
-                <details>
-                  <summary>{event.action}</summary>
-                  <div className="audit-json">{JSON.stringify(event.before)}</div>
-                  <div className="audit-json">{JSON.stringify(event.after)}</div>
-                </details>
-              </li>
-            ))}
-          </ul>
-          <div className="data-table">
-            <table className="audit-table">
-              <thead>
-                <tr>
-                  <th scope="col">Waktu</th>
-                  <th scope="col">Pelaku</th>
-                  <th scope="col">Aksi</th>
-                  <th scope="col">Entitas</th>
-                  <th scope="col">Alasan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((event) => (
-                  <AuditRowItem
-                    key={event.id}
-                    event={event}
-                    timezone={timezone}
-                    onSelect={openEvent}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+        <div className="audit-table-wrapper table-responsive">
+          <table className="audit-table">
+            <thead>
+              <tr>
+                <th scope="col" className="audit-col--time">
+                  Waktu
+                </th>
+                <th scope="col" className="audit-col--actor">
+                  Pelaku
+                </th>
+                <th scope="col" className="audit-col--action">
+                  Aksi
+                </th>
+                <th scope="col" className="audit-col--entity">
+                  Entitas
+                </th>
+                <th scope="col" className="audit-col--reason">
+                  Alasan
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {events.map((event) => (
+                <AuditRowItem
+                  key={event.id}
+                  event={event}
+                  timezone={timezone}
+                  onSelect={openEvent}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <Sheet open={selected !== null} onOpenChange={handleSheetOpenChange}>
@@ -408,9 +405,7 @@ export function AuditClient({
           {selected && (
             <>
               <SheetHeader>
-                <SheetTitle>
-                  {auditActionLabels[selected.action] ?? selected.action}
-                </SheetTitle>
+                <SheetTitle>{auditActionLabels[selected.action] ?? selected.action}</SheetTitle>
                 <SheetDescription>
                   {formatSchoolTime(selected.occurredAt, timezone)} · {selected.actor.name}
                 </SheetDescription>

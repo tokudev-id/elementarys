@@ -1,9 +1,8 @@
-import { PageContainer } from "@/components/app-shell";
-import { StateBanner } from "@/components/state-banner";
 export default function Loading() {
   return (
-    <PageContainer>
-      <StateBanner state="loading">Memuat halaman sekolah.</StateBanner>
-    </PageContainer>
+    <div className="main-content-loading" role="status" aria-label="Memuat...">
+      <div className="circular-spinner" aria-hidden="true" />
+      <span className="sr-only">Memuat...</span>
+    </div>
   );
 }
