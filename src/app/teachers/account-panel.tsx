@@ -16,9 +16,16 @@ export function AccountPanel({
   account: SchoolAccount;
   expectedVersion: number | null;
 }) {
+  const [accessOpen, setAccessOpen] = useState(false);
   const [reset, setReset] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const mutation = useMutation(`/api/users/${encodeURIComponent(account.id)}/access`, "PATCH");
+  function openAccess() {
+    setAccessOpen(true);
+  }
+  function closeAccess() {
+    setAccessOpen(false);
+  }
   function openReset() {
     setReset(true);
   }
@@ -68,8 +75,10 @@ export function AccountPanel({
           <dd>{account.mustChangePassword ? "Wajib ganti password" : "Sudah diganti"}</dd>
         </div>
       </dl>
-      <AccountAccessForm account={account} expectedVersion={expectedVersion} />
       <div className="button-row">
+        <Button variant="secondary" onClick={openAccess}>
+          Ubah akses
+        </Button>
         <Button variant="secondary" onClick={openReset}>
           Reset password akun
         </Button>
@@ -78,9 +87,12 @@ export function AccountPanel({
         </Button>
       </div>
       <MutationFeedback mutation={mutation} />
+      <Dialog open={accessOpen} onClose={closeAccess} title="Ubah akses akun" variant="sheet">
+        <AccountAccessForm account={account} expectedVersion={expectedVersion} onSuccess={closeAccess} />
+      </Dialog>
       <Dialog open={reset} onClose={closeReset} title="Reset password akun?" variant="sheet">
         <p>Sesi akun akan dicabut. Password sementara wajib diganti saat masuk.</p>
-        <PasswordResetForm account={account} expectedVersion={expectedVersion} />
+        <PasswordResetForm account={account} expectedVersion={expectedVersion} onSuccess={closeReset} />
       </Dialog>
       <ConfirmDialog
         open={confirm}

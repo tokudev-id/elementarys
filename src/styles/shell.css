@@ -264,6 +264,12 @@
 .school-shell .attendance-actions {
   bottom: calc(64px + env(safe-area-inset-bottom));
 }
+.school-shell[data-no-bottom-nav="true"] .attendance-actions {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+.school-shell[data-no-bottom-nav="true"] .page-container {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
 [data-slot="button"] {
   min-height: 44px;
   min-width: 44px;

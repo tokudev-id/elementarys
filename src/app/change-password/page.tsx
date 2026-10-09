@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { KeyRound } from "lucide-react";
 import { requireActor } from "@/server/auth/guards";
 import { AccountForm, Logout } from "../login/form";
+
 export default async function ChangePassword() {
   try {
     await requireActor(await headers(), { allowPasswordChange: true });
@@ -9,11 +11,24 @@ export default async function ChangePassword() {
     redirect("/login");
   }
   return (
-    <main>
-      <h1>Ganti password</h1>
-      <p>Ganti password sementara sebelum membuka data sekolah.</p>
-      <AccountForm change />
-      <Logout />
+    <main className="auth-page">
+      <div className="auth-card">
+        <div className="auth-card__brand">
+          <div className="auth-card__icon-wrap">
+            <KeyRound className="auth-card__icon" size={28} aria-hidden="true" />
+          </div>
+          <span className="auth-card__brand-name">Absensi Sekolah</span>
+        </div>
+        <div className="auth-card__header">
+          <h1 className="auth-card__title">Ganti password</h1>
+          <p className="auth-card__subtitle">Ganti password sementara sebelum membuka data sekolah.</p>
+        </div>
+        <AccountForm change />
+        <div className="auth-card__footer">
+          <Logout />
+        </div>
+      </div>
     </main>
   );
 }
+

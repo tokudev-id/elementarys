@@ -54,80 +54,90 @@ export default async function Rollover({
             </StateBanner>
           ) : (
             <>
-              <h2>{preparation.year.label}</h2>
-              <p>
-                {preparation.year.startsOn} sampai sebelum {preparation.year.endsOnExclusive}
-              </p>
-              <ol className="resource-list">
-                <li>
-                  <h3>Identitas dan periode</h3>
-                  <p>
-                    {preparation.identityReady
-                      ? "Identitas sekolah tersedia."
-                      : "Lengkapi nama dan zona waktu sekolah."}
-                  </p>
-                  <Link href="/settings">Konfigurasi sekolah</Link> ·{" "}
-                  <Link href="/academic-years">Buat atau edit periode</Link>
-                </li>
-                <li>
-                  <h3>Kelas tahun ini</h3>
-                  <p>
-                    {preparation.classes.filter((item) => !item.archivedAt).length} kelas tersedia.
-                  </p>
-                  <Link href={`/classes?yearId=${selected}`}>Atur kelas</Link>
-                </li>
-                <li>
-                  <h3>Kalender belajar</h3>
-                  <p>
-                    {preparation.weekdays
-                      ? `${preparation.weekdays} hari rutin per minggu.`
-                      : "Hari belajar belum diatur."}
-                  </p>
-                  <Link
-                    href={`/calendar?yearId=${selected}&month=${preparation.year.startsOn.slice(0, 7)}`}
-                  >
-                    Atur kalender
-                  </Link>
-                </li>
-                <li>
-                  <h3>Penempatan siswa</h3>
-                  <p>
-                    Periksa tiap siswa lewat preview sebelum menyimpan batch ke tahun yang
-                    disiapkan.
-                  </p>
-                  <form className="filter-form" action="/students/promote">
-                    <input type="hidden" name="targetYearId" value={selected} />
-                    <SelectField label="Kelas asal naik kelas" name="classId" required>
-                      {classes
-                        .filter((item) => item.yearId !== selected)
-                        .map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {years.find((year) => year.id === item.yearId)?.label} / {item.name}
-                          </option>
-                        ))}
-                    </SelectField>
-                    <Button type="submit">Buka preview naik kelas</Button>
-                  </form>
-                </li>
-                <li>
-                  <h3>Pindahkan tahun aktif</h3>
-                  {!preparation.ready && (
-                    <StateBanner state="empty">
-                      Lengkapi identitas, kelas dan kalender sebelum mengaktifkan lewat alur ini.
-                    </StateBanner>
-                  )}
-                  <ActivateYearForm preparation={preparation} />
-                </li>
-                <li>
-                  <h3>Arsip setelah penempatan ditutup</h3>
-                  <p>
-                    Arsip kelas dan tahun lama ditolak selama masih ada penempatan efektif setelah
-                    tanggal sekolah. Laporan lama tetap dapat dibaca dan diekspor.
-                  </p>
-                  <Link href="/classes">Periksa arsip kelas</Link> ·{" "}
-                  <Link href="/academic-years">Periksa arsip tahun</Link>
-                </li>
-              </ol>
+              <DataCard className="mb-6">
+                <DataCardHeader>
+                  <div className="data-card__title-group">
+                    <h2 className="data-card__title">
+                      {`Langkah persiapan ${preparation.year.label}`}
+                    </h2>
+                    <p className="data-card-subtitle text-muted-foreground text-sm">
+                      {`${preparation.year.startsOn} sampai sebelum ${preparation.year.endsOnExclusive}`}
+                    </p>
+                  </div>
+                </DataCardHeader>
+                <DataCardContent>
+                  <ol className="resource-list">
+                    <li>
+                      <h3>Identitas dan periode</h3>
+                      <p>
+                        {preparation.identityReady
+                          ? "Identitas sekolah tersedia."
+                          : "Lengkapi nama dan zona waktu sekolah."}
+                      </p>
+                      <Link href="/settings">Konfigurasi sekolah</Link> ·{" "}
+                      <Link href="/academic-years">Buat atau edit periode</Link>
+                    </li>
+                    <li>
+                      <h3>Kelas tahun ini</h3>
+                      <p>
+                        {preparation.classes.filter((item) => !item.archivedAt).length} kelas tersedia.
+                      </p>
+                      <Link href={`/classes?yearId=${selected}`}>Atur kelas</Link>
+                    </li>
+                    <li>
+                      <h3>Kalender belajar</h3>
+                      <p>
+                        {preparation.weekdays
+                          ? `${preparation.weekdays} hari rutin per minggu.`
+                          : "Hari belajar belum diatur."}
+                      </p>
+                      <Link
+                        href={`/calendar?yearId=${selected}&month=${preparation.year.startsOn.slice(0, 7)}`}
+                      >
+                        Atur kalender
+                      </Link>
+                    </li>
+                    <li>
+                      <h3>Penempatan siswa</h3>
+                      <p>
+                        Periksa tiap siswa lewat preview sebelum menyimpan batch ke tahun yang
+                        disiapkan.
+                      </p>
+                      <form className="filter-form" action="/students/promote">
+                        <input type="hidden" name="targetYearId" value={selected} />
+                        <SelectField label="Kelas asal naik kelas" name="classId" required>
+                          {classes
+                            .filter((item) => item.yearId !== selected)
+                            .map((item) => (
+                              <option key={item.id} value={item.id}>
+                                {years.find((year) => year.id === item.yearId)?.label} / {item.name}
+                              </option>
+                            ))}
+                        </SelectField>
+                        <Button type="submit">Buka preview naik kelas</Button>
+                      </form>
+                    </li>
+                    <li>
+                      <h3>Pindahkan tahun aktif</h3>
+                      {!preparation.ready && (
+                        <StateBanner state="empty">
+                          Lengkapi identitas, kelas dan kalender sebelum mengaktifkan lewat alur ini.
+                        </StateBanner>
+                      )}
+                      <ActivateYearForm preparation={preparation} />
+                    </li>
+                    <li>
+                      <h3>Arsip setelah penempatan ditutup</h3>
+                      <p>
+                        Arsip kelas dan tahun lama ditolak selama masih ada penempatan efektif setelah
+                        tanggal sekolah. Laporan lama tetap dapat dibaca dan diekspor.
+                      </p>
+                      <Link href="/classes">Periksa arsip kelas</Link> ·{" "}
+                      <Link href="/academic-years">Periksa arsip tahun</Link>
+                    </li>
+                  </ol>
+                </DataCardContent>
+              </DataCard>
               <DataCard id="daftar-kelas-persiapan">
                 <DataCardHeader
                   title="Penempatan pada tahun yang disiapkan"

@@ -219,9 +219,11 @@ type AccountFormData =
 export function TeacherAccountForm({
   teacher,
   accounts,
+  onSuccess,
 }: {
   teacher: TeacherView;
   accounts: SchoolAccount[];
+  onSuccess?: () => void;
 }) {
   const [mode, setMode] = useState<"create" | "existing">("create");
   const mutation = useMutation(`/api/teachers/${teacher.id}/account`, "POST");
@@ -245,6 +247,9 @@ export function TeacherAccountForm({
             password: "",
             role: "teacher",
           });
+          if (onSuccess) {
+            onSuccess();
+          }
         }
       },
     },
@@ -324,9 +329,11 @@ export function TeacherAccountForm({
 export function AccountAccessForm({
   account,
   expectedVersion,
+  onSuccess,
 }: {
   account: SchoolAccount;
   expectedVersion: number | null;
+  onSuccess?: () => void;
 }) {
   const mutation = useMutation(
     `/api/users/${encodeURIComponent(account.id)}/access`,
@@ -335,13 +342,16 @@ export function AccountAccessForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    await mutation.mutate({
+    const ok = await mutation.mutate({
       expectedVersion,
       expectedRole: account.role,
       expectedBanned: account.banned,
       role: data.get("role"),
       banned: data.has("banned"),
     });
+    if (ok && onSuccess) {
+      onSuccess();
+    }
   }
   return (
     <form
@@ -388,9 +398,11 @@ type ResetFormData = {
 export function PasswordResetForm({
   account,
   expectedVersion,
+  onSuccess,
 }: {
   account: SchoolAccount;
   expectedVersion: number | null;
+  onSuccess?: () => void;
 }) {
   const mutation = useMutation(
     `/api/users/${encodeURIComponent(account.id)}/reset-password`,
@@ -407,6 +419,9 @@ export function PasswordResetForm({
         const saved = await mutation.mutate(data);
         if (saved) {
           form.reset({ expectedVersion, newPassword: "" });
+          if (onSuccess) {
+            onSuccess();
+          }
         }
       },
     },

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { MoreHorizontal, History } from "lucide-react";
+import { MoreHorizontal, History, Info } from "lucide-react";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Field } from "@/components/field";
@@ -9,6 +9,11 @@ import { DateStepper } from "@/components/date-stepper";
 import { StateBanner } from "@/components/state-banner";
 import { StatusBadge } from "@/components/status-badge";
 import { PageHeader } from "@/components/page-header";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -119,18 +124,21 @@ export function AttendanceForm({
             {state}
           </StatusBadge>
         }
-        description={`${view.students.length} siswa · ${formatAttendanceDate(view.date)}`}
         actions={
           <>
-            <Link
-              href={`/attendance/${view.classId}/history?date=${view.date}`}
-              prefetch={false}
-              className="button-link button-link--secondary"
-              aria-label="Riwayat absensi"
-            >
-              <History aria-hidden="true" size={16} />
-              Riwayat
-            </Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/attendance/${view.classId}/history?date=${view.date}`}
+                  prefetch={false}
+                  className="button-link button-link--ghost icon-btn"
+                  aria-label="Riwayat absensi"
+                >
+                  <History aria-hidden="true" size={18} />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Riwayat absensi</TooltipContent>
+            </Tooltip>
             {form.canEdit && !form.editing && (
               <Button variant="secondary" disabled={form.blocked} onClick={form.startEditing}>
                 {view.sessionState === "voided" ? "Isi ulang catatan" : "Koreksi catatan"}
@@ -243,16 +251,29 @@ export function AttendanceForm({
               </Button>
             </div>
             {form.canRecord && (
-              <Button variant="secondary" onClick={form.markAllPresent} disabled={form.blocked}>
-                Semua hadir
-              </Button>
+              <div className="roster-actions-group">
+                <Button variant="secondary" onClick={form.markAllPresent} disabled={form.blocked}>
+                  Semua hadir
+                </Button>
+                {view.sessionState === "not_recorded" && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Petunjuk absensi"
+                        className="roster-info-btn"
+                      >
+                        <Info size={16} aria-hidden="true" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Hadir disiapkan untuk siswa lain. Catatan dibuat setelah konfirmasi.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             )}
           </div>
-          {form.canRecord && view.sessionState === "not_recorded" && (
-            <small className="roster-help">
-              Hadir disiapkan untuk siswa lain. Catatan dibuat setelah konfirmasi.
-            </small>
-          )}
           <div
             className="roster-scroll"
             ref={rosterRef}
@@ -293,7 +314,7 @@ export function AttendanceForm({
       <Link
         href="/attendance"
         prefetch={false}
-        className="attendance-back-link"
+        className="attendance-back-link sr-only"
         aria-label="Kembali ke hari ini"
       >
         Kembali ke daftar kelas

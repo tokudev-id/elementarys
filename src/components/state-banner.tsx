@@ -1,5 +1,12 @@
 import type { ReactNode } from "react";
-export type BannerState = "loading" | "empty" | "error" | "conflict" | "session-expired" | "saved";
+export type BannerState =
+  | "loading"
+  | "empty"
+  | "error"
+  | "conflict"
+  | "session-expired"
+  | "saved"
+  | "info";
 const titles: Record<BannerState, string> = {
   loading: "Sedang memuat",
   empty: "Belum ada data",
@@ -7,13 +14,16 @@ const titles: Record<BannerState, string> = {
   conflict: "Data telah berubah",
   "session-expired": "Sesi telah habis",
   saved: "Tersimpan",
+  info: "Informasi",
 };
 export function StateBanner({
   state,
+  title,
   children,
   action,
 }: {
   state: BannerState;
+  title?: string;
   children?: ReactNode;
   action?: ReactNode;
 }) {
@@ -24,7 +34,7 @@ export function StateBanner({
       role={urgent ? "alert" : "status"}
       aria-atomic="true"
     >
-      <strong>{titles[state]}</strong>
+      <strong>{title ?? titles[state]}</strong>
       {children && <div>{children}</div>}
       {action && <div className="state-banner__action">{action}</div>}
     </div>

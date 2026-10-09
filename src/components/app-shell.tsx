@@ -117,12 +117,14 @@ export function AppShell({
   actor,
   currentPath = "/",
   breadcrumbs,
+  hideBottomNav = false,
   children,
 }: {
   school: { name: string; date: string; timezone: string } | null;
   actor: { name: string; role: "admin" | "teacher" };
   currentPath?: string;
   breadcrumbs?: { label: string; href?: string }[];
+  hideBottomNav?: boolean;
   children: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -155,7 +157,11 @@ export function AppShell({
     setMenuOpen(false);
   }
   return (
-    <div className="school-shell" data-collapsed={collapsed}>
+    <div
+      className="school-shell"
+      data-collapsed={collapsed}
+      data-no-bottom-nav={hideBottomNav ? "true" : undefined}
+    >
       <a className="skip-link" href="#main-content">
         Langsung ke isi halaman
       </a>
@@ -267,17 +273,19 @@ export function AppShell({
         </header>
         <PageContainer>{children}</PageContainer>
       </div>
-      <nav className="shell-bottom-nav" aria-label="Navigasi utama">
-        {bottomIds.map((id) => {
-          const item = navigation.find((value) => value.id === id);
-          if (!item) return null;
-          return <MenuLink key={id} item={item} path={currentPath} />;
-        })}
-        <button type="button" onClick={openMenu} aria-label="Lainnya">
-          <MoreHorizontal aria-hidden="true" size={20} strokeWidth={1.75} />
-          <span>Lainnya</span>
-        </button>
-      </nav>
+      {!hideBottomNav && (
+        <nav className="shell-bottom-nav" aria-label="Navigasi utama">
+          {bottomIds.map((id) => {
+            const item = navigation.find((value) => value.id === id);
+            if (!item) return null;
+            return <MenuLink key={id} item={item} path={currentPath} />;
+          })}
+          <button type="button" onClick={openMenu} aria-label="Lainnya">
+            <MoreHorizontal aria-hidden="true" size={20} strokeWidth={1.75} />
+            <span>Lainnya</span>
+          </button>
+        </nav>
+      )}
       <Dialog open={menuOpen} title="Menu sekolah" onClose={closeMenu} variant="sheet">
         <GroupedMenu role={actor.role} path={currentPath} onNavigate={closeMenu} />
       </Dialog>

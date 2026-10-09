@@ -28,10 +28,13 @@ test("profile account classes reset and temporary-password journey work on mobil
   await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
   const detailUrl = page.url();
   await page.getByRole("tab", { name: "Kelas utama", exact: true }).click();
+  await page.getByRole("button", { name: "Ubah kelas utama", exact: true }).click();
   await page.getByLabel("Kelas 1 Contoh", { exact: true }).check();
   await page.getByRole("button", { name: "Simpan kelas utama", exact: true }).click();
   await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
   await page.getByRole("tab", { name: "Akun & akses", exact: true }).click();
+  await page.getByRole("button", { name: "Hubungkan akun guru", exact: true }).click();
   await page.getByLabel("Email akun guru", { exact: true }).fill(email);
   await page.getByLabel("Password sementara", { exact: true }).fill("TemporarySynthetic123!");
   await page.getByRole("button", { name: "Hubungkan akun guru", exact: true }).click();
@@ -70,6 +73,7 @@ test("profile account classes reset and temporary-password journey work on mobil
   await expect(page.getByRole("heading", { name: "Ganti password", exact: true })).toBeVisible();
   await page.getByLabel("Password saat ini", { exact: true }).fill(resetPassword);
   await page.getByLabel("Password baru", { exact: true }).fill("ChangedSynthetic123!");
+  await page.getByLabel("Ulangi password baru", { exact: true }).fill("ChangedSynthetic123!");
   await page.getByRole("button", { name: "Simpan password baru", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
   await page.goto(detailUrl);

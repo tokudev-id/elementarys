@@ -10,21 +10,18 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await page.getByLabel("Password", { exact: true }).fill("SyntheticTest123!");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Absensi", exact: true })).toBeVisible();
-  await page.goto("/academic-years");
+  await page.goto("/academic-years/new");
   const create = page.getByTestId("year-create");
   await create.getByLabel("Nama tahun ajaran", { exact: true }).fill("2029/2030");
   await create.getByLabel("Tanggal mulai", { exact: true }).fill("2030-01-01");
   await create.getByLabel("Berakhir sebelum tanggal", { exact: true }).fill("2031-01-01");
   await create.getByRole("button", { name: "Tambah tahun ajaran", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "2029/2030", exact: true })).toBeVisible();
-  const editYear = page
-    .locator('[data-testid^="year-edit-"]')
-    .filter({ has: page.locator('input[name="label"][value="2029/2030"]') });
+  await expect(page.getByRole("link", { name: "2029/2030" }).first()).toBeVisible();
+  await page.getByRole("link", { name: "2029/2030" }).first().click();
+  const editYear = page.locator('[data-testid^="year-edit-"]');
   await editYear.getByLabel("Nama tahun ajaran", { exact: true }).fill("2030/2031");
   await editYear.getByRole("button", { name: "Simpan tahun ajaran", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "2030/2031", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "2030/2031" }).first()).toBeVisible();
   await page.goto("/classes/new");
   const classForm = page.getByTestId("class-create");
   await classForm.getByLabel("Nama kelas", { exact: true }).fill("Kelas Uji Kalender");
@@ -46,12 +43,12 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await page
     .getByLabel("Tahun ajaran", { exact: true })
     .selectOption({ label: "2030/2031" });
-  await page.getByLabel("Bulan kalender", { exact: true }).fill("2030-01");
-  await page.getByRole("button", { name: "Tampilkan kalender", exact: true }).click();
+  await page.getByRole("button", { name: "Ubah", exact: true }).click();
   await page.getByLabel("Senin", { exact: true }).check();
   await page.getByLabel("Kamis", { exact: true }).check();
   await page.getByRole("button", { name: "Simpan hari rutin", exact: true }).click();
   await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Tambah pengecualian", exact: true }).click();
   await page.getByLabel("Tanggal pengecualian", { exact: true }).fill("2030-01-01");
   await page.getByLabel("Alasan pengecualian", { exact: true }).fill("Libur sintetis");
   await page.getByRole("button", { name: "Simpan pengecualian", exact: true }).click();
@@ -59,6 +56,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
     page.getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }),
   ).toHaveCount(0);
