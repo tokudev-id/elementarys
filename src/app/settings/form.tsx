@@ -11,11 +11,7 @@ import { useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
 import { useZodForm } from "@/components/use-zod-form";
 import { FormErrorSummary } from "@/components/form-error-summary";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 
 const primaryIndonesianZones = [
   { value: "Asia/Jakarta", label: "WIB (Asia/Jakarta · UTC+7)" },
@@ -42,15 +38,13 @@ export function SettingsForm({ initial }: { initial: SchoolSettings }) {
         name: data.name,
         location: data.location || null,
         timezone: data.timezone,
-        reason: isTimezoneChanged ? (data.reason || null) : null,
+        reason: isTimezoneChanged ? data.reason || null : null,
       });
     },
   });
 
   const selectedTimezone =
-    typeof form.values.timezone === "string"
-      ? form.values.timezone
-      : initial.timezone;
+    typeof form.values.timezone === "string" ? form.values.timezone : initial.timezone;
   const isTimezoneChanged = selectedTimezone !== initial.timezone;
 
   const resetForm = form.reset;
@@ -68,7 +62,9 @@ export function SettingsForm({ initial }: { initial: SchoolSettings }) {
   const ianaTimezones = useMemo(() => {
     try {
       if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
-        return (Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf("timeZone");
+        return (
+          Intl as unknown as { supportedValuesOf: (key: string) => string[] }
+        ).supportedValuesOf("timeZone");
       }
     } catch {
       // fallback
@@ -92,26 +88,14 @@ export function SettingsForm({ initial }: { initial: SchoolSettings }) {
   }
 
   return (
-    <DataCard className="settings-form-card">
-      <DataCardHeader title="Identitas sekolah" />
-      <DataCardContent>
-        <form
-          className="resource-form redesigned-form"
-          {...form.formProps}
-        >
+    <form className="resource-form redesigned-form" {...form.formProps}>
+      <DataCard className="settings-form-card">
+        <DataCardHeader title="Identitas sekolah" />
+        <DataCardContent className="data-card__content--padded">
           <FormErrorSummary errors={form.errorSummary} />
           <fieldset disabled={mutation.pending} key={initial.version ?? "initial"}>
-            <Field
-              label="Nama sekolah"
-              required
-              maxLength={200}
-              {...form.register("name")}
-            />
-            <Field
-              label="Lokasi sekolah"
-              maxLength={300}
-              {...form.register("location")}
-            />
+            <Field label="Nama sekolah" required maxLength={200} {...form.register("name")} />
+            <Field label="Lokasi sekolah" maxLength={300} {...form.register("location")} />
 
             <div className="timezone-selection-group">
               <div className="timezone-quick-buttons">
@@ -174,16 +158,17 @@ export function SettingsForm({ initial }: { initial: SchoolSettings }) {
                 {...form.register("reason")}
               />
             )}
-
-            <div className="button-row">
-              <Button type="submit" pending={mutation.pending}>
-                Simpan identitas sekolah
-              </Button>
-            </div>
           </fieldset>
-          <MutationFeedback mutation={mutation} />
-        </form>
-      </DataCardContent>
-    </DataCard>
+        </DataCardContent>
+        <DataCardFooter>
+          <div className="form-actions">
+            <Button type="submit" pending={mutation.pending}>
+              Simpan identitas sekolah
+            </Button>
+          </div>
+        </DataCardFooter>
+      </DataCard>
+      <MutationFeedback mutation={mutation} />
+    </form>
   );
 }

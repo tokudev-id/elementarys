@@ -7,7 +7,7 @@
 | Dibuat | 6 Oktober 2026 |
 | Rencana | [Implementation Plan v2.0](IMPLEMENTATION_PLAN.md) |
 | Prompt pelaksana | [Agent Prompt](AGENT_PROMPT.md) |
-| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done; FIX-06 done |
+| Status saat ini | UI-R0 done; UI-R1 teknis lulus, needs_human H-03; UI-R2 done; UI-F1 done; UI-F2 done; UI-F3 done; UI-F4 done; UI-R3 done; UI-R4 done; FIX-05 done; FIX-06 done; FIX-07 done |
 | Task berikutnya | Handover & checkpoint manusia (H-01–H-09) |
 
 ## 1. Aturan pencatatan
@@ -577,3 +577,39 @@ Entri berikut mencatat hasil command, penerimaan, dan tindak lanjut. Format entr
   - `pnpm test:domain`: 18 passed (100%).
   - `pnpm test:integration`: 111 passed (100%).
   - Playwright E2E: `tests/e2e/school-master.spec.ts` (lulus), `tests/e2e/redesign-f4.spec.ts` (lulus + tangkapan layar `calendar-desktop.png` dan `calendar-mobile.png` terverifikasi akurat menyerupai referensi), `tests/e2e/mobile-sweep.spec.ts` (28 rute × 6 viewport lulus 100% tanpa touch target overflow).
+
+### FIX-07: Performa Kalender & Responsivitas Info, Redesign Rollover, Cardifikasi Form Terpisah, dan Perbaikan Kontras & Padding Rekap
+- **Masalah & Temuan Pengguna**:
+  1. Halaman `/academic-years/rollover` belum disesuaikan dengan page lain, belum memakai Card, dan tampilannya belum tertata.
+  2. Seluruh form terpisah (misalnya `/new` dan `edit`) belum dibungkus Card, dan tombol submit/batal berada di luar card.
+  3. Halaman rekap (`/reports`) masih membutuhkan penyesuaian padding, serta terdapat teks berwarna biru/abu-abu pucat (`text-muted` yang memetakan ke background `#eef4f9`) yang tidak terbaca di atas layar putih.
+  4. Halaman kalender (`/calendar`) terasa lambat ketika berpindah bulan; perlu lazy load dan fetch asinkron agar navigasi bulan instan.
+  5. Section informasi siswa tidak hadir di kalender belum responsif (keterangan terlipat jadi 2 baris, kolom nomor angka terlalu lebar), dan card Hari Belajar Rutin perlu penambahan padding.
+- **Implementasi**:
+  1. **Performa Kalender & Navigasi Asinkron (`src/app/calendar/calendar-client.tsx`, `src/app/api/calendar/absences/route.ts`)**:
+     - Navigasi bulan diubah menjadi instan (client state) menggunakan fungsi domain `monthDates()` dan `resolveSchoolDay()`.
+     - Data absensi bulanan diambil secara lazy/asynchronous via API endpoint `/api/calendar/absences` dengan caching di memori klien.
+     - Section "Siswa tidak hadir": Kolom `#` dirampingkan (`28px`), kolom status keterangan dikunci 1 baris (`white-space: nowrap !important;`), dan tabel dibungkus kontainer responsif dengan scroll horizontal aman jika viewport sempit.
+     - Card "Hari belajar rutin": Ditambahkan padding `20px` (`16px` mobile) dan chip pill hijau responsif.
+  2. **Cardifikasi Form Terpisah (`src/components/form-section.tsx`, `src/components/data-card.tsx`, `src/app/**/form.tsx`)**:
+     - `DataCardHeader` diperluas mendukung prop `description?: ReactNode` dengan kelas styling `.data-card__description`.
+     - `FormSection` direfaktor membungkus seluruh field dalam `DataCard`, `DataCardHeader`, `DataCardContent` (`.data-card__content--padded`), dan `DataCardFooter` untuk aksi form.
+     - Form terpisah (`academic-years/form.tsx`, `classes/form.tsx`, `students/form.tsx`, `teachers/forms.tsx`, `settings/form.tsx`) diperbarui memasukkan tombol aksi (Simpan / Tambah / Batal) ke dalam `DataCardFooter` di dalam card.
+  3. **Redesign Total Halaman Rollover (`src/app/academic-years/rollover/page.tsx`, `activate-form.tsx`, `src/styles/components.css`)**:
+     - Menggunakan `AppShell` breadcrumbs (`Tahun ajaran / Persiapan tahun ajaran`) dan `PageHeader` dengan tombol rekap.
+     - Card 1 (`#card-filter-rollover`): Pemilihan tahun yang disiapkan dengan filter form di dalam card.
+     - Card 2 (`#card-langkah-persiapan`): Checklist 6 langkah persiapan dengan nomor urut melingkar (`.rollover-step-num`), judul, deskripsi, dan tombol aksi terstruktur.
+     - Card 3 (`#daftar-kelas-persiapan`): Tabel penempatan kelas tahun persiapan responsif dengan badge status dan paginasi `DataTablePagination`.
+     - `ActivateYearForm` dipercantik di dalam `.activate-year-box`.
+  4. **Perbaikan Padding dan Kontras Halaman Rekap (`src/app/reports/page.tsx`, `src/components/report-table.tsx`, `src/styles/components.css`)**:
+     - Filter card diberikan padding konsisten `20px` via `.data-card__content--padded`.
+     - Rekap kelas dibungkus kontainer `.report-card-body` (`padding: 20px`, mobile `16px`), merapikan KPI grid, warning banner, change notice, dan chip legend.
+     - Tabel tanggal `.report-table-scroll` diberi `border-top: 1px solid var(--border)` dan overflow horizontal mandiri.
+     - Memperbaiki kontras teks: Seluruh pemanggilan `text-muted` (yang memetakan ke warna sangat pucat `#eef4f9`) diganti ke `text-muted-foreground` (`#56687a`), dan menambahkan aturan CSS `.text-muted { color: var(--muted-foreground) !important; }` serta kelas khusus `.col-date__day` dan `.col-student__code` sehingga nama hari dan kode siswa terbaca sangat jelas dan tajam.
+- **Hasil Verifikasi**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm typecheck`: 0 errors.
+  - `pnpm test:domain`: 18 passed (100%).
+  - `pnpm test:integration`: 111 passed (100%).
+  - Playwright E2E: `reports.spec.ts` (360px, 768px, 1024px), `year-operations.spec.ts`, `school-master.spec.ts`, `redesign-f4.spec.ts`, `redesign-r3.spec.ts`, `mobile-sweep.spec.ts` seluruhnya 100% lulus.
+  - `pnpm build`: Berhasil tanpa error dalam 10.7 detik (38 rute).

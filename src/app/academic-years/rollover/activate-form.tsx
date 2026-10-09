@@ -31,10 +31,12 @@ export function ActivateYearForm({ preparation }: { preparation: YearPreparation
     closeConfirmation();
   }
   return (
-    <>
-      <p>Tahun aktif saat ini: {preparation.currentYear?.label ?? "Belum dipilih"}.</p>
+    <div className="activate-year-box">
+      <p>
+        Tahun aktif saat ini: <strong>{preparation.currentYear?.label ?? "Belum dipilih"}</strong>.
+      </p>
       {isCurrent || preparation.year.isCurrent ? (
-        <p>Tahun ini sudah aktif.</p>
+        <p className="font-semibold text-emerald-600">Tahun ini sudah aktif.</p>
       ) : (
         <Button
           type="button"
@@ -74,6 +76,6 @@ export function ActivateYearForm({ preparation }: { preparation: YearPreparation
           </p>
         )}
       </Dialog>
-    </>
+    </div>
   );
 }

@@ -5,16 +5,8 @@ import { StateBanner } from "@/components/state-banner";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/button";
 import { Field } from "@/components/field";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-} from "@/components/data-card";
-import {
-  ReportLegend,
-  ReportChangeNotice,
-  ReportClassView,
-} from "@/components/report-table";
+import { DataCard, DataCardHeader, DataCardContent } from "@/components/data-card";
+import { ReportLegend, ReportChangeNotice, ReportClassView } from "@/components/report-table";
 import { ReportDownload } from "@/components/report-download";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { reportFilters, buildMonthlyAttendanceReport } from "@/server/reports/monthly";
@@ -68,11 +60,7 @@ export default async function Reports({
   const defaultClassId = options.classes[0]?.id;
   const classParam = typeof selected.classId === "string" ? selected.classId : undefined;
   const classId =
-    classParam === "all"
-      ? undefined
-      : classParam !== undefined
-        ? classParam
-        : defaultClassId;
+    classParam === "all" ? undefined : classParam !== undefined ? classParam : defaultClassId;
 
   let report: MonthlyReport | undefined;
   let message = "";
@@ -119,10 +107,7 @@ export default async function Reports({
           report && (
             <div className="flex flex-wrap gap-2 items-center">
               <ReportDownload input={report.input} />
-              <Link
-                className="button-link"
-                href={`/reports/print?${printParams.toString()}`}
-              >
+              <Link className="button-link" href={`/reports/print?${printParams.toString()}`}>
                 Buka halaman cetak
               </Link>
             </div>
@@ -134,7 +119,7 @@ export default async function Reports({
         {/* Filter Card */}
         <DataCard id="card-filter-rekap">
           <DataCardHeader title="Filter laporan" />
-          <DataCardContent>
+          <DataCardContent className="data-card__content--padded">
             <form action="/reports" method="get" noValidate className="report-filter-bar">
               <div className="ui-field report-filter-item">
                 <label htmlFor="report-year">Tahun ajaran</label>
@@ -148,13 +133,7 @@ export default async function Reports({
               </div>
 
               <div className="report-filter-item">
-                <Field
-                  label="Bulan"
-                  name="month"
-                  type="month"
-                  defaultValue={month}
-                  required
-                />
+                <Field label="Bulan" name="month" type="month" defaultValue={month} required />
               </div>
 
               <div className="ui-field report-filter-item">
@@ -185,15 +164,12 @@ export default async function Reports({
         {report && (
           <>
             {!report.classes.length && (
-              <StateBanner state="empty">
-                Belum ada kelas pada tahun ajaran ini.
-              </StateBanner>
+              <StateBanner state="empty">Belum ada kelas pada tahun ajaran ini.</StateBanner>
             )}
 
             {report.classes.map((item) => {
               const totalPresent = item.totals.H;
-              const totalTracked =
-                item.totals.H + item.totals.S + item.totals.I + item.totals.A;
+              const totalTracked = item.totals.H + item.totals.S + item.totals.I + item.totals.A;
               const attendanceRate =
                 totalTracked > 0 ? Math.round((totalPresent / totalTracked) * 100) : 0;
 
@@ -214,53 +190,58 @@ export default async function Reports({
                   />
 
                   <DataCardContent>
-                    {/* Class KPIs */}
-                    <div className="report-kpi-grid">
-                      <div className="kpi-card">
-                        <span className="kpi-card__label">Rata-rata kehadiran</span>
-                        <span className="kpi-card__value">{attendanceRate}%</span>
-                        <span className="kpi-card__sub">
-                          {totalPresent} dari {totalTracked} kehadiran siswa
-                        </span>
+                    <div className="report-card-body">
+                      {/* Class KPIs */}
+                      <div className="report-kpi-grid">
+                        <div className="kpi-card">
+                          <span className="kpi-card__label">Rata-rata kehadiran</span>
+                          <span className="kpi-card__value">{attendanceRate}%</span>
+                          <span className="kpi-card__sub">
+                            {totalPresent} dari {totalTracked} kehadiran siswa
+                          </span>
+                        </div>
+
+                        <div className="kpi-card">
+                          <span className="kpi-card__label">Total Sakit (S)</span>
+                          <span className="kpi-card__value">{item.totals.S}</span>
+                          <span className="kpi-card__sub">Akumulasi izin sakit</span>
+                        </div>
+
+                        <div className="kpi-card">
+                          <span className="kpi-card__label">Total Izin (I)</span>
+                          <span className="kpi-card__value">{item.totals.I}</span>
+                          <span className="kpi-card__sub">Akumulasi izin keperluan</span>
+                        </div>
+
+                        <div className="kpi-card">
+                          <span className="kpi-card__label">Total Alpa (A)</span>
+                          <span className="kpi-card__value">{item.totals.A}</span>
+                          <span className="kpi-card__sub">Tanpa keterangan</span>
+                        </div>
                       </div>
 
-                      <div className="kpi-card">
-                        <span className="kpi-card__label">Total Sakit (S)</span>
-                        <span className="kpi-card__value">{item.totals.S}</span>
-                        <span className="kpi-card__sub">Akumulasi izin sakit</span>
-                      </div>
+                      {/* Incomplete warning banner */}
+                      {!item.complete && (
+                        <StateBanner state="empty">
+                          Belum lengkap: {item.missingDays} catatan siswa belum dicatat pada bulan
+                          ini.
+                        </StateBanner>
+                      )}
 
-                      <div className="kpi-card">
-                        <span className="kpi-card__label">Total Izin (I)</span>
-                        <span className="kpi-card__value">{item.totals.I}</span>
-                        <span className="kpi-card__sub">Akumulasi izin keperluan</span>
-                      </div>
+                      {/* Change notice if modified after last export */}
+                      <ReportChangeNotice report={item} />
 
-                      <div className="kpi-card">
-                        <span className="kpi-card__label">Total Alpa (A)</span>
-                        <span className="kpi-card__value">{item.totals.A}</span>
-                        <span className="kpi-card__sub">Tanpa keterangan</span>
-                      </div>
+                      {/* Legend Chips */}
+                      <ReportLegend />
                     </div>
-
-                    {/* Incomplete warning banner */}
-                    {!item.complete && (
-                      <StateBanner state="empty">
-                        Belum lengkap: {item.missingDays} catatan siswa belum dicatat pada bulan ini.
-                      </StateBanner>
-                    )}
-
-                    {/* Change notice if modified after last export */}
-                    <ReportChangeNotice report={item} />
-
-                    {/* Legend Chips */}
-                    <ReportLegend />
 
                     {/* Student List & Grid Table */}
                     {!item.students.length ? (
-                      <StateBanner state="empty">
-                        Tidak ada siswa yang ditempatkan pada kelas ini dalam bulan tersebut.
-                      </StateBanner>
+                      <div className="report-empty-wrapper">
+                        <StateBanner state="empty">
+                          Tidak ada siswa yang ditempatkan pada kelas ini dalam bulan tersebut.
+                        </StateBanner>
+                      </div>
                     ) : (
                       <ReportClassView report={item} dates={report.dates} />
                     )}

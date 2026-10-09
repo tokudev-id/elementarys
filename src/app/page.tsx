@@ -14,23 +14,14 @@ import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
 import { StatusBadge } from "@/components/status-badge";
 import { SetupChecklist } from "@/components/setup-checklist";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { getDashboard } from "@/server/queries/dashboard";
 import { schoolIdentity } from "@/components/school-identity";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const actor = await requirePageActor();
   if (actor.role === "teacher") {
     redirect("/attendance");
@@ -51,9 +42,7 @@ export default async function Home({
   const totalRecordedStudents = totalHadir + totalSakit + totalIzin + totalAlpa;
 
   const attendanceRate =
-    totalRecordedStudents > 0
-      ? Math.round((totalHadir / totalRecordedStudents) * 100)
-      : null;
+    totalRecordedStudents > 0 ? Math.round((totalHadir / totalRecordedStudents) * 100) : null;
 
   // Pagination for unrecorded classes (page size 10)
   const pageSize = 10;
@@ -116,11 +105,7 @@ export default async function Home({
           <div className="kpi-card">
             <span className="kpi-card__label">Kehadiran hari ini</span>
             <span className="kpi-card__value">
-              {!dashboard.isSchoolDay
-                ? "—"
-                : attendanceRate !== null
-                  ? `${attendanceRate}%`
-                  : "—"}
+              {!dashboard.isSchoolDay ? "—" : attendanceRate !== null ? `${attendanceRate}%` : "—"}
             </span>
             <span className="kpi-card__sub">
               {!dashboard.isSchoolDay
@@ -206,10 +191,7 @@ export default async function Home({
                           <StatusBadge tone="neutral">Belum dicatat</StatusBadge>
                         </td>
                         <td data-slot="table-cell" className="cell-actions">
-                          <Link
-                            className="button-link"
-                            href={`/attendance/${item.classId}`}
-                          >
+                          <Link className="button-link" href={`/attendance/${item.classId}`}>
                             Catat
                           </Link>
                         </td>
@@ -238,20 +220,19 @@ export default async function Home({
           <DataCardHeader title="Pintasan cepat" />
           <DataCardContent>
             <div className="dashboard-quick-actions">
-              <Link
-                href="/reports"
-                className="quick-action-card quick-action-card--highlight"
-              >
+              <Link href="/reports" className="quick-action-card quick-action-card--highlight">
                 <span className="quick-action-icon">
                   <FileSpreadsheet size={20} aria-hidden="true" />
                 </span>
                 <div className="quick-action-content">
                   <span className="quick-action-title">Rekap bulan ini</span>
-                  <span className="quick-action-desc">
-                    Laporan kehadiran dan unduh Excel
-                  </span>
+                  <span className="quick-action-desc">Laporan kehadiran dan unduh Excel</span>
                 </div>
-                <ChevronRight size={16} className="text-muted ml-auto" aria-hidden="true" />
+                <ChevronRight
+                  size={16}
+                  className="text-muted-foreground ml-auto"
+                  aria-hidden="true"
+                />
               </Link>
 
               <Link href="/attendance" className="quick-action-card">
@@ -262,7 +243,11 @@ export default async function Home({
                   <span className="quick-action-title">Presensi harian</span>
                   <span className="quick-action-desc">Daftar kelas dan input absensi</span>
                 </div>
-                <ChevronRight size={16} className="text-muted ml-auto" aria-hidden="true" />
+                <ChevronRight
+                  size={16}
+                  className="text-muted-foreground ml-auto"
+                  aria-hidden="true"
+                />
               </Link>
 
               <Link href="/calendar" className="quick-action-card">
@@ -273,7 +258,11 @@ export default async function Home({
                   <span className="quick-action-title">Kalender sekolah</span>
                   <span className="quick-action-desc">Jadwal belajar dan hari libur</span>
                 </div>
-                <ChevronRight size={16} className="text-muted ml-auto" aria-hidden="true" />
+                <ChevronRight
+                  size={16}
+                  className="text-muted-foreground ml-auto"
+                  aria-hidden="true"
+                />
               </Link>
 
               <Link href="/students/new" className="quick-action-card">
@@ -284,7 +273,11 @@ export default async function Home({
                   <span className="quick-action-title">Tambah siswa</span>
                   <span className="quick-action-desc">Daftarkan siswa baru</span>
                 </div>
-                <ChevronRight size={16} className="text-muted ml-auto" aria-hidden="true" />
+                <ChevronRight
+                  size={16}
+                  className="text-muted-foreground ml-auto"
+                  aria-hidden="true"
+                />
               </Link>
 
               <Link href="/settings" className="quick-action-card">
@@ -295,7 +288,11 @@ export default async function Home({
                   <span className="quick-action-title">Pengaturan sekolah</span>
                   <span className="quick-action-desc">Identitas dan zona waktu</span>
                 </div>
-                <ChevronRight size={16} className="text-muted ml-auto" aria-hidden="true" />
+                <ChevronRight
+                  size={16}
+                  className="text-muted-foreground ml-auto"
+                  aria-hidden="true"
+                />
               </Link>
             </div>
           </DataCardContent>

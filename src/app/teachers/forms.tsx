@@ -107,7 +107,22 @@ export function TeacherProfileForm({
     >
       <FormErrorSummary errors={form.errorSummary} />
       <fieldset disabled={mutation.pending} key={teacher?.version ?? "create"}>
-        <FormSection title="Profil guru">
+        <FormSection
+          title="Profil guru"
+          actions={
+            redirect ? (
+              <FormActions
+                cancelHref={teacher ? `/teachers/${teacher.id}` : "/teachers"}
+                pending={mutation.pending}
+                label={teacher ? "Simpan profil guru" : "Tambah profil guru"}
+              />
+            ) : (
+              <Button type="submit" pending={mutation.pending}>
+                {teacher ? "Simpan profil guru" : "Tambah profil guru"}
+              </Button>
+            )
+          }
+        >
           <Field
             label="Nama lengkap guru"
             required
@@ -120,22 +135,8 @@ export function TeacherProfileForm({
             onCheckedChange={handleActiveChange}
             name="active"
           />
-          <p>
-            Menonaktifkan profil juga menonaktifkan akun terhubung dan mengakhiri
-            sesinya.
-          </p>
+          <p>Menonaktifkan profil juga menonaktifkan akun terhubung dan mengakhiri sesinya.</p>
         </FormSection>
-        {redirect ? (
-          <FormActions
-            cancelHref={teacher ? `/teachers/${teacher.id}` : "/teachers"}
-            pending={mutation.pending}
-            label={teacher ? "Simpan profil guru" : "Tambah profil guru"}
-          />
-        ) : (
-          <Button type="submit" pending={mutation.pending}>
-            {teacher ? "Simpan profil guru" : "Tambah profil guru"}
-          </Button>
-        )}
       </fieldset>
       <MutationFeedback mutation={mutation} />
       <ConfirmDialog
@@ -148,8 +149,7 @@ export function TeacherProfileForm({
         label="Nonaktifkan profil"
       >
         <p>
-          Akun terhubung ikut dinonaktifkan dan sesinya berakhir. Riwayat
-          absensi tetap tersedia.
+          Akun terhubung ikut dinonaktifkan dan sesinya berakhir. Riwayat absensi tetap tersedia.
         </p>
       </ConfirmDialog>
     </form>
@@ -176,19 +176,14 @@ export function TeacherClassesForm({
     <form className="resource-form" noValidate onSubmit={submit}>
       <fieldset disabled={mutation.pending} key={teacher.version}>
         <legend>Kelas utama</legend>
-        <p>
-          Kelas utama mengatur urutan. Guru aktif tetap dapat mencatat seluruh
-          kelas.
-        </p>
+        <p>Kelas utama mengatur urutan. Guru aktif tetap dapat mencatat seluruh kelas.</p>
         {classes.map((item) => (
           <label className="checkbox-field" key={item.id}>
             <input
               type="checkbox"
               name="classId"
               value={item.id}
-              defaultChecked={teacher.classes.some(
-                (current) => current.id === item.id,
-              )}
+              defaultChecked={teacher.classes.some((current) => current.id === item.id)}
             />
             {item.name}
           </label>
@@ -229,35 +224,33 @@ export function TeacherAccountForm({
   const mutation = useMutation(`/api/teachers/${teacher.id}/account`, "POST");
 
   const form = useZodForm<AccountFormData>(teacherAccountSchema, {
-      defaultValues: {
-        mode: "create",
-        expectedVersion: teacher.version,
-        email: "",
-        password: "",
-        role: "teacher",
-      },
-      serverErrors: mutation.errors,
-      onSubmit: async (data: AccountFormData) => {
-        const saved = await mutation.mutate(data);
-        if (saved) {
-          form.reset({
-            mode,
-            expectedVersion: teacher.version,
-            email: "",
-            password: "",
-            role: "teacher",
-          });
-          if (onSuccess) {
-            onSuccess();
-          }
-        }
-      },
+    defaultValues: {
+      mode: "create",
+      expectedVersion: teacher.version,
+      email: "",
+      password: "",
+      role: "teacher",
     },
-  );
+    serverErrors: mutation.errors,
+    onSubmit: async (data: AccountFormData) => {
+      const saved = await mutation.mutate(data);
+      if (saved) {
+        form.reset({
+          mode,
+          expectedVersion: teacher.version,
+          email: "",
+          password: "",
+          role: "teacher",
+        });
+        if (onSuccess) {
+          onSuccess();
+        }
+      }
+    },
+  });
 
   function changeMode(event: ChangeEvent<HTMLSelectElement>) {
-    const nextMode =
-      event.currentTarget.value === "existing" ? "existing" : "create";
+    const nextMode = event.currentTarget.value === "existing" ? "existing" : "create";
     setMode(nextMode);
     form.setValue("mode", nextMode);
   }
@@ -289,25 +282,17 @@ export function TeacherAccountForm({
               autoComplete="new-password"
               {...form.register("password")}
             />
-            <SelectField
-              label="Peran akun"
-              required
-              {...form.register("role")}
-            >
+            <SelectField label="Peran akun" required {...form.register("role")}>
               <option value="teacher">Guru</option>
               <option value="admin">Admin</option>
             </SelectField>
             <p>
-              Sampaikan password melalui kanal yang disepakati. Guru wajib
-              menggantinya saat masuk pertama.
+              Sampaikan password melalui kanal yang disepakati. Guru wajib menggantinya saat masuk
+              pertama.
             </p>
           </>
         ) : (
-          <SelectField
-            label="Akun yang belum tertaut"
-            required
-            {...form.register("userId")}
-          >
+          <SelectField label="Akun yang belum tertaut" required {...form.register("userId")}>
             <option value="">Pilih akun</option>
             {accounts.map((user) => (
               <option key={user.id} value={user.id}>
@@ -335,10 +320,7 @@ export function AccountAccessForm({
   expectedVersion: number | null;
   onSuccess?: () => void;
 }) {
-  const mutation = useMutation(
-    `/api/users/${encodeURIComponent(account.id)}/access`,
-    "PATCH",
-  );
+  const mutation = useMutation(`/api/users/${encodeURIComponent(account.id)}/access`, "PATCH");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -365,20 +347,12 @@ export function AccountAccessForm({
         key={`${expectedVersion}:${account.role}:${account.banned}`}
       >
         <legend>Akses akun {account.email}</legend>
-        <SelectField
-          label="Peran akun"
-          name="role"
-          defaultValue={account.role}
-        >
+        <SelectField label="Peran akun" name="role" defaultValue={account.role}>
           <option value="teacher">Guru</option>
           <option value="admin">Admin</option>
         </SelectField>
         <label className="checkbox-field">
-          <input
-            name="banned"
-            type="checkbox"
-            defaultChecked={account.banned}
-          />
+          <input name="banned" type="checkbox" defaultChecked={account.banned} />
           Nonaktifkan akses akun
         </label>
         <Button type="submit" pending={mutation.pending}>
@@ -410,22 +384,21 @@ export function PasswordResetForm({
   );
 
   const form = useZodForm<ResetFormData>(resetPasswordSchema, {
-      defaultValues: {
-        expectedVersion,
-        newPassword: "",
-      },
-      serverErrors: mutation.errors,
-      onSubmit: async (data: ResetFormData) => {
-        const saved = await mutation.mutate(data);
-        if (saved) {
-          form.reset({ expectedVersion, newPassword: "" });
-          if (onSuccess) {
-            onSuccess();
-          }
-        }
-      },
+    defaultValues: {
+      expectedVersion,
+      newPassword: "",
     },
-  );
+    serverErrors: mutation.errors,
+    onSubmit: async (data: ResetFormData) => {
+      const saved = await mutation.mutate(data);
+      if (saved) {
+        form.reset({ expectedVersion, newPassword: "" });
+        if (onSuccess) {
+          onSuccess();
+        }
+      }
+    },
+  });
 
   return (
     <form
@@ -445,8 +418,7 @@ export function PasswordResetForm({
           {...form.register("newPassword")}
         />
         <p>
-          Semua sesi akun akan dicabut. Pengguna wajib mengganti password
-          setelah masuk kembali.
+          Semua sesi akun akan dicabut. Pengguna wajib mengganti password setelah masuk kembali.
         </p>
         <Button type="submit" pending={mutation.pending}>
           Reset password akun

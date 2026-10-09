@@ -2,10 +2,7 @@
 
 import { useMemo } from "react";
 import type { StudentView, StudentInput, StudentPatchInput } from "@/contracts/students";
-import {
-  studentInputSchema,
-  studentPatchSchema,
-} from "@/contracts/students";
+import { studentInputSchema, studentPatchSchema } from "@/contracts/students";
 import type { ClassView, AcademicYearView } from "@/contracts/school-master";
 import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
@@ -53,9 +50,7 @@ export function StudentForm({
   const availableClasses = useMemo(
     () =>
       classes.filter(
-        (item) =>
-          !item.archivedAt &&
-          !years.find((year) => year.id === item.yearId)?.archivedAt,
+        (item) => !item.archivedAt && !years.find((year) => year.id === item.yearId)?.archivedAt,
       ),
     [classes, years],
   );
@@ -85,9 +80,7 @@ export function StudentForm({
   const schema = (current ? studentPatchSchema : studentInputSchema) as ZodLikeSchema<
     StudentPatchInput | StudentInput
   >;
-  const form = useZodForm<StudentPatchInput | StudentInput, StudentFormValues>(
-    schema,
-    {
+  const form = useZodForm<StudentPatchInput | StudentInput, StudentFormValues>(schema, {
     defaultValues,
     serverErrors: mutation.errors,
     onSubmit: async (validatedData) => {
@@ -109,7 +102,24 @@ export function StudentForm({
     >
       <FormErrorSummary errors={form.errorSummary} />
       <fieldset disabled={mutation.pending} key={current?.version ?? "create"}>
-        <FormSection title="Identitas">
+        <FormSection
+          title="Identitas siswa"
+          actions={
+            current ? (
+              redirect ? (
+                <FormActions
+                  cancelHref={`/students/${current.id}`}
+                  pending={mutation.pending}
+                  label="Simpan identitas siswa"
+                />
+              ) : (
+                <Button type="submit" pending={mutation.pending}>
+                  Simpan identitas siswa
+                </Button>
+              )
+            ) : undefined
+          }
+        >
           <Field
             label="Nama lengkap siswa"
             required
@@ -117,34 +127,30 @@ export function StudentForm({
             {...form.register("fullName")}
           />
           {current && (
-            <Field
-              label="Kode siswa"
-              required
-              maxLength={64}
-              {...form.register("studentCode")}
-            />
+            <Field label="Kode siswa" required maxLength={64} {...form.register("studentCode")} />
           )}
-          <Field
-            label="NIS"
-            maxLength={30}
-            {...form.register("nis")}
-          />
-          <Field
-            label="NISN"
-            maxLength={10}
-            {...form.register("nisn")}
-          />
+          <Field label="NIS" maxLength={30} {...form.register("nis")} />
+          <Field label="NISN" maxLength={10} {...form.register("nisn")} />
         </FormSection>
         {!current && (
           <FormSection
             title="Penempatan awal"
             description="Kode siswa dibuat otomatis. Tanggal akhir penempatan mengikuti tahun ajaran kelas."
+            actions={
+              redirect ? (
+                <FormActions
+                  cancelHref="/students"
+                  pending={mutation.pending}
+                  label="Tambah siswa"
+                />
+              ) : (
+                <Button type="submit" pending={mutation.pending}>
+                  Tambah siswa
+                </Button>
+              )
+            }
           >
-            <SelectField
-              label="Kelas awal"
-              required
-              {...form.register("classId")}
-            >
+            <SelectField label="Kelas awal" required {...form.register("classId")}>
               {availableClasses.map((item) => (
                 <option key={item.id} value={item.id}>
                   {years.find((year) => year.id === item.yearId)?.label} / {item.name}
@@ -158,17 +164,6 @@ export function StudentForm({
               {...form.register("startsOn")}
             />
           </FormSection>
-        )}
-        {redirect ? (
-          <FormActions
-            cancelHref={current ? `/students/${current.id}` : "/students"}
-            pending={mutation.pending}
-            label={current ? "Simpan identitas siswa" : "Tambah siswa"}
-          />
-        ) : (
-          <Button type="submit" pending={mutation.pending}>
-            {current ? "Simpan identitas siswa" : "Tambah siswa"}
-          </Button>
         )}
       </fieldset>
       <MutationFeedback mutation={mutation} />

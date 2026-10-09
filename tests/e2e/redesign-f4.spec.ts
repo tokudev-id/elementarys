@@ -73,12 +73,16 @@ test("capture UI-F4 screenshots", async ({ page }) => {
   await page.getByRole("tab", { name: "Akun & akses" }).click();
   await page.screenshot({ path: "docs/redesign/after/UI-F4/teacher-account-tab.png" });
 
-  // 7. Attendance Roster (Class detail)
+  // 8. Form /new with Card & Footer Actions
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/academic-years/new");
+  await expect(page.getByRole("heading", { name: "Tambah tahun ajaran" })).toBeVisible();
+  await page.screenshot({ path: "docs/redesign/after/UI-F4/form-new-desktop.png" });
+
+  // 9. Reports Page (Padding & Contrast)
+  await page.goto("/reports");
+  await expect(page.getByRole("heading", { name: "Rekap bulanan" })).toBeVisible();
+  await page.screenshot({ path: "docs/redesign/after/UI-F4/reports-desktop.png" });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/attendance");
-  const classLink = page.locator("a[href^='/attendance/']:not([href='/attendance'])").first();
-  await expect(classLink).toBeVisible();
-  await classLink.click();
-  await expect(page.getByTestId("student-row").first()).toBeVisible();
-  await page.screenshot({ path: "docs/redesign/after/UI-F4/attendance-mobile.png" });
+  await page.screenshot({ path: "docs/redesign/after/UI-F4/reports-mobile.png" });
 });

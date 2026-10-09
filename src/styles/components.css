@@ -124,6 +124,25 @@
     z-index: 10;
     flex-wrap: wrap;
   }
+  .data-card__footer .form-actions {
+    position: static;
+    border-top: none;
+    padding: 0;
+    background: transparent;
+  }
+}
+.form-card {
+  margin-bottom: 20px;
+}
+.data-card__description {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+  font-weight: normal;
+}
+.data-card__content--padded .form-section__fields {
+  margin-top: 0;
 }
 .form-section {
   margin-bottom: 20px;
@@ -152,6 +171,14 @@
   gap: 12px;
   justify-content: flex-end;
   padding-block: 16px;
+}
+.data-card__footer .form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 .field-required {
   color: var(--destructive);
@@ -1514,7 +1541,7 @@
 
 @media (min-width: 1024px) {
   .calendar-split-layout {
-    grid-template-columns: 1.45fr 1fr;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
   }
 }
 
@@ -1836,7 +1863,7 @@ button.calendar-day-btn {
 }
 
 .calendar-info-content {
-  padding: 16px 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1913,16 +1940,121 @@ button.calendar-day-btn {
   margin: 0;
 }
 
-.calendar-info-table th,
-.calendar-info-table td {
-  padding: 8px 10px;
-  font-size: 13px;
+/* Student Absence Table (Responsive & 1-Row Status) */
+.calendar-info-table-wrapper {
+  width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
 }
 
-.col-idx {
-  width: 36px;
-  text-align: center;
+.calendar-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  margin: 0;
+}
+
+.calendar-info-table thead {
+  background: var(--surface-muted);
+}
+
+.calendar-info-table th {
+  padding: 8px 6px;
+  font-size: 11.5px;
+  font-weight: 600;
   color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.calendar-info-table td {
+  padding: 7px 6px;
+  font-size: 13px;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.calendar-info-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.calendar-info-table tbody tr:hover {
+  background: var(--surface-muted);
+}
+
+/* Col 1: # (Angka/Row) - Ramping & Tidak Boros Ruang */
+.calendar-info-table th.col-idx,
+.calendar-info-table td.col-idx {
+  width: 28px;
+  min-width: 28px;
+  max-width: 32px;
+  padding: 7px 2px 7px 6px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Col 2: Nama Siswa */
+.calendar-info-table th.col-name,
+.calendar-info-table td.col-name {
+  text-align: left;
+  min-width: 80px;
+  padding: 7px 6px;
+}
+
+.calendar-info-table td.col-name strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+  display: block;
+  line-height: 1.3;
+}
+
+/* Col 3: Kelas */
+.calendar-info-table th.col-class,
+.calendar-info-table td.col-class {
+  width: 48px;
+  min-width: 44px;
+  max-width: 56px;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  padding: 7px 4px;
+}
+
+/* Col 4: Keterangan (1 ROW ONLY, NO WRAP) */
+.calendar-info-table th.col-status,
+.calendar-info-table td.col-status {
+  width: 76px;
+  min-width: 76px;
+  text-align: right;
+  white-space: nowrap !important;
+  padding: 7px 8px 7px 4px;
+}
+
+.calendar-info-table .status-badge {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
 }
 
 .calendar-info-actions {
@@ -1978,24 +2110,64 @@ button.calendar-day-btn {
   margin-top: 2px;
 }
 
-/* Weekday Chips in Card 2 */
+/* Card 2: Hari Belajar Rutin Content & Responsive Chips */
+.calendar-weekdays-card .data-card__content,
+.calendar-weekdays-content {
+  padding: 20px;
+}
+
 .weekday-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 4px 0;
+  gap: 10px;
+  align-items: center;
 }
 
 .weekday-chip {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   padding: 6px 14px;
   border-radius: 9999px;
-  background: var(--surface-muted);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  font-size: 13px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 13.5px;
   font-weight: 500;
+  line-height: 1.2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.weekday-chip-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.calendar-weekdays-help {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+@media (max-width: 639px) {
+  .calendar-weekdays-card .data-card__content,
+  .calendar-weekdays-content {
+    padding: 16px;
+  }
+  .weekday-chips {
+    gap: 8px;
+  }
+  .weekday-chip {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 }
 
 /* Responsive Mobile Refinements */
@@ -2201,6 +2373,10 @@ button.calendar-day-btn {
 }
 
 /* Rekap / Reports Redesign (UI-R3) */
+.data-card__content--padded .report-filter-bar {
+  padding: 0;
+}
+
 .report-filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -2221,11 +2397,34 @@ button.calendar-day-btn {
   margin-left: auto;
 }
 
+.report-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 639px) {
+  .report-card-body {
+    padding: 16px;
+  }
+}
+
+.report-empty-wrapper {
+  padding: 20px;
+}
+
+@media (max-width: 639px) {
+  .report-empty-wrapper {
+    padding: 16px;
+  }
+}
+
 .report-kpi-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  margin: 16px 0;
+  margin: 0;
 }
 
 @media (min-width: 640px) {
@@ -2245,7 +2444,8 @@ button.calendar-day-btn {
   flex-wrap: wrap;
   gap: 8px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   background: var(--surface-muted);
 }
 
@@ -2304,6 +2504,13 @@ button.calendar-day-btn {
   border-bottom: 1px solid var(--border);
 }
 
+.report-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1px solid var(--border);
+}
+
 .report-sticky-table {
   width: 100%;
   border-collapse: collapse;
@@ -2327,6 +2534,20 @@ button.calendar-day-btn {
   min-width: 160px;
   max-width: 200px;
   border-right: 2px solid var(--border);
+  padding: 8px 12px;
+}
+
+.report-sticky-table th.col-student .col-student__name {
+  display: block;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.report-sticky-table th.col-student .col-student__code {
+  color: var(--muted-foreground) !important;
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 2px;
 }
 
 .report-sticky-table th.col-total,
@@ -2334,12 +2555,27 @@ button.calendar-day-btn {
   font-weight: 600;
   min-width: 36px;
   background: var(--surface-muted);
+  color: var(--foreground);
 }
 
 .report-sticky-table th.col-date {
-  min-width: 32px;
+  min-width: 34px;
+  padding: 6px 4px;
   font-size: 11px;
   line-height: 1.2;
+}
+
+.report-sticky-table th.col-date .col-date__day {
+  color: var(--muted-foreground) !important;
+  font-weight: 500;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.report-sticky-table th.col-date .col-date__num {
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .report-sticky-table td.cell-status-h {
@@ -2369,6 +2605,20 @@ button.calendar-day-btn {
 .report-sticky-table td.cell-status-holiday {
   background: var(--surface-muted);
   color: var(--muted-foreground);
+}
+
+.report-mobile-totals {
+  padding: 0 20px 16px;
+}
+
+@media (max-width: 639px) {
+  .report-mobile-totals {
+    padding: 0 16px 16px;
+  }
+}
+
+.text-muted {
+  color: var(--muted-foreground) !important;
 }
 
 .report-mobile-card {
@@ -2419,4 +2669,76 @@ button.calendar-day-btn {
   width: 100%;
   height: 100%;
   opacity: 0.01;
+}
+
+/* Rollover Steps (Academic Years Rollover) */
+.rollover-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rollover-step-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rollover-step-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.rollover-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rollover-step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rollover-step-body h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.rollover-step-body p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  line-height: 18px;
+}
+
+.rollover-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.activate-year-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.activate-year-box p {
+  margin: 0;
 }
