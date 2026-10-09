@@ -56,7 +56,7 @@ Status task: `not_started`, `in_progress`, `done`, `blocked`, `needs_human`. Sta
 | UI-F3 | Daftar & pagination | UI-F2 | done | DataCard tahun ajaran, audit diff sheet, history absensi, unlinked accounts, grid kelas, promote wizard; integration 111, domain 18, e2e redesign-f3 lulus |
 | UI-F4 | Dialog/page form & absensi | UI-F2 | done | Form inline → dialog/page (guru, kalender, settings, rollover, login, absensi); 111 integration, 18 domain, e2e redesign-f4/attendance/auth/teachers/settings lulus |
 | [UI-R3](docs/redesign/IMPLEMENTATION.md) | Redesign rekap/beranda | UI-F3, UI-F4 | done | Dashboard admin, single-class report, KPI, chip legend; domain 18/integration 111/e2e 20 lulus |
-| [UI-R4](docs/redesign/IMPLEMENTATION.md) | Polish & verifikasi akhir | UI-R3 | done | Audit CSS lama, WCAG contrast 19 passed, benchmark 600 siswa 108.65ms, kriteria penerimaan bagian 8 lulus, sweep e2e 28 rute × 6 viewport lulus; domain 18/integration 111/e2e lengkap lulus |
+| [UI-R4](docs/redesign/IMPLEMENTATION.md) | Polish & verifikasi akhir | UI-R3 | done | 97eab30 → 72df382; audit CSS lama, WCAG contrast 19 passed, benchmark 600 siswa 108.65ms, kriteria penerimaan bagian 8 lulus, sweep e2e 28 rute × 6 viewport lulus; domain 18/integration 111/e2e lengkap lulus |
 
 Task perbaikan dari checkpoint manusia ditambahkan sebagai `FIX-xx` di bawah register ini dengan dependensi dan alasan.
 
