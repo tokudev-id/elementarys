@@ -105,12 +105,14 @@
 }
 .shell-bottom-nav .shell-menu-link,
 .shell-bottom-nav > button {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  justify-content: center;
+  gap: 6px;
+  justify-content: flex-start;
   align-items: center;
-  padding: 4px;
+  padding: 10px 4px 4px;
   font-size: 12px;
   border-radius: var(--radius-control);
   color: var(--muted-foreground);
@@ -142,7 +144,7 @@
 }
 .shell-menu-link[aria-current="page"] {
   background: var(--primary-tint);
-  color: var(--primary);
+  color: var(--primary-text);
   font-weight: 600;
   box-shadow: inset 3px 0 var(--brand-teal);
 }
@@ -410,9 +412,7 @@
     position: sticky;
     top: 0;
     height: 100dvh;
-    background:
-      radial-gradient(240px 200px at 0% 0%, rgb(13 148 136 / 0.35) 0%, transparent 70%),
-      var(--sidebar-bg);
+    background: var(--sidebar-bg);
     color: var(--sidebar-fg);
     border-right: 1px solid var(--sidebar-border);
     padding: 8px 4px;
@@ -646,4 +646,43 @@
   .school-shell {
     display: block;
   }
+}
+
+/* bottom nav active state: pill behind the icon (standard mobile pattern) */
+.shell-bottom-nav .shell-menu-link::before,
+.shell-bottom-nav > button::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 5px;
+  left: 50%;
+  width: 56px;
+  height: 30px;
+  translate: -50% 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background-color var(--dur-fast) ease;
+}
+.shell-bottom-nav .shell-menu-link,
+.shell-bottom-nav .shell-menu-link:hover,
+.shell-bottom-nav .shell-menu-link[aria-current="page"],
+.shell-bottom-nav > button,
+.shell-bottom-nav > button:hover {
+  background: transparent;
+  box-shadow: none;
+}
+.shell-bottom-nav .shell-menu-link:hover::before,
+.shell-bottom-nav > button:hover::before {
+  background: var(--surface-muted);
+}
+.shell-bottom-nav .shell-menu-link[aria-current="page"] {
+  color: var(--primary-text);
+  font-weight: 700;
+}
+.shell-bottom-nav .shell-menu-link[aria-current="page"]::before {
+  background: var(--primary-soft);
+}
+.shell-bottom-nav .shell-menu-link:focus-visible,
+.shell-bottom-nav > button:focus-visible {
+  outline-offset: -2px;
 }

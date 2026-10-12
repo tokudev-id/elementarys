@@ -29,9 +29,11 @@
 
   /* brand: education teal + amber highlight */
   --brand-teal: #0d9488;
-  --primary: #0f766e;
+  --primary: #0d857b;
   --primary-foreground: #ffffff;
-  --primary-hover: #115e59;
+  --primary-hover: #0f766e;
+  /* text-safe teal: 4.5:1+ on page background and white */
+  --primary-text: #0f766e;
   --primary-strong: #134e4a;
   --primary-soft: #ccfbf1;
   --primary-soft-hover: #99f6e4;
@@ -58,13 +60,13 @@
   --warning: #b45309;
 
   /* app shell */
-  --sidebar-bg: #0b3b39;
+  --sidebar-bg: #115e59;
   --sidebar-fg: rgb(255 255 255 / 0.78);
-  --sidebar-fg-muted: rgb(255 255 255 / 0.55);
+  --sidebar-fg-muted: rgb(255 255 255 / 0.72);
   --sidebar-fg-active: #ffffff;
-  --sidebar-hover-bg: rgb(255 255 255 / 0.07);
-  --sidebar-active-bg: rgb(255 255 255 / 0.12);
-  --sidebar-border: rgb(255 255 255 / 0.1);
+  --sidebar-hover-bg: rgb(255 255 255 / 0.09);
+  --sidebar-active-bg: rgb(255 255 255 / 0.16);
+  --sidebar-border: rgb(255 255 255 / 0.14);
 
   /* attendance status: always paired with a letter or label, never color alone */
   --status-h: #15803d;
@@ -119,6 +121,6 @@
   --dur-base: 200ms;
   --dur-slow: 250ms;
 
-  --accent: var(--primary);
+  --accent: var(--primary-text);
   --muted: var(--muted-foreground);
 }

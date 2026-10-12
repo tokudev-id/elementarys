@@ -29,13 +29,13 @@ Batasan dari `PRODUCT.md` tetap berlaku: target sentuh minimal 44px, nama sekola
 
 Mode terang saja untuk rilis ini. Identitas visual memakai **teal edukasi dengan aksen amber** (redesign UI-R4, data dari ui-ux-pro-max baris LMS). Teal dipakai untuk aksi dan identitas; hijau murni tetap khusus status Hadir, sehingga Hadir digelapkan ke `#15803d` agar tidak tertukar dengan teal.
 
-Teal terang (`--brand-teal`, `#0d9488`) hanya ±3.7:1 terhadap putih, jadi tidak dipakai untuk teks atau latar tombol bertulisan putih. Tombol dan teks memakai `--primary` (`#0f766e`, ±5.5:1). Amber (`--accent-amber`) adalah sorotan langka: indikator menu aktif di sidebar, chip "siswa tidak hadir" di kalender, label "Data uji", dan KPI sorotan. Teks di atas amber memakai `--accent-amber-on` yang gelap.
+Teal terang (`--brand-teal`, `#0d9488`) hanya ±3.7:1 terhadap putih, jadi tidak dipakai untuk teks atau latar tombol bertulisan putih. Isian tombol memakai `--primary` (`#0d857b`, teks putih ±4.5:1), sedangkan teks/link teal memakai `--primary-text` (`#0f766e`, ±5.2:1 di latar halaman). Semua warna flat: tidak ada gradient. Amber (`--accent-amber`) adalah sorotan langka: indikator menu aktif di sidebar, chip "siswa tidak hadir" di kalender, label "Data uji", dan KPI sorotan. Teks di atas amber memakai `--accent-amber-on` yang gelap.
 
 | Token | Nilai | Pemakaian |
 |---|---|---|
 | `--brand-teal` | `#0d9488` | Aksen dekoratif: ring fokus, garis tab aktif, chart, ikon besar |
-| `--primary` | `#0f766e` | Tombol utama, link, teks aktif (putih di atasnya ±5.5:1) |
-| `--primary-hover` | `#115e59` | Hover/pressed tombol utama |
+| `--primary` | `#0d857b` | Isian tombol utama, halaman aktif pagination (putih di atasnya ±4.5:1) |
+| `--primary-hover` / `--primary-text` | `#0f766e` | Hover tombol utama; teks, link, tab dan menu aktif |
 | `--primary-strong` | `#134e4a` | Tooltip, teks di atas latar teal muda |
 | `--primary-soft` / `--primary-tint` | `#ccfbf1` / `#f0fdfa` | Latar tombol soft, badge info, hover baris tabel |
 | `--accent-amber` / `-soft` / `-text` / `-on` | `#d97706` / `#fef3c7` / `#b45309` / `#451a03` | Sorotan (lihat di atas) |
@@ -44,7 +44,7 @@ Teal terang (`--brand-teal`, `#0d9488`) hanya ±3.7:1 terhadap putih, jadi tidak
 | `--surface-muted` | `#eef5f4` | Header tabel, footer dialog, area filter |
 | `--border` / `--border-strong` | `#dce7e5` / `#c3d3d0` | Garis card dan pemisah / border tombol secondary |
 | `--foreground` / `--muted-foreground` | `#0f1f1e` / `#52635f` | Teks utama / sekunder |
-| `--sidebar-bg` | `#0b3b39` | Sidebar desktop/rail (teks putih 78%, aktif putih penuh) |
+| `--sidebar-bg` | `#115e59` | Sidebar desktop/rail (teks putih 78%, judul grup 72%, aktif putih penuh) |
 | `--destructive` | `#c0352b` | Aksi berisiko |
 | `--warning` | `#b45309` | Peringatan, data belum lengkap |
 
@@ -110,7 +110,7 @@ Bottom nav HP:
 - Guru: Absensi, Rekap, Siswa, Lainnya.
 - Admin: Beranda, Absensi, Siswa, Lainnya.
 
-Bottom nav punya tinggi 64px plus safe-area, item aktif berwarna `--primary` dengan label selalu tampil.
+Bottom nav punya tinggi 64px plus safe-area dan label selalu tampil. Item aktif memakai pola standar mobile: pill `--primary-soft` 56×30 di belakang ikon, ikon dan label `--primary-text` tebal. Tidak ada garis indikator di samping.
 
 ## Anatomi halaman
 
@@ -199,7 +199,7 @@ Berlaku untuk semua input, termasuk dialog, filter tanggal, login, dan ganti pas
 
 | Varian | Pemakaian |
 |---|---|
-| Primary | Maksimal satu per view: Simpan, Tambah, Simpan absensi. Gradient teal halus + bayangan tipis |
+| Primary | Maksimal satu per view: Simpan, Tambah, Simpan absensi. Teal flat + bayangan tipis |
 | Secondary | Batal, Ubah, Ekspor, Cetak, navigasi pendamping. Putih dengan border |
 | Soft | Aksi kontekstual berulang di dalam card/tabel ("Catat"), submit filter ("Tampilkan rekap") |
 | Ghost | Aksi ikon di toolbar/tabel |
@@ -245,7 +245,7 @@ Lihat spesifikasi lengkap di brief bagian Absensi. Ringkasnya:
 
 ## Motion
 
-Durasi 150–250ms (`--dur-*`, kurva `--motion-ease`), hanya untuk dropdown, dialog/sheet (fade + scale 0.97), toast, dan perubahan state tombol. Tidak ada animasi masuk halaman. Loading memakai skeleton (`PageSkeleton`) yang bentuknya mengikuti layout akhir; efek shimmer hanya aktif bila `prefers-reduced-motion` tidak diset.
+Durasi 150–250ms (`--dur-*`, kurva `--motion-ease`), hanya untuk dropdown, dialog/sheet (fade + scale 0.97), toast, dan perubahan state tombol. Tidak ada animasi masuk halaman. Loading memakai skeleton (`PageSkeleton`) yang bentuknya mengikuti layout akhir; efek denyut opacity hanya aktif bila `prefers-reduced-motion` tidak diset.
 
 ## Aksesibilitas
 

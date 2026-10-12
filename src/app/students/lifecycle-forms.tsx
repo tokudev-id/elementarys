@@ -13,7 +13,7 @@ import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
 import { TextareaField } from "@/components/textarea-field";
 import { Button } from "@/components/button";
-import { useMutation } from "@/components/use-mutation";
+import { useAfterRefresh, useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
 import { useZodForm } from "@/components/use-zod-form";
 import { FormErrorSummary } from "@/components/form-error-summary";
@@ -50,6 +50,7 @@ export function PlacementForm({
 }) {
   const [mode, setMode] = useState<"transfer" | "placement">("transfer");
   const mutation = useMutation(`/api/students/${student.id}/enrollments`, "POST");
+  const markDone = useAfterRefresh(mutation.pending, onSuccess);
 
   const availableClasses = classes.filter(
     (item) => !item.archivedAt && !years.find((year) => year.id === item.yearId)?.archivedAt,
@@ -72,7 +73,7 @@ export function PlacementForm({
         expectedVersion: student.version,
       });
       if (res) {
-        onSuccess?.();
+        markDone();
       }
     },
   });
@@ -163,6 +164,7 @@ export function EndEnrollmentForm({
 }) {
   const future = enrollment.startsOn > today;
   const mutation = useMutation(`/api/enrollments/${enrollment.id}/end`, "PATCH");
+  const markDone = useAfterRefresh(mutation.pending, onSuccess);
 
   const form = useZodForm(enrollmentEndSchema as unknown as z.ZodType<EndFormData>, {
     defaultValues: {
@@ -178,7 +180,7 @@ export function EndEnrollmentForm({
         reason: data.reason,
       });
       if (res) {
-        onSuccess?.();
+        markDone();
       }
     },
   });
@@ -234,6 +236,7 @@ export function StudentArchiveForm({
   onSuccess?: () => void;
 }) {
   const mutation = useMutation(`/api/students/${student.id}`, "PATCH");
+  const markDone = useAfterRefresh(mutation.pending, onSuccess);
 
   const form = useZodForm(studentArchiveSchema as unknown as z.ZodType<ArchiveFormData>, {
     defaultValues: {
@@ -245,7 +248,7 @@ export function StudentArchiveForm({
     onSubmit: async (data: ArchiveFormData) => {
       const res = await mutation.mutate(data);
       if (res) {
-        onSuccess?.();
+        markDone();
       }
     },
   });

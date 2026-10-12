@@ -54,7 +54,7 @@
 }
 .roster-filters [aria-pressed="true"] {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-text);
 }
 .roster-actions-group {
   display: flex;
@@ -265,7 +265,7 @@
 }
 .date-picker-grid .date-picker-day:hover:not(:disabled) {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-text);
 }
 .attendance-class-grid {
   display: grid;

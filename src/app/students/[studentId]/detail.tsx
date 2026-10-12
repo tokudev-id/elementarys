@@ -36,6 +36,19 @@ function lastDay(exclusive: string) {
   return formatted(date.toISOString().slice(0, 10));
 }
 
+const placementLabel = {
+  cancelled: "Dibatalkan sebelum mulai",
+  upcoming: "Mendatang",
+  done: "Selesai",
+  current: "Berjalan",
+} as const;
+const placementTone = {
+  cancelled: "neutral",
+  upcoming: "info",
+  done: "neutral",
+  current: "success",
+} as const;
+
 export function StudentDetailView({
   student,
   classes,
@@ -165,42 +178,40 @@ export function StudentDetailView({
         <TabsContent value="history">
           <DataCard id="riwayat-penempatan">
             <DataCardHeader title="Riwayat penempatan" />
-            <DataCardContent>
+            <DataCardContent className="data-card__content--padded">
               {student.enrollments.length ? (
                 <ol className="placement-timeline">
                   {student.enrollments
                     .slice((historyPage - 1) * 10, historyPage * 10)
-                    .map((item) => (
-                      <li key={item.id}>
-                        <strong>
-                          {item.className} · {item.yearLabel}
-                        </strong>
-                        <p>
-                          {item.cancelled
-                            ? `Rencana mulai ${formatted(item.startsOn)}`
-                            : `${formatted(item.startsOn)} – ${lastDay(item.endsOnExclusive)}`}
-                        </p>
-                        <StatusBadge
-                          tone={
-                            item.cancelled
-                              ? "neutral"
-                              : item.startsOn > today
-                                ? "info"
-                                : item.endsOnExclusive <= today
-                                  ? "neutral"
-                                  : "success"
-                          }
-                        >
-                          {item.cancelled
-                            ? "Dibatalkan sebelum mulai"
-                            : item.startsOn > today
-                              ? "Mendatang"
-                              : item.endsOnExclusive <= today
-                                ? "Selesai"
-                                : "Berjalan"}
-                        </StatusBadge>
-                      </li>
-                    ))}
+                    .map((item) => {
+                      const state = item.cancelled
+                        ? "cancelled"
+                        : item.startsOn > today
+                          ? "upcoming"
+                          : item.endsOnExclusive <= today
+                            ? "done"
+                            : "current";
+                      return (
+                        <li key={item.id} data-state={state}>
+                          <span className="placement-timeline__marker" aria-hidden="true" />
+                          <div className="placement-timeline__body">
+                            <div className="placement-timeline__title">
+                              <strong>
+                                {item.className} · {item.yearLabel}
+                              </strong>
+                              <StatusBadge tone={placementTone[state]}>
+                                {placementLabel[state]}
+                              </StatusBadge>
+                            </div>
+                            <p>
+                              {item.cancelled
+                                ? `Rencana mulai ${formatted(item.startsOn)}`
+                                : `${formatted(item.startsOn)} – ${lastDay(item.endsOnExclusive)}`}
+                            </p>
+                          </div>
+                        </li>
+                      );
+                    })}
                 </ol>
               ) : (
                 <EmptyState

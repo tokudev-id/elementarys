@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { mutationResultSchema } from "@/contracts/mutations";
 import { HttpError, requestJson } from "@/lib/http-client";
@@ -62,4 +62,16 @@ export function useMutation(
     }
   }
   return { pending: pending || refreshing, notice, errors, mutate, reloadLatest };
+}
+
+// runs `onDone` only after the post-save refresh has rendered, so a dialog
+// never closes onto data that still shows the old state
+export function useAfterRefresh(pending: boolean, onDone?: () => void) {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (done && !pending) onDone?.();
+  }, [done, pending, onDone]);
+  return function markDone() {
+    setDone(true);
+  };
 }

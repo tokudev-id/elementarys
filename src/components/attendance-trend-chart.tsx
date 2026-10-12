@@ -63,12 +63,6 @@ export function AttendanceTrendChart({ points }: { points: TrendPoint[] }) {
       <div className="trend-chart__plot" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={points} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-            <defs>
-              <linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" className="trend-chart__stop-top" />
-                <stop offset="100%" className="trend-chart__stop-bottom" />
-              </linearGradient>
-            </defs>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -90,7 +84,6 @@ export function AttendanceTrendChart({ points }: { points: TrendPoint[] }) {
               type="monotone"
               dataKey="rate"
               connectNulls
-              fill="url(#trend-fill)"
               strokeWidth={2}
               dot={{ r: 3, className: "trend-chart__dot" }}
               activeDot={{ r: 5, className: "trend-chart__dot trend-chart__dot--active" }}
