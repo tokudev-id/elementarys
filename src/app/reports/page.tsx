@@ -107,7 +107,10 @@ export default async function Reports({
           report && (
             <div className="flex flex-wrap gap-2 items-center">
               <ReportDownload input={report.input} />
-              <Link className="button-link" href={`/reports/print?${printParams.toString()}`}>
+              <Link
+                className="button-link button-link--secondary"
+                href={`/reports/print?${printParams.toString()}`}
+              >
                 Buka halaman cetak
               </Link>
             </div>

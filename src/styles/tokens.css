@@ -39,6 +39,9 @@
   --primary-foreground: #ffffff;
   --primary-hover: #075985;
   --primary-soft: #e0f2fe;
+  --primary-soft-hover: #cbe9fb;
+  --destructive-hover: #a32c23;
+  --control-height: 44px;
   --ring: #0284c7;
   --destructive: #c0352b;
   --warning: #b45309;

@@ -105,7 +105,7 @@ export function StudentDetailView({
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" aria-label="Aksi siswa">
+                  <Button variant="secondary" size="icon" aria-label="Aksi siswa">
                     <MoreHorizontal aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>

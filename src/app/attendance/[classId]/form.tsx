@@ -131,7 +131,7 @@ export function AttendanceForm({
                 <Link
                   href={`/attendance/${view.classId}/history?date=${view.date}`}
                   prefetch={false}
-                  className="button-link button-link--ghost icon-btn"
+                  className="button-link button-link--secondary icon-btn"
                   aria-label="Riwayat absensi"
                 >
                   <History aria-hidden="true" size={18} />
@@ -152,7 +152,7 @@ export function AttendanceForm({
             {role === "admin" && view.sessionState === "submitted" && !form.editing && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" aria-label="Aksi catatan">
+                  <Button variant="secondary" size="icon" aria-label="Aksi catatan">
                     <MoreHorizontal aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>

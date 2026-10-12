@@ -240,7 +240,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 8px 8px 8px 20px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -250,7 +250,7 @@
   line-height: 24px;
 }
 .app-dialog__body {
-  padding: 16px;
+  padding: 20px;
   overflow: auto;
   min-height: 0;
   overscroll-behavior: contain;
@@ -261,11 +261,25 @@
   justify-content: flex-end;
   gap: 12px;
   border-top: 1px solid var(--border);
-  padding: 12px 16px;
+  padding: 12px 20px;
   flex-shrink: 0;
 }
 .app-dialog__header .ui-button {
   flex-shrink: 0;
+}
+/* forms inside a dialog fill its body evenly instead of the page-form max width */
+.app-dialog__body .resource-form {
+  max-width: none;
+  margin: 0;
+}
+.app-dialog__body .resource-form legend {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.app-dialog__body .resource-form fieldset > p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
 }
 .school-shell .attendance-actions {
   bottom: calc(64px + env(safe-area-inset-bottom));

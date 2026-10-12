@@ -65,7 +65,7 @@ export default async function Rollover({
               <DataCardHeader title="Pilih tahun ajaran yang disiapkan" />
               <DataCardContent className="data-card__content--padded">
                 <form className="list-filter-form" action="/academic-years/rollover" method="get">
-                  <div className="list-filter-search-group">
+                  <div className="list-filter-search-group list-filter-search-group--stack">
                     <SelectField label="Tahun yang disiapkan" name="yearId" defaultValue={selected}>
                       {years.map((year) => (
                         <option key={year.id} value={year.id}>
@@ -180,7 +180,7 @@ export default async function Rollover({
                             method="get"
                           >
                             <input type="hidden" name="targetYearId" value={selected} />
-                            <div className="list-filter-search-group">
+                            <div className="list-filter-search-group list-filter-search-group--stack">
                               <SelectField label="Kelas asal naik kelas" name="classId" required>
                                 {classes
                                   .filter((item) => item.yearId !== selected)
@@ -251,7 +251,7 @@ export default async function Rollover({
                         description="Tambahkan kelas untuk tahun ajaran ini terlebih dahulu."
                       />
                     ) : (
-                      <div className="data-table">
+                      <div className="data-table data-table--scroll">
                         <table>
                           <thead>
                             <tr>

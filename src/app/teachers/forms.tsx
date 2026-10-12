@@ -235,8 +235,9 @@ export function TeacherAccountForm({
     onSubmit: async (data: AccountFormData) => {
       const saved = await mutation.mutate(data);
       if (saved) {
+        setMode("create");
         form.reset({
-          mode,
+          mode: "create",
           expectedVersion: teacher.version,
           email: "",
           password: "",
@@ -252,7 +253,18 @@ export function TeacherAccountForm({
   function changeMode(event: ChangeEvent<HTMLSelectElement>) {
     const nextMode = event.currentTarget.value === "existing" ? "existing" : "create";
     setMode(nextMode);
-    form.setValue("mode", nextMode);
+    // schema variants are strict, so leftover fields from the other mode must go
+    form.reset(
+      nextMode === "existing"
+        ? { mode: "existing", expectedVersion: teacher.version, userId: "" }
+        : {
+            mode: "create",
+            expectedVersion: teacher.version,
+            email: "",
+            password: "",
+            role: "teacher",
+          },
+    );
   }
 
   return (
@@ -300,6 +312,9 @@ export function TeacherAccountForm({
               </option>
             ))}
           </SelectField>
+        )}
+        {mode === "existing" && accounts.length === 0 && (
+          <p>Belum ada akun tanpa profil guru. Pilih “Buat akun baru”.</p>
         )}
         <Button type="submit" pending={mutation.pending}>
           Hubungkan akun guru

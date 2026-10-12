@@ -30,7 +30,12 @@ function Actions({ row }: { row: MasterRow }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" aria-label={`Aksi ${row.title}`} className="action-menu-trigger">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={`Aksi ${row.title}`}
+          className="action-menu-trigger"
+        >
           <MoreHorizontal aria-hidden="true" size={18} />
         </Button>
       </DropdownMenuTrigger>

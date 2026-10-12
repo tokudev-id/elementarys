@@ -61,7 +61,7 @@ export function PageHeader({
               <div className="page-header__secondary-mobile">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" aria-label="Aksi lainnya">
+                    <Button variant="secondary" size="icon" aria-label="Aksi lainnya">
                       <MoreHorizontal aria-hidden="true" size={20} />
                     </Button>
                   </DropdownMenuTrigger>
