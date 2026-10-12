@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
+import { earliestPlacementEnd } from "@/domain/calendar";
 import type { z } from "zod";
 import type { StudentDetail } from "@/contracts/students";
 import {
@@ -151,6 +152,15 @@ type EndFormData = {
   reason: string;
 };
 
+function shortDate(date: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
+}
+
 export function EndEnrollmentForm({
   student,
   enrollment,
@@ -163,13 +173,15 @@ export function EndEnrollmentForm({
   onSuccess?: () => void;
 }) {
   const future = enrollment.startsOn > today;
+  // the first day always stays in history, so the earliest end can be after today
+  const earliestEnd = earliestPlacementEnd(enrollment.startsOn, today);
   const mutation = useMutation(`/api/enrollments/${enrollment.id}/end`, "PATCH");
   const markDone = useAfterRefresh(mutation.pending, onSuccess);
 
   const form = useZodForm(enrollmentEndSchema as unknown as z.ZodType<EndFormData>, {
     defaultValues: {
       expectedVersion: student.version,
-      endsOnExclusive: future ? enrollment.startsOn : today,
+      endsOnExclusive: future ? enrollment.startsOn : earliestEnd,
       reason: "",
     },
     serverErrors: mutation.errors,
@@ -202,7 +214,9 @@ export function EndEnrollmentForm({
           <Field
             label="Tidak bersekolah mulai tanggal"
             type="date"
+            min={earliestEnd}
             max={enrollment.endsOnExclusive}
+            hint={`Hari terakhir di kelas adalah sehari sebelum tanggal ini. Paling cepat ${shortDate(earliestEnd)}.`}
             required
             {...form.register("endsOnExclusive")}
           />

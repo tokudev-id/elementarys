@@ -5,6 +5,7 @@ import { MoreHorizontal, Pencil } from "lucide-react";
 import type { StudentDetail } from "@/contracts/students";
 import type { AcademicYearView, ClassView } from "@/contracts/school-master";
 import type { AttendanceTotals } from "@/domain/attendance";
+import { addDays, earliestPlacementEnd } from "@/domain/calendar";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Avatar } from "@/components/avatar";
@@ -41,13 +42,33 @@ const placementLabel = {
   upcoming: "Mendatang",
   done: "Selesai",
   current: "Berjalan",
+  ending: "Berakhir",
 } as const;
 const placementTone = {
   cancelled: "neutral",
   upcoming: "info",
   done: "neutral",
   current: "success",
+  ending: "warning",
 } as const;
+
+type Enrollment = StudentDetail["enrollments"][number];
+
+// a closed placement still counts until its last day, so say when it ends instead of "Berjalan"
+function placementState(item: Enrollment, today: string) {
+  if (item.cancelled) return "cancelled";
+  if (item.startsOn > today) return "upcoming";
+  if (item.endsOnExclusive <= today) return "done";
+  return item.closed ? "ending" : "current";
+}
+
+function placementBadge(item: Enrollment, today: string) {
+  const state = placementState(item, today);
+  if (state !== "ending") return placementLabel[state];
+  return addDays(item.endsOnExclusive, -1) === today
+    ? "Berakhir hari ini"
+    : `Berakhir ${lastDay(item.endsOnExclusive)}`;
+}
 
 export function StudentDetailView({
   student,
@@ -75,8 +96,12 @@ export function StudentDetailView({
   const current = student.enrollments.find(
     (item) => !item.cancelled && item.startsOn <= today && item.endsOnExclusive > today,
   );
+  // only placements that can still be cancelled or shortened
   const openEnrollments = student.enrollments.filter(
-    (item) => !item.cancelled && item.endsOnExclusive > today,
+    (item) =>
+      !item.cancelled &&
+      item.endsOnExclusive > today &&
+      (item.startsOn > today || item.endsOnExclusive > earliestPlacementEnd(item.startsOn, today)),
   );
   function openPlacement() {
     setDialog({ version: student.version, action: "placement" });
@@ -184,13 +209,7 @@ export function StudentDetailView({
                   {student.enrollments
                     .slice((historyPage - 1) * 10, historyPage * 10)
                     .map((item) => {
-                      const state = item.cancelled
-                        ? "cancelled"
-                        : item.startsOn > today
-                          ? "upcoming"
-                          : item.endsOnExclusive <= today
-                            ? "done"
-                            : "current";
+                      const state = placementState(item, today);
                       return (
                         <li key={item.id} data-state={state}>
                           <span className="placement-timeline__marker" aria-hidden="true" />
@@ -200,7 +219,7 @@ export function StudentDetailView({
                                 {item.className} · {item.yearLabel}
                               </strong>
                               <StatusBadge tone={placementTone[state]}>
-                                {placementLabel[state]}
+                                {placementBadge(item, today)}
                               </StatusBadge>
                             </div>
                             <p>

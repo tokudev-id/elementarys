@@ -2,7 +2,7 @@ import "server-only";
 import type { Pool, PoolClient } from "pg";
 import type { Actor } from "@/server/auth/guards";
 import { DomainError } from "@/domain/errors";
-import { resolveSchoolDay, systemClock, type Clock } from "@/domain/calendar";
+import { addDays, resolveSchoolDay, systemClock, type Clock } from "@/domain/calendar";
 import { attendanceTotals, type AttendanceStatus } from "@/domain/attendance";
 import { dashboardInputSchema, parseInput } from "@/contracts/attendance";
 import { pool, transaction } from "@/server/db/pool";
@@ -91,19 +91,13 @@ export async function getDashboard(
 
 const TREND_DAYS = 14;
 
-function shiftDate(date: string, days: number) {
-  const value = new Date(date + "T00:00:00Z");
-  value.setUTCDate(value.getUTCDate() + days);
-  return value.toISOString().slice(0, 10);
-}
-
 // last school days up to `date` with submitted attendance totals, oldest first
 async function attendanceTrend(
   client: PoolClient,
   year: { id: string; starts_on: string; ends_on_exclusive: string },
   date: string,
 ) {
-  const lookback = shiftDate(date, -TREND_DAYS * 3);
+  const lookback = addDays(date, -TREND_DAYS * 3);
   const from = lookback < year.starts_on ? year.starts_on : lookback;
   const weekdays = (
     await client.query<{ weekday: number }>(
@@ -124,7 +118,7 @@ async function attendanceTrend(
     overrides,
   };
   const days: string[] = [];
-  for (let day = date; day >= from && days.length < TREND_DAYS; day = shiftDate(day, -1)) {
+  for (let day = date; day >= from && days.length < TREND_DAYS; day = addDays(day, -1)) {
     if (resolveSchoolDay(day, calendar).isSchoolDay) days.unshift(day);
   }
   if (!days.length) return [];

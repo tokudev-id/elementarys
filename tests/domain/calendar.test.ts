@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { isDateOnly, isTimezone, resolveSchoolDay, schoolToday } from "../../src/domain/calendar";
+import {
+  addDays,
+  earliestPlacementEnd,
+  isDateOnly,
+  isTimezone,
+  resolveSchoolDay,
+  schoolToday,
+} from "../../src/domain/calendar";
 import { attendanceTotals } from "../../src/domain/attendance";
 describe("school calendar", () => {
   it("rejects normalized dates and supports leap dates", () => {
@@ -48,5 +55,17 @@ describe("school calendar", () => {
       I: 0,
       A: 1,
     });
+  });
+});
+describe("placement end dates", () => {
+  it("adds days across month and year boundaries", () => {
+    expect(addDays("2026-10-31", 1)).toBe("2026-11-01");
+    expect(addDays("2027-01-01", -1)).toBe("2026-12-31");
+  });
+  it("keeps the first day of a placement that started today", () => {
+    expect(earliestPlacementEnd("2026-10-12", "2026-10-12")).toBe("2026-10-13");
+  });
+  it("allows ending from today for an older placement", () => {
+    expect(earliestPlacementEnd("2026-07-01", "2026-10-12")).toBe("2026-10-12");
   });
 });

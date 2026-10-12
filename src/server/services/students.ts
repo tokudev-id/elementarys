@@ -47,8 +47,8 @@ export async function getStudent(id: string, source: Pool = pool): Promise<Stude
     if (!student) throw new DomainError("RESOURCE_NOT_FOUND", "Siswa tidak ditemukan.", 404);
     const enrollments = (
       await client.query<StudentDetail["enrollments"][number]>(
-        `SELECT e.id,e.class_id "classId",c.name "className",y.label "yearLabel",e.starts_on::text "startsOn",e.ends_on_exclusive::text "endsOnExclusive",false cancelled FROM enrollments e JOIN classes c ON c.id=e.class_id JOIN academic_years y ON y.id=c.academic_year_id WHERE e.student_id=$1
-        UNION ALL SELECT (changes_json->'before'->>'id')::uuid,(changes_json->'before'->>'classId')::uuid,changes_json->'before'->>'className',changes_json->'before'->>'yearLabel',changes_json->'before'->>'startsOn',changes_json->'before'->>'endsOnExclusive',true FROM audit_events WHERE entity_type='student' AND entity_id=$1::text AND action='enrollment.cancel' ORDER BY "startsOn",id`,
+        `SELECT e.id,e.class_id "classId",c.name "className",y.label "yearLabel",e.starts_on::text "startsOn",e.ends_on_exclusive::text "endsOnExclusive",false cancelled,e.exit_reason IS NOT NULL closed FROM enrollments e JOIN classes c ON c.id=e.class_id JOIN academic_years y ON y.id=c.academic_year_id WHERE e.student_id=$1
+        UNION ALL SELECT (changes_json->'before'->>'id')::uuid,(changes_json->'before'->>'classId')::uuid,changes_json->'before'->>'className',changes_json->'before'->>'yearLabel',changes_json->'before'->>'startsOn',changes_json->'before'->>'endsOnExclusive',true,false FROM audit_events WHERE entity_type='student' AND entity_id=$1::text AND action='enrollment.cancel' ORDER BY "startsOn",id`,
         [id],
       )
     ).rows;

@@ -1163,6 +1163,13 @@
   background: var(--muted-foreground);
   box-shadow: inset 0 0 0 4px var(--surface);
 }
+.placement-timeline li[data-state="ending"] .placement-timeline__marker {
+  border-color: var(--accent-amber);
+  background: var(--accent-amber);
+  box-shadow:
+    inset 0 0 0 3px var(--surface),
+    0 0 0 4px var(--accent-amber-soft);
+}
 .placement-timeline li[data-state="upcoming"] .placement-timeline__marker {
   border-style: dashed;
   border-color: var(--primary);

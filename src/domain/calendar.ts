@@ -42,3 +42,14 @@ export function resolveSchoolDay(date: string, calendar: Calendar) {
     reason: override?.reason ?? null,
   };
 }
+export function addDays(date: string, days: number): string {
+  const value = new Date(`${date}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+// a started placement must keep at least its first day, so the earliest
+// "no longer attends from" date is the day after it started (and never in the past)
+export function earliestPlacementEnd(startsOn: string, today: string): string {
+  const nextDay = addDays(startsOn, 1);
+  return nextDay > today ? nextDay : today;
+}

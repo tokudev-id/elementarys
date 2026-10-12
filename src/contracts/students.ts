@@ -6,10 +6,7 @@ export const studentNameSchema = z
   .trim()
   .min(1, "Isi nama siswa.")
   .max(200, "Nama maksimal 200 karakter.")
-  .refine(
-    (val) => val.length >= 2 && /\p{L}/u.test(val),
-    "Nama minimal 2 huruf.",
-  );
+  .refine((val) => val.length >= 2 && /\p{L}/u.test(val), "Nama minimal 2 huruf.");
 
 export const studentNisSchema = z
   .string()
@@ -26,10 +23,7 @@ export const studentNisSchema = z
 export const studentNisnSchema = z
   .string()
   .trim()
-  .refine(
-    (val) => val === "" || /^[0-9]{10}$/.test(val),
-    "NISN harus 10 digit angka.",
-  )
+  .refine((val) => val === "" || /^[0-9]{10}$/.test(val), "NISN harus 10 digit angka.")
   .transform((val) => (val === "" ? null : val))
   .nullable()
   .optional();
@@ -85,5 +79,7 @@ export type StudentDetail = StudentView & {
     startsOn: string;
     endsOnExclusive: string;
     cancelled: boolean;
+    /** ended early through "Tutup penempatan" or a transfer (has an exit reason) */
+    closed: boolean;
   }[];
 };
