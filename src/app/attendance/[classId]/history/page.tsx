@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { History } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
@@ -13,6 +14,11 @@ import { formatSchoolTime } from "@/domain/format";
 import { statusLabels, formatAttendanceDate } from "../attendance-state";
 import { ButtonLink } from "@/components/button";
 import type { AttendanceHistory } from "@/contracts/attendance-history";
+
+export const metadata: Metadata = {
+  title: "Riwayat absensi",
+  description: "Riwayat perubahan catatan absensi satu kelas.",
+};
 
 const actionLabels = {
   "attendance.submit": "Pencatatan awal",

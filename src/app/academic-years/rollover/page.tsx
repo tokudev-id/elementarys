@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CalendarRange } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -14,6 +15,11 @@ import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/com
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { EmptyState } from "@/components/empty-state";
 import { ActivateYearForm } from "./activate-form";
+
+export const metadata: Metadata = {
+  title: "Persiapan tahun ajaran",
+  description: "Langkah transisi ke tahun ajaran berikutnya.",
+};
 
 export default async function Rollover({
   searchParams,

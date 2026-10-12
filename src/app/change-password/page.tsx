@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { KeyRound } from "lucide-react";
 import { requireActor } from "@/server/auth/guards";
 import { AccountForm, Logout } from "../login/form";
+
+export const metadata: Metadata = {
+  title: "Ganti password",
+  description: "Ganti password akun sekolah.",
+};
 
 export default async function ChangePassword() {
   try {

@@ -29,13 +29,35 @@ Sebelum men-deploy aplikasi ke Vercel, siapkan database di Neon:
      postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require
      ```
 3. Jalankan migrasi skema ke database produksi dari mesin lokal Anda:
-   ```bash
-   DATABASE_MIGRATION_URL="postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require" pnpm release:migrate
-   ```
+   - **PowerShell (Windows)**:
+     ```powershell
+     $env:DATABASE_URL="postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require"
+     pnpm db:migrate:deploy
+     ```
+   - **Bash / macOS / Linux**:
+     ```bash
+     DATABASE_URL="postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require" pnpm db:migrate:deploy
+     ```
+
 4. Buat akun admin pertama sekolah:
-   ```bash
-   DATABASE_URL="postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require" BETTER_AUTH_SECRET="<secret-anda>" BETTER_AUTH_URL="https://<nama-app>.vercel.app" pnpm release:bootstrap
-   ```
+   - **PowerShell (Windows)**:
+     ```powershell
+     $env:DATABASE_URL="postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require"
+     $env:BETTER_AUTH_SECRET="<secret-anda>"
+     $env:BETTER_AUTH_URL="https://<nama-app>.vercel.app"
+     $env:BOOTSTRAP_EMAIL="admin@sekolah.sch.id"
+     $env:BOOTSTRAP_PASSWORD="PasswordKuat123!"
+     pnpm auth:bootstrap
+     ```
+   - **Bash / macOS / Linux**:
+     ```bash
+     DATABASE_URL="postgresql://<user>:<password>@<endpoint>.ap-southeast-1.aws.neon.tech/<dbname>?sslmode=require" \
+     BETTER_AUTH_SECRET="<secret-anda>" \
+     BETTER_AUTH_URL="https://<nama-app>.vercel.app" \
+     BOOTSTRAP_EMAIL="admin@sekolah.sch.id" \
+     BOOTSTRAP_PASSWORD="PasswordKuat123!" \
+     pnpm auth:bootstrap
+     ```
 
 ---
 

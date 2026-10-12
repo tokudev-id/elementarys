@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { StateBanner } from "@/components/state-banner";
@@ -7,6 +8,11 @@ import { getAttendance } from "@/server/queries/attendance";
 import { AttendanceForm } from "./form";
 import { getDashboard } from "@/server/queries/dashboard";
 import { getCalendar } from "@/server/services/school-master";
+
+export const metadata: Metadata = {
+  title: "Catat absensi",
+  description: "Catat kehadiran siswa satu kelas untuk tanggal sekolah.",
+};
 
 export default async function ClassAttendance({
   params,

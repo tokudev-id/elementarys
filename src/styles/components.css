@@ -278,21 +278,25 @@
 .redesigned-form .data-card {
   margin: 0;
 }
+/* mobile: the form's save bar is pinned above the bottom nav so the main action
+   is always in reach, whichever section the user is editing */
 @media (max-width: 639px) {
-  .form-page .form-actions {
-    position: sticky;
+  .form-page .data-card__footer:has(> .form-actions) {
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: calc(64px + env(safe-area-inset-bottom));
-    background: var(--surface);
+    z-index: 15;
+    padding: 12px 16px;
     border-top: 1px solid var(--border);
-    padding: 12px;
-    z-index: 10;
-    flex-wrap: wrap;
+    background: var(--surface);
+    box-shadow: 0 -4px 12px rgb(15 31 30 / 0.08);
   }
-  .data-card__footer .form-actions {
-    position: static;
-    border-top: none;
-    padding: 0;
-    background: transparent;
+  .form-page .data-card__footer .form-actions > * {
+    flex: 1 1 0;
+  }
+  .school-shell .page-container:has(.form-page .form-actions) {
+    padding-bottom: calc(100px + 72px);
   }
 }
 .form-card {
@@ -3570,4 +3574,75 @@ a.pagination-btn:hover {
 }
 .data-table-pagination__nav {
   align-items: center;
+}
+
+/* 404 and error pages */
+.status-page {
+  display: grid;
+  place-items: center;
+  min-height: min(70dvh, 640px);
+  padding: 24px 16px;
+}
+.status-page__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 30rem;
+  padding: 32px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--elev-1);
+  text-align: center;
+}
+.status-page__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-tint);
+  border: 1px solid var(--primary-soft);
+  color: var(--primary-text);
+}
+.status-page--error .status-page__icon {
+  background: var(--destructive-soft);
+  border-color: #f5c2bd;
+  color: var(--destructive);
+}
+.status-page__icon svg {
+  width: 26px;
+  height: 26px;
+}
+.status-page__code {
+  margin: 4px 0 0;
+  font-size: var(--type-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
+}
+.status-page h1 {
+  margin: 0;
+  font-size: var(--type-xl);
+  line-height: 28px;
+  letter-spacing: -0.015em;
+}
+.status-page__description p {
+  margin: 0;
+  max-width: none;
+  color: var(--muted-foreground);
+}
+.status-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (max-width: 639px) {
+  .status-page__actions > * {
+    flex: 1 1 100%;
+  }
 }

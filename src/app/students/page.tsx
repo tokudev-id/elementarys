@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listStudents } from "@/server/services/students";
@@ -22,6 +23,11 @@ import { studentListSchema } from "@/contracts/lists";
 import { Plus, Users } from "lucide-react";
 import { ButtonLink } from "@/components/button";
 import { parseInput } from "@/contracts/attendance";
+
+export const metadata: Metadata = {
+  title: "Siswa",
+  description: "Daftar siswa beserta kelas aktif.",
+};
 
 export default async function Students({
   searchParams,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -27,6 +28,11 @@ import { getSchoolSettings } from "@/server/services/settings";
 import { getDashboard } from "@/server/queries/dashboard";
 import { ButtonLink } from "@/components/button";
 import { schoolIdentity } from "@/components/school-identity";
+
+export const metadata: Metadata = {
+  title: "Beranda",
+  description: "Ringkasan kehadiran hari ini, tren 14 hari sekolah, dan kelas yang belum dicatat.",
+};
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const actor = await requirePageActor();

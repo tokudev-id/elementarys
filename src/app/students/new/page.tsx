@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requireAdminPageActor } from "@/server/auth/page-actor";
 import { listAcademicYears, listClassOptions } from "@/server/services/school-master";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -7,6 +8,11 @@ import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { StudentForm } from "../form";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Tambah siswa",
+  description: "Daftarkan siswa baru dan penempatan awalnya.",
+};
 
 export default async function NewStudent() {
   const actor = await requireAdminPageActor();

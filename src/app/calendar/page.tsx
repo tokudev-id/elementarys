@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CalendarDays } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listAcademicYears, getCalendar } from "@/server/services/school-master";
@@ -11,6 +12,11 @@ import { PageHeader } from "@/components/page-header";
 import type { CalendarView } from "@/contracts/school-master";
 import { getMonthStudentAbsences } from "@/server/queries/calendar-absences";
 import { CalendarClient } from "./calendar-client";
+
+export const metadata: Metadata = {
+  title: "Kalender akademik",
+  description: "Hari belajar rutin, hari libur, dan pengecualian kalender.",
+};
 
 export default async function Calendar({
   searchParams,

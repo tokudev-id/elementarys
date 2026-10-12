@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listAcademicYears, listClasses } from "@/server/services/school-master";
@@ -21,6 +22,11 @@ import { classListSchema } from "@/contracts/lists";
 import { Plus, School, SearchX } from "lucide-react";
 import { ButtonLink } from "@/components/button";
 import { parseInput } from "@/contracts/attendance";
+
+export const metadata: Metadata = {
+  title: "Kelas",
+  description: "Daftar kelas per tahun ajaran.",
+};
 
 export default async function Classes({
   searchParams,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -9,6 +10,11 @@ import { StateBanner } from "@/components/state-banner";
 import { SelectField } from "@/components/select-field";
 import { Button } from "@/components/button";
 import { PromotionForm } from "./form";
+
+export const metadata: Metadata = {
+  title: "Naik kelas / penempatan",
+  description: "Pindahkan siswa ke kelas berikutnya secara bertahap.",
+};
 export default async function Promote({
   searchParams,
 }: {

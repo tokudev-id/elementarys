@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { orNotFound } from "@/server/not-found";
 import { School } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getClass, listAcademicYears } from "@/server/services/school-master";
@@ -13,6 +15,11 @@ import { EmptyState } from "@/components/empty-state";
 import { ButtonLink } from "@/components/button";
 import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 
+export const metadata: Metadata = {
+  title: "Detail kelas",
+  description: "Siswa aktif dan akses cepat absensi kelas.",
+};
+
 export default async function ClassDetail({
   params,
   searchParams,
@@ -24,7 +31,7 @@ export default async function ClassDetail({
   const id = (await params).classId;
   const selected = await searchParams;
   const [current, years, settings, students] = await Promise.all([
-    getClass(id),
+    orNotFound(getClass(id)),
     listAcademicYears(),
     getSchoolSettings(),
     listStudents({ classId: id, page: selected.page, pageSize: selected.pageSize }),

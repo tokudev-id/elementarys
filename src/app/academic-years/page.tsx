@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listAcademicYearsPage } from "@/server/services/school-master";
@@ -21,6 +22,11 @@ import { parseInput } from "@/contracts/attendance";
 import { Plus, CalendarRange, SearchX } from "lucide-react";
 import { ButtonLink } from "@/components/button";
 import { academicYearListSchema } from "@/contracts/lists";
+
+export const metadata: Metadata = {
+  title: "Tahun ajaran",
+  description: "Periode tahun ajaran sekolah.",
+};
 
 export default async function AcademicYears({
   searchParams,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { buildMonthlyAttendanceReport } from "@/server/reports/monthly";
@@ -9,6 +10,11 @@ import { formatSchoolTime } from "@/domain/format";
 import { ReportTable, ReportLegend, ReportChangeNotice } from "@/components/report-table";
 import { StateBanner } from "@/components/state-banner";
 import { PrintReportButton } from "@/components/print-report-button";
+
+export const metadata: Metadata = {
+  title: "Cetak rekap",
+  description: "Versi cetak rekap kehadiran bulanan.",
+};
 
 export default async function PrintReport({
   searchParams,

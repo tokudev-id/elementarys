@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listTeachers } from "@/server/services/teachers";
@@ -23,6 +24,11 @@ import { teacherListSchema } from "@/contracts/lists";
 import { Plus, GraduationCap, SearchX } from "lucide-react";
 import { ButtonLink } from "@/components/button";
 import { UnlinkedAccountList } from "./unlinked-list";
+
+export const metadata: Metadata = {
+  title: "Guru",
+  description: "Profil guru, kelas utama, dan akun sekolah.",
+};
 
 export default async function Teachers({
   searchParams,

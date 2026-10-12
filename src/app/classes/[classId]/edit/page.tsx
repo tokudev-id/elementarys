@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { orNotFound } from "@/server/not-found";
 import { requireAdminPageActor } from "@/server/auth/page-actor";
 import { getClass, listAcademicYears } from "@/server/services/school-master";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -5,10 +7,15 @@ import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
 import { ClassForm } from "../../form";
+
+export const metadata: Metadata = {
+  title: "Ubah kelas",
+  description: "Ubah data kelas.",
+};
 export default async function EditClass({ params }: { params: Promise<{ classId: string }> }) {
   const actor = await requireAdminPageActor();
   const [current, years, settings] = await Promise.all([
-    getClass((await params).classId),
+    orNotFound(getClass((await params).classId)),
     listAcademicYears(),
     getSchoolSettings(),
   ]);

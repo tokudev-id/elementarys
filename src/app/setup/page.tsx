@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ListChecks } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -7,6 +8,11 @@ import { StateBanner } from "@/components/state-banner";
 import { PageHeader } from "@/components/page-header";
 import { ButtonLink } from "@/components/button";
 import { schoolIdentity } from "@/components/school-identity";
+
+export const metadata: Metadata = {
+  title: "Persiapan sekolah",
+  description: "Checklist kesiapan data sebelum operasional dimulai.",
+};
 
 export default async function Setup() {
   const actor = await requirePageActor();

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdminPageActor } from "@/server/auth/page-actor";
 import { listAcademicYears } from "@/server/services/school-master";
@@ -7,6 +8,11 @@ import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { ClassForm } from "../form";
+
+export const metadata: Metadata = {
+  title: "Tambah kelas",
+  description: "Buat kelas baru.",
+};
 export default async function NewClass() {
   const actor = await requireAdminPageActor();
   const [settings, years] = await Promise.all([getSchoolSettings(), listAcademicYears()]);

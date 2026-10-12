@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { orNotFound } from "@/server/not-found";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getTeacher, unlinkedAccounts } from "@/server/services/teachers";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -11,10 +13,15 @@ import { Avatar } from "@/components/avatar";
 import { ButtonLink } from "@/components/button";
 import { TeacherDetailView } from "./detail";
 
+export const metadata: Metadata = {
+  title: "Detail guru",
+  description: "Profil, kelas utama, dan akses akun guru.",
+};
+
 export default async function Teacher({ params }: { params: Promise<{ teacherId: string }> }) {
   const actor = await requirePageActor();
   const [teacher, settings, years] = await Promise.all([
-    getTeacher((await params).teacherId, actor),
+    orNotFound(getTeacher((await params).teacherId, actor)),
     getSchoolSettings(),
     listAcademicYears(),
   ]);

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { FileSpreadsheet } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -14,6 +15,11 @@ import { DomainError } from "@/domain/errors";
 import { parseInput } from "@/contracts/attendance";
 import { reportInputSchema } from "@/contracts/reports";
 import type { MonthlyReport } from "@/contracts/reports";
+
+export const metadata: Metadata = {
+  title: "Rekap bulanan",
+  description: "Rekap kehadiran bulanan per kelas, siap diunduh sebagai Excel.",
+};
 
 export default async function Reports({
   searchParams,

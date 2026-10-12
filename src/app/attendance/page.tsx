@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Star, ClipboardCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -17,6 +18,11 @@ import { getDashboard } from "@/server/queries/dashboard";
 import { getCalendar } from "@/server/services/school-master";
 import { ButtonLink } from "@/components/button";
 import { AttendanceDatePicker } from "./date-picker";
+
+export const metadata: Metadata = {
+  title: "Absensi",
+  description: "Daftar kelas dan status pencatatan absensi harian.",
+};
 
 export default async function Today({
   searchParams,

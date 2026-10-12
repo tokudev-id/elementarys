@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { History } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,6 +10,11 @@ import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
 import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { AuditClient } from "./audit-client";
+
+export const metadata: Metadata = {
+  title: "Audit administratif",
+  description: "Catatan perubahan dan ekspor data sekolah.",
+};
 
 export default async function Audit({
   searchParams,
