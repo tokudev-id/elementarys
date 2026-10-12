@@ -136,26 +136,16 @@ export async function updateAcademicYear(
         );
     }
     const effectiveLabel =
-      data.label !== undefined
-        ? parseInput(yearLabelSchema, data.label)
-        : before.label;
+      data.label !== undefined ? parseInput(yearLabelSchema, data.label) : before.label;
     const effectiveStartsOn = data.startsOn ?? before.startsOn;
     const effectiveEndsOn = data.endsOnExclusive ?? before.endsOnExclusive;
     if (effectiveEndsOn <= effectiveStartsOn) {
-      throw new DomainError(
-        "INVALID_INPUT",
-        "Tanggal akhir harus setelah tanggal mulai.",
-        400,
-      );
+      throw new DomainError("INVALID_INPUT", "Tanggal akhir harus setelah tanggal mulai.", 400);
     }
     const startMs = new Date(effectiveStartsOn).getTime();
     const endMs = new Date(effectiveEndsOn).getTime();
     if ((endMs - startMs) / (1000 * 60 * 60 * 24) > 400) {
-      throw new DomainError(
-        "INVALID_INPUT",
-        "Satu tahun ajaran maksimal 400 hari.",
-        400,
-      );
+      throw new DomainError("INVALID_INPUT", "Satu tahun ajaran maksimal 400 hari.", 400);
     }
     const input = {
       label: effectiveLabel,

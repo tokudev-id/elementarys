@@ -235,7 +235,12 @@ it("enforces new year validation rules: YYYY/YYYY format and 400 days limit", as
   // Invalid format
   await expect(
     createAcademicYear(
-      { label: "2028-2029", startsOn: "2028-01-01", endsOnExclusive: "2029-01-01", isCurrent: false },
+      {
+        label: "2028-2029",
+        startsOn: "2028-01-01",
+        endsOnExclusive: "2029-01-01",
+        isCurrent: false,
+      },
       actor,
       randomUUID(),
       source,
@@ -247,7 +252,12 @@ it("enforces new year validation rules: YYYY/YYYY format and 400 days limit", as
   // Non-consecutive years in label
   await expect(
     createAcademicYear(
-      { label: "2028/2030", startsOn: "2028-01-01", endsOnExclusive: "2029-01-01", isCurrent: false },
+      {
+        label: "2028/2030",
+        startsOn: "2028-01-01",
+        endsOnExclusive: "2029-01-01",
+        isCurrent: false,
+      },
       actor,
       randomUUID(),
       source,
@@ -259,7 +269,12 @@ it("enforces new year validation rules: YYYY/YYYY format and 400 days limit", as
   // Exceeds 400 days
   await expect(
     createAcademicYear(
-      { label: "2028/2029", startsOn: "2028-01-01", endsOnExclusive: "2029-04-01", isCurrent: false },
+      {
+        label: "2028/2029",
+        startsOn: "2028-01-01",
+        endsOnExclusive: "2029-04-01",
+        isCurrent: false,
+      },
       actor,
       randomUUID(),
       source,
@@ -268,4 +283,3 @@ it("enforces new year validation rules: YYYY/YYYY format and 400 days limit", as
     code: "INVALID_INPUT",
   });
 });
-

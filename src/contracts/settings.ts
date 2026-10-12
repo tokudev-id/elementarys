@@ -9,17 +9,8 @@ export const settingsInputSchema = z
       .trim()
       .min(1, "Isi nama sekolah.")
       .max(200, "Nama sekolah maksimal 200 karakter."),
-    location: z
-      .string()
-      .trim()
-      .max(300, "Lokasi maksimal 300 karakter.")
-      .nullable()
-      .default(null),
-    timezone: z
-      .string()
-      .trim()
-      .min(1, "Pilih zona waktu.")
-      .refine(isTimezone, "Pilih zona waktu."),
+    location: z.string().trim().max(300, "Lokasi maksimal 300 karakter.").nullable().default(null),
+    timezone: z.string().trim().min(1, "Pilih zona waktu.").refine(isTimezone, "Pilih zona waktu."),
     reason: z
       .string()
       .trim()

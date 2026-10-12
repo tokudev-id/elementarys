@@ -149,4 +149,3 @@ it("enforces new student validation rules: name letters, NIS format, NISN 10 dig
   );
   expect(valid.id).toBeDefined();
 });
-

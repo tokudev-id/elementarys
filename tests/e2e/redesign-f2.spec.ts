@@ -9,7 +9,9 @@ test("UI-F2: inline validation, noValidate, first error focus, error summary, an
   const source = new Pool({ connectionString: process.env.DATABASE_URL });
   let studentId: string;
   try {
-    const studentRow = (await source.query("SELECT id FROM students WHERE archived_at IS NULL LIMIT 1")).rows[0];
+    const studentRow = (
+      await source.query("SELECT id FROM students WHERE archived_at IS NULL LIMIT 1")
+    ).rows[0];
     studentId = studentRow.id;
   } finally {
     await source.end();
@@ -55,7 +57,10 @@ test("UI-F2: inline validation, noValidate, first error focus, error summary, an
 
   // First error focused: Nama lengkap
   await expect(page.getByLabel("Nama lengkap siswa", { exact: true })).toBeFocused();
-  await expect(page.getByLabel("Nama lengkap siswa", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByLabel("Nama lengkap siswa", { exact: true })).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
   await expect(page.getByText("Isi nama siswa.")).toBeVisible();
 
   // Test invalid name (only 1 char)
@@ -66,7 +71,9 @@ test("UI-F2: inline validation, noValidate, first error focus, error summary, an
   // Test invalid NIS
   await page.getByLabel("NIS", { exact: true }).fill("NIS 123 !");
   await page.getByRole("button", { name: "Tambah siswa", exact: true }).click();
-  await expect(page.getByText("NIS hanya boleh angka, titik, garis miring, atau strip.")).toBeVisible();
+  await expect(
+    page.getByText("NIS hanya boleh angka, titik, garis miring, atau strip."),
+  ).toBeVisible();
 
   // Test invalid NISN (not 10 digits)
   await page.getByLabel("NISN", { exact: true }).fill("12345");
@@ -75,7 +82,9 @@ test("UI-F2: inline validation, noValidate, first error focus, error summary, an
 
   // Error summary should be visible when >= 3 errors
   await expect(page.locator(".form-error-summary")).toBeVisible();
-  await expect(page.locator(".form-error-summary").getByText("NISN harus 10 digit angka.")).toBeVisible();
+  await expect(
+    page.locator(".form-error-summary").getByText("NISN harus 10 digit angka."),
+  ).toBeVisible();
 
   await page.screenshot({ path: "docs/redesign/after/UI-F2/siswa-form-error.png" });
 

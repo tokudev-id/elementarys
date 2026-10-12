@@ -45,13 +45,19 @@ test("Beranda Admin: KPI cards, kelas belum dicatat, dan pintasan cepat", async 
   await expect(quickActions.getByRole("link", { name: "Pengaturan sekolah" })).toBeVisible();
 
   // Screenshot desktop
-  await page.screenshot({ path: path.join(afterDir, "dashboard-admin-desktop.png"), fullPage: true });
+  await page.screenshot({
+    path: path.join(afterDir, "dashboard-admin-desktop.png"),
+    fullPage: true,
+  });
 
   // Viewport mobile
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expectNoPageOverflow(page);
-  await page.screenshot({ path: path.join(afterDir, "dashboard-admin-mobile.png"), fullPage: true });
+  await page.screenshot({
+    path: path.join(afterDir, "dashboard-admin-mobile.png"),
+    fullPage: true,
+  });
 });
 
 test("Guru diarahkan ke Absensi ketika membuka root /", async ({ page }) => {
@@ -67,7 +73,9 @@ test("Guru diarahkan ke Absensi ketika membuka root /", async ({ page }) => {
   expect(page.url()).toContain("/attendance");
 });
 
-test("Rekap Bulanan: satu kelas per tampilan, KPI kelas, legend chips, dan sticky totals", async ({ page }) => {
+test("Rekap Bulanan: satu kelas per tampilan, KPI kelas, legend chips, dan sticky totals", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("guru@example.test");
@@ -112,7 +120,10 @@ test("Rekap Bulanan: satu kelas per tampilan, KPI kelas, legend chips, dan stick
   await expect(headers.nth(3)).toHaveText("I");
   await expect(headers.nth(4)).toHaveText("A");
 
-  await page.screenshot({ path: path.join(afterDir, "reports-single-class-desktop.png"), fullPage: true });
+  await page.screenshot({
+    path: path.join(afterDir, "reports-single-class-desktop.png"),
+    fullPage: true,
+  });
 
   // Mobile view test
   await page.setViewportSize({ width: 390, height: 844 });

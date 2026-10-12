@@ -22,20 +22,14 @@ export const changePasswordSchema = z
     confirmNewPassword: z.string().min(1, "Password belum sama."),
   })
   .strict()
-  .refine(
-    (data) => data.newPassword !== data.currentPassword,
-    {
-      message: "Gunakan password yang berbeda.",
-      path: ["newPassword"],
-    },
-  )
-  .refine(
-    (data) => data.confirmNewPassword === data.newPassword,
-    {
-      message: "Password belum sama.",
-      path: ["confirmNewPassword"],
-    },
-  );
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: "Gunakan password yang berbeda.",
+    path: ["newPassword"],
+  })
+  .refine((data) => data.confirmNewPassword === data.newPassword, {
+    message: "Password belum sama.",
+    path: ["confirmNewPassword"],
+  });
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

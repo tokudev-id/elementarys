@@ -114,7 +114,10 @@ test("admin transfers, cancels a future placement, closes and archives a student
     const filterBtn = page.getByRole("button", { name: /Buka filter daftar/ });
     if (await filterBtn.isVisible()) {
       await filterBtn.click();
-      await page.getByRole("dialog", { name: "Filter daftar" }).getByLabel("Status siswa", { exact: true }).selectOption("all");
+      await page
+        .getByRole("dialog", { name: "Filter daftar" })
+        .getByLabel("Status siswa", { exact: true })
+        .selectOption("all");
       await page.getByRole("button", { name: "Selesai", exact: true }).click();
     } else {
       await page.getByLabel("Status siswa", { exact: true }).selectOption("all");

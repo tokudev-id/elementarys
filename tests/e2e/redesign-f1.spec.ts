@@ -32,7 +32,9 @@ test("UI-F1: sticky topbar, sidebar collapse at bottom, DataCard on master pages
 
   // Sidebar collapse is at bottom (below menu)
   const menuBox = await page.locator(".shell-sidebar-nav").boundingBox();
-  const collapseBox = await page.getByRole("button", { name: "Ciutkan sidebar", exact: true }).boundingBox();
+  const collapseBox = await page
+    .getByRole("button", { name: "Ciutkan sidebar", exact: true })
+    .boundingBox();
   expect(menuBox).not.toBeNull();
   expect(collapseBox).not.toBeNull();
   expect(collapseBox!.y).toBeGreaterThan(menuBox!.y);
@@ -68,7 +70,9 @@ test("UI-F1: sticky topbar, sidebar collapse at bottom, DataCard on master pages
   const moreActions = page.getByRole("button", { name: "Aksi lainnya", exact: true });
   await expect(moreActions).toBeVisible();
   await moreActions.click();
-  await expect(page.getByRole("menuitem", { name: "Naik kelas / penempatan", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("menuitem", { name: "Naik kelas / penempatan", exact: true }),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
 
   // Mobile filter sheet works

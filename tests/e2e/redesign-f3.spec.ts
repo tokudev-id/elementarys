@@ -16,10 +16,13 @@ test("UI-F3: pagination and DataCard on remaining pages, separate form pages, au
     const yearRow = (await source.query("SELECT id FROM academic_years WHERE is_current")).rows[0];
     currentYearId = yearRow.id;
     const classRow = (
-      await source.query("SELECT id FROM classes WHERE academic_year_id=$1 LIMIT 1", [currentYearId])
+      await source.query("SELECT id FROM classes WHERE academic_year_id=$1 LIMIT 1", [
+        currentYearId,
+      ])
     ).rows[0];
     classId = classRow.id;
-    const adminRow = (await source.query("SELECT id FROM \"user\" WHERE role='admin' LIMIT 1")).rows[0];
+    const adminRow = (await source.query("SELECT id FROM \"user\" WHERE role='admin' LIMIT 1"))
+      .rows[0];
     adminId = adminRow.id;
 
     // Seed additional academic years so that /academic-years has > 25 items for pagination
@@ -87,16 +90,23 @@ test("UI-F3: pagination and DataCard on remaining pages, separate form pages, au
   // 3. New Academic Year page (/academic-years/new)
   await page.getByRole("link", { name: "Tambah tahun ajaran", exact: true }).click();
   await expect(page).toHaveURL("/academic-years/new");
-  await expect(page.getByRole("heading", { name: "Tambah tahun ajaran", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Tambah tahun ajaran", exact: true }),
+  ).toBeVisible();
 
   // Form validation on empty submit
   const newYearForm = page.locator("form.redesigned-form");
   await expect(newYearForm).toBeVisible();
   expect(await newYearForm.getAttribute("novalidate")).not.toBeNull();
   await page.getByRole("button", { name: "Tambah tahun ajaran", exact: true }).click();
-  await expect(page.getByLabel("Nama tahun ajaran", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByLabel("Nama tahun ajaran", { exact: true })).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
   await expect(page.locator(".form-error-summary")).toBeVisible();
-  await expect(page.locator(".field-error").filter({ hasText: "Gunakan format 2026/2027." })).toBeVisible();
+  await expect(
+    page.locator(".field-error").filter({ hasText: "Gunakan format 2026/2027." }),
+  ).toBeVisible();
 
   await page.screenshot({ path: "docs/redesign/after/UI-F3/tahun-ajaran-new.png" });
 
@@ -165,7 +175,10 @@ test("UI-F3: pagination and DataCard on remaining pages, separate form pages, au
 
   // Step 2: candidate selection in DataCard
   await expect(page.locator("#pilih-siswa-promosi")).toBeVisible();
-  const selectAllBtn = page.getByRole("button", { name: "Pilih semua di semua halaman", exact: true });
+  const selectAllBtn = page.getByRole("button", {
+    name: "Pilih semua di semua halaman",
+    exact: true,
+  });
   const deselectAllBtn = page.getByRole("button", { name: "Batal pilih semua", exact: true });
   await expect(selectAllBtn).toBeVisible();
   await expect(deselectAllBtn).toBeVisible();

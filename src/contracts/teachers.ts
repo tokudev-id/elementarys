@@ -5,10 +5,7 @@ export const teacherNameSchema = z
   .trim()
   .min(1, "Isi nama guru.")
   .max(200, "Nama maksimal 200 karakter.")
-  .refine(
-    (val) => val.length >= 2 && /\p{L}/u.test(val),
-    "Nama minimal 2 huruf.",
-  );
+  .refine((val) => val.length >= 2 && /\p{L}/u.test(val), "Nama minimal 2 huruf.");
 
 export const teacherInputSchema = z
   .object({
@@ -45,10 +42,7 @@ export const teacherAccountSchema = z.discriminatedUnion("mode", [
     .object({
       mode: z.literal("existing"),
       expectedVersion: z.number().int().positive(),
-      userId: z
-        .string()
-        .min(1, "Pilih akun yang akan ditautkan.")
-        .max(128),
+      userId: z.string().min(1, "Pilih akun yang akan ditautkan.").max(128),
     })
     .strict(),
 ]);
@@ -56,9 +50,7 @@ export const teacherAccountSchema = z.discriminatedUnion("mode", [
 export const teacherClassesSchema = z
   .object({
     expectedVersion: z.number().int().positive(),
-    classIds: z
-      .array(z.uuid().transform((value) => value.toLowerCase()))
-      .max(1000),
+    classIds: z.array(z.uuid().transform((value) => value.toLowerCase())).max(1000),
   })
   .strict()
   .refine(

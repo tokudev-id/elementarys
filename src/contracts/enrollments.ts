@@ -66,9 +66,7 @@ export const promotionInputSchema = z
   })
   .strict()
   .refine(
-    (data) =>
-      new Set(data.entries.map((entry) => entry.studentId)).size ===
-      data.entries.length,
+    (data) => new Set(data.entries.map((entry) => entry.studentId)).size === data.entries.length,
     "Siswa tidak boleh duplikat.",
   );
 
@@ -87,9 +85,7 @@ export const promotionPreviewSchema = z.object({
 export const promotionResultSchema = z.object({
   saved: z.literal(true),
   id: z.string(),
-  results: z.array(
-    z.object({ studentId: z.uuid(), version: z.number().int().positive() }),
-  ),
+  results: z.array(z.object({ studentId: z.uuid(), version: z.number().int().positive() })),
 });
 
 export type PlacementInput = z.infer<typeof enrollmentInputSchema>;

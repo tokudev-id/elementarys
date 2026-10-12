@@ -25,9 +25,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await page.goto("/classes/new");
   const classForm = page.getByTestId("class-create");
   await classForm.getByLabel("Nama kelas", { exact: true }).fill("Kelas Uji Kalender");
-  await classForm
-    .getByLabel("Tahun ajaran", { exact: true })
-    .selectOption({ label: "2030/2031" });
+  await classForm.getByLabel("Tahun ajaran", { exact: true }).selectOption({ label: "2030/2031" });
   await classForm.getByRole("button", { name: "Tambah kelas", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Kelas Uji Kalender", exact: true }),
@@ -40,9 +38,7 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
   await editClass.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await expect(page.getByText("Tingkat 2 · 2030/2031", { exact: true })).toBeVisible();
   await page.goto("/calendar");
-  await page
-    .getByLabel("Tahun ajaran", { exact: true })
-    .selectOption({ label: "2030/2031" });
+  await page.getByLabel("Tahun ajaran", { exact: true }).selectOption({ label: "2030/2031" });
   await page.getByRole("button", { name: "Ubah", exact: true }).click();
   await page.getByLabel("Senin", { exact: true }).check();
   await page.getByLabel("Kamis", { exact: true }).check();
@@ -56,7 +52,10 @@ test("admin creates year/class and edits calendar on mobile; teacher reads witho
     page.getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Hapus pengecualian 2030-01-01", exact: true }),
   ).toHaveCount(0);
