@@ -1,17 +1,29 @@
 "use client";
-import Link from "next/link";
-import { PageContainer } from "@/components/app-shell";
-import { StateBanner } from "@/components/state-banner";
-import { Button } from "@/components/button";
+import { RotateCcw, TriangleAlert } from "lucide-react";
+import { Button, ButtonLink } from "@/components/button";
+import { StatusPage } from "@/components/status-page";
+
 export default function PageError({ reset }: { reset: () => void }) {
   return (
-    <PageContainer>
-      <h1>Halaman belum dapat dimuat</h1>
-      <StateBanner state="error" action={<Button onClick={reset}>Muat ulang halaman</Button>}>
-        Periksa koneksi dan coba kembali. Jika tetap gagal, hubungi admin untuk memeriksa halaman
-        yang dibuka.
-      </StateBanner>
-      <Link href="/attendance">Kembali ke hari ini</Link>
-    </PageContainer>
+    <StatusPage
+      icon={TriangleAlert}
+      tone="error"
+      title="Halaman belum dapat dimuat"
+      description={
+        <p role="alert">
+          Periksa koneksi dan coba kembali. Jika tetap gagal, hubungi admin untuk memeriksa halaman
+          yang dibuka.
+        </p>
+      }
+      actions={
+        <>
+          <Button onClick={reset}>
+            <RotateCcw aria-hidden="true" />
+            Muat ulang halaman
+          </Button>
+          <ButtonLink href="/attendance">Kembali ke hari ini</ButtonLink>
+        </>
+      }
+    />
   );
 }

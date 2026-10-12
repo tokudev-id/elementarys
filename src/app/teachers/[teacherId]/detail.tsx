@@ -73,7 +73,9 @@ export function TeacherDetailView({
           <div className="section-header-row">
             <div>
               <h2>Kelas utama</h2>
-              <p>Kelas utama mengatur urutan daftar; guru aktif tetap dapat mencatat kelas lainnya.</p>
+              <p>
+                Kelas utama mengatur urutan daftar; guru aktif tetap dapat mencatat kelas lainnya.
+              </p>
             </div>
             {admin && (
               <Button variant="secondary" onClick={handleOpenClasses}>
@@ -100,10 +102,7 @@ export function TeacherDetailView({
             title="Ubah kelas utama guru"
             variant="sheet"
           >
-            <TeacherClassesForm
-              teacher={teacher}
-              classes={classes}
-            />
+            <TeacherClassesForm teacher={teacher} classes={classes} />
           </Dialog>
         )}
       </TabsContent>

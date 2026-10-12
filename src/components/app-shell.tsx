@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Logout } from "@/app/login/form";
 import { availableNavigation, navigation, type NavigationItem } from "./navigation";
+import { Avatar } from "./avatar";
 import { Button } from "./button";
 import { Dialog } from "./dialog";
 import {
@@ -235,11 +236,7 @@ function RootShell({
     school?.name.replace(/\s*\(data sintetis\)/gi, "").trim() ?? "Identitas sekolah belum diatur";
   const synthetic = /data sintetis|lingkungan uji|sekolah uji/i.test(school?.name ?? "");
   const page = navigation.find((item) => item.id !== "account" && active(item, currentPath));
-  const initials = actor.name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("");
+  const roleLabel = actor.role === "admin" ? "Admin sekolah" : "Guru";
   const bottomIds =
     actor.role === "admin"
       ? ["home", "attendance", "students"]
@@ -277,8 +274,11 @@ function RootShell({
           Langsung ke isi halaman
         </a>
         <aside className="shell-sidebar">
-          <div className="shell-school-name">
-            <strong title={name}>{name}</strong>
+          <div className="shell-brand">
+            <div className="shell-school-name">
+              <strong title={name}>{name}</strong>
+              <small>{actor.role === "admin" ? "Panel admin" : "Panel guru"}</small>
+            </div>
           </div>
           <Button variant="ghost" className="shell-expand-rail" onClick={openMenu}>
             <PanelLeftOpen aria-hidden="true" />
@@ -368,14 +368,19 @@ function RootShell({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="user-menu-trigger" aria-label="Menu pengguna">
-                    <span className="user-initials" aria-hidden="true">
-                      {initials}
+                    <Avatar name={actor.name} size="md" />
+                    <span className="user-name">
+                      <strong>{actor.name}</strong>
+                      <small>{roleLabel}</small>
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="user-menu-content">
                   <DropdownMenuLabel>
-                    {actor.name} · {actor.role === "admin" ? "Admin" : "Guru"}
+                    <span className="user-menu-label">
+                      <strong>{actor.name}</strong>
+                      <small>{roleLabel}</small>
+                    </span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>

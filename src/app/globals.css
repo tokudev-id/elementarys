@@ -190,14 +190,14 @@ textarea {
   width: 100%;
 }
 select {
-  height: 36px;
-  min-height: 36px;
+  height: var(--control-height);
+  min-height: var(--control-height);
   padding: 0 28px 0 10px;
   font: inherit;
   font-size: 14px;
   background: var(--surface, white);
   border: 1px solid var(--control-border);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
 }
 textarea {
   min-height: 80px;
@@ -206,7 +206,7 @@ textarea {
   font-size: 14px;
   background: var(--surface, white);
   border: 1px solid var(--control-border);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
 }
 .filter-form {
   display: flex;
@@ -268,17 +268,14 @@ textarea {
 }
 .report-table caption {
   text-align: left;
-  padding-block: 0.75rem;
+  padding: 0.75rem 1rem;
 }
 
-:root {
-  --accent: var(--primary);
-}
 body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.9375rem;
   line-height: 1.5;
 }
@@ -319,14 +316,13 @@ a {
   margin: 2rem 0;
 }
 .account-form label {
-  display: grid;
-  gap: 0.375rem;
+  display: block;
   font-weight: 600;
 }
 input {
   width: 100%;
-  height: 38px;
-  min-height: 38px;
+  height: var(--control-height);
+  min-height: var(--control-height);
   padding: 0 12px;
   font: inherit;
   font-size: 14px;
@@ -334,38 +330,57 @@ input {
   color: inherit;
   background: var(--surface, white);
   border: 1px solid var(--control-border);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
 }
-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  height: 44px;
-  padding: 0 16px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  border: 0;
-  border-radius: 6px;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+input:hover:not(:disabled, :focus),
+select:hover:not(:disabled, :focus),
+textarea:hover:not(:disabled, :focus) {
+  border-color: var(--foreground);
 }
-button:hover {
-  background: var(--primary-hover);
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--brand-teal);
+  box-shadow: 0 0 0 3px rgb(13 148 136 / 0.22);
 }
-button:disabled {
-  opacity: 0.65;
-  cursor: wait;
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--surface-muted);
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+/* layered so variant/utility classes (ghost, outline, switch, tabs) can override it */
+@layer base {
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease;
+  }
+  button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
 }
 small {
   font-size: 0.875rem;
@@ -375,11 +390,8 @@ small {
   color: var(--destructive);
 }
 
-:root {
-  --muted: var(--muted-foreground);
-}
 body {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 body:has(dialog[open]) {
   overflow: hidden;
@@ -399,10 +411,12 @@ a {
   position: fixed;
   top: 0.5rem;
   left: 0.5rem;
-  z-index: 10;
+  z-index: 60;
   transform: translateY(-160%);
   padding: 0.75rem;
-  background: white;
+  background: var(--surface);
+  border-radius: var(--radius-control);
+  box-shadow: var(--elev-3);
 }
 .skip-link:focus {
   transform: translateY(0);
@@ -412,10 +426,6 @@ button:disabled {
 }
 button[aria-busy="true"] {
   cursor: wait;
-}
-.ui-button:active:not(:disabled) {
-  background: var(--primary-hover);
-  color: white;
 }
 .status-choices label:active span {
   background: var(--primary-soft);
@@ -476,8 +486,8 @@ button[aria-busy="true"] {
   min-height: 48px;
   padding: 0.5rem 0.25rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: white;
+  border-radius: var(--radius-control);
+  background: var(--surface);
 }
 .status-choices input:checked + span {
   border: 2px solid var(--accent);
@@ -493,22 +503,34 @@ button[aria-busy="true"] {
 }
 .state-banner {
   margin-block: 1rem;
-  padding: 1rem;
+  padding: 14px 16px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: #fff;
+  border-left-width: 4px;
+  border-radius: var(--radius-control);
+  background: var(--surface);
 }
 .state-banner--error,
 .state-banner--conflict,
 .state-banner--session-expired {
-  background: #fff3ef;
-  color: #782323;
+  background: var(--destructive-soft);
+  border-color: #f5c2bd;
+  border-left-color: var(--destructive);
+  color: #7a1f17;
 }
 .state-banner--saved {
-  background: var(--primary-soft);
+  background: var(--primary-tint);
+  border-color: var(--primary-soft);
+  border-left-color: var(--primary);
+}
+.state-banner--warning {
+  background: var(--accent-amber-soft);
+  border-color: #fde68a;
+  border-left-color: var(--accent-amber);
+  color: var(--accent-amber-on);
 }
 .state-banner--info {
-  background: var(--surface-muted);
+  background: var(--surface);
+  border-left-color: var(--brand-teal);
   color: var(--foreground);
 }
 .state-banner__action {
@@ -530,24 +552,8 @@ h2 {
   }
 }
 .button-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   min-width: 44px;
-  min-height: 44px;
-  height: 44px;
-  padding: 0 16px;
-  font-size: 14px;
-  font-weight: 500;
-  background: var(--primary);
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
   flex-shrink: 0;
-  white-space: nowrap;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
 }
 .attendance-form {
   padding-bottom: 7rem;
@@ -565,6 +571,7 @@ h2 {
   padding: 1rem;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-radius: var(--radius-control);
 }
 details summary {
   cursor: pointer;
@@ -608,4 +615,10 @@ details summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
+}
+input[aria-invalid="true"]:focus-visible,
+select[aria-invalid="true"]:focus-visible,
+textarea[aria-invalid="true"]:focus-visible {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px rgb(192 53 43 / 0.2);
 }

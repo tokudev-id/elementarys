@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listStudents } from "@/server/services/students";
@@ -19,7 +20,14 @@ import {
   DataCardFooter,
 } from "@/components/data-card";
 import { studentListSchema } from "@/contracts/lists";
+import { Plus, Users } from "lucide-react";
+import { ButtonLink } from "@/components/button";
 import { parseInput } from "@/contracts/attendance";
+
+export const metadata: Metadata = {
+  title: "Siswa",
+  description: "Daftar siswa beserta kelas aktif.",
+};
 
 export default async function Students({
   searchParams,
@@ -83,13 +91,15 @@ export default async function Students({
   return (
     <AppShell school={schoolIdentity(settings)} actor={actor} currentPath="/students">
       <PageHeader
+        icon={Users}
         title="Siswa"
         description={`${students.total} siswa sesuai filter`}
         primaryAction={
           actor.role === "admin" ? (
-            <Link className="button-link" href="/students/new">
+            <ButtonLink variant="primary" href="/students/new">
+              <Plus aria-hidden="true" />
               Tambah siswa
-            </Link>
+            </ButtonLink>
           ) : undefined
         }
         secondaryActions={
@@ -125,6 +135,7 @@ export default async function Students({
         <DataCardContent>
           {rows.length ? (
             <MasterList
+              avatars
               items={rows}
               label="Daftar siswa"
               currentSort={filter.sort}
@@ -139,6 +150,7 @@ export default async function Students({
             />
           ) : (
             <EmptyState
+              icon={Users}
               title={filter.q || filter.classId ? "Tidak ada siswa yang cocok" : "Belum ada siswa"}
               description="Periksa filter atau tambahkan siswa yang sudah diverifikasi."
               action={<Link href="/students">Reset filter</Link>}

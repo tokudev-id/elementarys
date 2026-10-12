@@ -507,7 +507,8 @@ export function CalendarClient({
                               className="calendar-absence-chip"
                               title={`${dayAbsences.length} siswa tidak hadir`}
                             >
-                              {dayAbsences.length} siswa
+                              {dayAbsences.length}
+                              <span className="calendar-absence-chip__unit">&nbsp;siswa</span>
                             </span>
                           )}
                           {override && dayAbsences.length === 0 && (
@@ -739,7 +740,7 @@ export function CalendarClient({
               Belum ada tanggal pengecualian untuk tahun ajaran ini.
             </p>
           ) : (
-            <div className="data-table">
+            <div className="data-table data-table--scroll">
               <table>
                 <thead>
                   <tr>

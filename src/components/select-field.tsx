@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useId,
-  type SelectHTMLAttributes,
-  type ReactNode,
-} from "react";
+import { useId, type SelectHTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function SelectField({
@@ -26,11 +22,7 @@ export function SelectField({
   const generatedId = useId();
   const id = suppliedId ?? (props.name ? `field-${props.name}` : generatedId);
   const describedBy =
-    [
-      hint && `${id}-hint`,
-      error && `${id}-error`,
-      props["aria-describedby"],
-    ]
+    [hint && `${id}-hint`, error && `${id}-error`, props["aria-describedby"]]
       .filter(Boolean)
       .join(" ") || undefined;
 

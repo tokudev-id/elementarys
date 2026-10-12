@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { KeyRound } from "lucide-react";
 import { requireActor } from "@/server/auth/guards";
 import { AccountForm, Logout } from "../login/form";
+
+export const metadata: Metadata = {
+  title: "Ganti password",
+  description: "Ganti password akun sekolah.",
+};
 
 export default async function ChangePassword() {
   try {
@@ -21,7 +27,9 @@ export default async function ChangePassword() {
         </div>
         <div className="auth-card__header">
           <h1 className="auth-card__title">Ganti password</h1>
-          <p className="auth-card__subtitle">Ganti password sementara sebelum membuka data sekolah.</p>
+          <p className="auth-card__subtitle">
+            Ganti password sementara sebelum membuka data sekolah.
+          </p>
         </div>
         <AccountForm change />
         <div className="auth-card__footer">
@@ -31,4 +39,3 @@ export default async function ChangePassword() {
     </main>
   );
 }
-

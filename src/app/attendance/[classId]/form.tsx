@@ -1,19 +1,15 @@
 "use client";
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { MoreHorizontal, History, Info } from "lucide-react";
-import { Button } from "@/components/button";
+import { MoreHorizontal, History, Info, ClipboardCheck } from "lucide-react";
+import { Button, ButtonLink } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Field } from "@/components/field";
 import { DateStepper } from "@/components/date-stepper";
 import { StateBanner } from "@/components/state-banner";
 import { StatusBadge } from "@/components/status-badge";
 import { PageHeader } from "@/components/page-header";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -118,6 +114,7 @@ export function AttendanceForm({
   return (
     <div className="attendance-form attendance-compact" onKeyDown={keyboard}>
       <PageHeader
+        icon={ClipboardCheck}
         title={view.className}
         meta={
           <StatusBadge tone={view.sessionState === "submitted" ? "success" : "neutral"}>
@@ -128,14 +125,14 @@ export function AttendanceForm({
           <>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link
+                <ButtonLink
                   href={`/attendance/${view.classId}/history?date=${view.date}`}
                   prefetch={false}
-                  className="button-link button-link--ghost icon-btn"
+                  size="icon"
                   aria-label="Riwayat absensi"
                 >
                   <History aria-hidden="true" size={18} />
-                </Link>
+                </ButtonLink>
               </TooltipTrigger>
               <TooltipContent>Riwayat absensi</TooltipContent>
             </Tooltip>
@@ -152,7 +149,7 @@ export function AttendanceForm({
             {role === "admin" && view.sessionState === "submitted" && !form.editing && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" aria-label="Aksi catatan">
+                  <Button variant="secondary" size="icon" aria-label="Aksi catatan">
                     <MoreHorizontal aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -208,17 +205,13 @@ export function AttendanceForm({
                 <AttendanceSummary view={view} />
               </StateBanner>
               <div className="button-row">
-                <Link
-                  href="/attendance"
-                  className="button-link button-link--secondary"
-                  aria-label="Kembali ke hari ini"
-                >
+                <ButtonLink href="/attendance" aria-label="Kembali ke hari ini">
                   Kembali ke daftar kelas
-                </Link>
+                </ButtonLink>
                 {nextClassHref && (
-                  <Link href={nextClassHref} className="button-link">
+                  <ButtonLink href={nextClassHref} variant="primary">
                     Kelas berikutnya
-                  </Link>
+                  </ButtonLink>
                 )}
               </div>
             </div>

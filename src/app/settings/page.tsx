@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { Settings as SettingsIcon } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
@@ -6,6 +8,11 @@ import { SetupChecklist } from "@/components/setup-checklist";
 import { PageHeader } from "@/components/page-header";
 import { SettingsForm } from "./form";
 import { schoolIdentity } from "@/components/school-identity";
+
+export const metadata: Metadata = {
+  title: "Konfigurasi sekolah",
+  description: "Identitas sekolah, lokasi, dan zona waktu.",
+};
 
 export default async function Settings() {
   const actor = await requirePageActor();
@@ -18,6 +25,7 @@ export default async function Settings() {
       breadcrumbs={[{ label: "Sekolah", href: "/settings" }]}
     >
       <PageHeader
+        icon={SettingsIcon}
         title="Konfigurasi sekolah"
         description="Identitas sekolah, lokasi, dan zona waktu acuan operasional absensi."
       />
@@ -32,9 +40,7 @@ export default async function Settings() {
         )}
 
         {!settings.setup.ready && (
-          <StateBanner state="empty">
-            Lengkapi: {settings.setup.missing.join(", ")}.
-          </StateBanner>
+          <StateBanner state="empty">Lengkapi: {settings.setup.missing.join(", ")}.</StateBanner>
         )}
 
         {actor.role === "admin" ? (

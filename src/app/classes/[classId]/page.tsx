@@ -1,4 +1,6 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { orNotFound } from "@/server/not-found";
+import { School } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getClass, listAcademicYears } from "@/server/services/school-master";
 import { listStudents } from "@/server/services/students";
@@ -10,12 +12,13 @@ import { StatusBadge } from "@/components/status-badge";
 import { MasterList, type MasterRow } from "@/components/master-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { EmptyState } from "@/components/empty-state";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { ButtonLink } from "@/components/button";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
+
+export const metadata: Metadata = {
+  title: "Detail kelas",
+  description: "Siswa aktif dan akses cepat absensi kelas.",
+};
 
 export default async function ClassDetail({
   params,
@@ -28,7 +31,7 @@ export default async function ClassDetail({
   const id = (await params).classId;
   const selected = await searchParams;
   const [current, years, settings, students] = await Promise.all([
-    getClass(id),
+    orNotFound(getClass(id)),
     listAcademicYears(),
     getSchoolSettings(),
     listStudents({ classId: id, page: selected.page, pageSize: selected.pageSize }),
@@ -53,6 +56,7 @@ export default async function ClassDetail({
       breadcrumbs={[{ label: "Kelas", href: "/classes" }, { label: current.name }]}
     >
       <PageHeader
+        icon={School}
         title={current.name}
         meta={
           <StatusBadge tone={current.archivedAt ? "neutral" : "success"}>
@@ -62,20 +66,15 @@ export default async function ClassDetail({
         description={`Tingkat ${current.grade} · ${year?.label ?? ""}`}
         actions={
           <>
-            <Link className="button-link" href={`/attendance/${id}?date=${school?.date ?? ""}`}>
+            <ButtonLink variant="primary" href={`/attendance/${id}?date=${school?.date ?? ""}`}>
               Catat absensi
-            </Link>
-            <Link
-              className="button-link button-link--secondary"
+            </ButtonLink>
+            <ButtonLink
               href={`/reports?yearId=${current.yearId}&classId=${id}&month=${school?.date.slice(0, 7) ?? ""}`}
             >
               Rekap kelas
-            </Link>
-            {actor.role === "admin" && (
-              <Link className="button-link button-link--secondary" href={`/classes/${id}/edit`}>
-                Ubah
-              </Link>
-            )}
+            </ButtonLink>
+            {actor.role === "admin" && <ButtonLink href={`/classes/${id}/edit`}>Ubah</ButtonLink>}
           </>
         }
       />
@@ -102,6 +101,7 @@ export default async function ClassDetail({
         <DataCardContent>
           {rows.length ? (
             <MasterList
+              avatars
               items={rows}
               columns={[{ key: "code", label: "Kode" }]}
               label="Siswa aktif kelas"

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "./button";
+import { MoreHorizontal, type LucideIcon } from "lucide-react";
+import { Button, ButtonLink } from "./button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,7 +22,11 @@ export function PageHeader({
   primaryAction,
   secondaryActions,
   meta,
+  icon: Icon,
+  leading,
 }: {
+  icon?: LucideIcon;
+  leading?: ReactNode;
   title: string;
   description?: string;
   actions?: ReactNode;
@@ -33,11 +37,19 @@ export function PageHeader({
   return (
     <header className="page-header">
       <div className="page-header__main">
-        <div className="page-header__title-row">
-          <h1>{title}</h1>
-          {meta}
+        {leading && <span className="page-header__leading">{leading}</span>}
+        {Icon && !leading && (
+          <span className="page-header__icon" aria-hidden="true">
+            <Icon strokeWidth={1.75} />
+          </span>
+        )}
+        <div className="page-header__text">
+          <div className="page-header__title-row">
+            <h1>{title}</h1>
+            {meta}
+          </div>
+          {description && <p className="page-header__description">{description}</p>}
         </div>
-        {description && <p className="page-header__description">{description}</p>}
       </div>
       {(actions || primaryAction || (secondaryActions && secondaryActions.length > 0)) && (
         <div className="page-header__actions">
@@ -47,21 +59,19 @@ export function PageHeader({
             <>
               <div className="page-header__secondary-desktop">
                 {secondaryActions.map((item) => (
-                  <Link
+                  <ButtonLink
                     key={item.label}
                     href={item.href}
-                    className={`button-link ${
-                      item.destructive ? "button-link--destructive" : "button-link--secondary"
-                    }`}
+                    className={item.destructive ? "button-link--danger" : undefined}
                   >
                     {item.label}
-                  </Link>
+                  </ButtonLink>
                 ))}
               </div>
               <div className="page-header__secondary-mobile">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" aria-label="Aksi lainnya">
+                    <Button variant="secondary" size="icon" aria-label="Aksi lainnya">
                       <MoreHorizontal aria-hidden="true" size={20} />
                     </Button>
                   </DropdownMenuTrigger>

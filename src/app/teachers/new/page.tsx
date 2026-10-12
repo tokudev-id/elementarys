@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { requireAdminPageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
 import { TeacherProfileForm } from "../forms";
+
+export const metadata: Metadata = {
+  title: "Tambah guru",
+  description: "Buat profil guru baru.",
+};
 export default async function NewTeacher() {
   const actor = await requireAdminPageActor();
   const settings = await getSchoolSettings();

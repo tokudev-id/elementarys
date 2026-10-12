@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listAcademicYears, listClasses } from "@/server/services/school-master";
@@ -18,7 +19,14 @@ import {
   DataCardFooter,
 } from "@/components/data-card";
 import { classListSchema } from "@/contracts/lists";
+import { Plus, School, SearchX } from "lucide-react";
+import { ButtonLink } from "@/components/button";
 import { parseInput } from "@/contracts/attendance";
+
+export const metadata: Metadata = {
+  title: "Kelas",
+  description: "Daftar kelas per tahun ajaran.",
+};
 
 export default async function Classes({
   searchParams,
@@ -70,13 +78,15 @@ export default async function Classes({
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/classes">
       <PageHeader
+        icon={School}
         title="Kelas"
         description="Daftar kelas per tahun ajaran."
         primaryAction={
           actor.role === "admin" ? (
-            <Link className="button-link" href="/classes/new">
+            <ButtonLink variant="primary" href="/classes/new">
+              <Plus aria-hidden="true" />
               Tambah kelas
-            </Link>
+            </ButtonLink>
           ) : undefined
         }
       />
@@ -128,6 +138,7 @@ export default async function Classes({
             />
           ) : (
             <EmptyState
+              icon={SearchX}
               title="Belum ada kelas yang cocok"
               description="Periksa filter atau tambahkan kelas."
               action={<Link href="/classes">Reset filter</Link>}

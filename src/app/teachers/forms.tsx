@@ -13,7 +13,7 @@ import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
 import { SwitchField } from "@/components/switch-field";
 import { Button } from "@/components/button";
-import { useMutation } from "@/components/use-mutation";
+import { useAfterRefresh, useMutation } from "@/components/use-mutation";
 import { MutationFeedback } from "@/components/mutation-feedback";
 import { useRouter } from "next/navigation";
 import { useFormGuard } from "@/components/use-form-guard";
@@ -222,6 +222,7 @@ export function TeacherAccountForm({
 }) {
   const [mode, setMode] = useState<"create" | "existing">("create");
   const mutation = useMutation(`/api/teachers/${teacher.id}/account`, "POST");
+  const markDone = useAfterRefresh(mutation.pending, onSuccess);
 
   const form = useZodForm<AccountFormData>(teacherAccountSchema, {
     defaultValues: {
@@ -235,16 +236,15 @@ export function TeacherAccountForm({
     onSubmit: async (data: AccountFormData) => {
       const saved = await mutation.mutate(data);
       if (saved) {
+        setMode("create");
         form.reset({
-          mode,
+          mode: "create",
           expectedVersion: teacher.version,
           email: "",
           password: "",
           role: "teacher",
         });
-        if (onSuccess) {
-          onSuccess();
-        }
+        markDone();
       }
     },
   });
@@ -252,7 +252,18 @@ export function TeacherAccountForm({
   function changeMode(event: ChangeEvent<HTMLSelectElement>) {
     const nextMode = event.currentTarget.value === "existing" ? "existing" : "create";
     setMode(nextMode);
-    form.setValue("mode", nextMode);
+    // schema variants are strict, so leftover fields from the other mode must go
+    form.reset(
+      nextMode === "existing"
+        ? { mode: "existing", expectedVersion: teacher.version, userId: "" }
+        : {
+            mode: "create",
+            expectedVersion: teacher.version,
+            email: "",
+            password: "",
+            role: "teacher",
+          },
+    );
   }
 
   return (
@@ -301,6 +312,9 @@ export function TeacherAccountForm({
             ))}
           </SelectField>
         )}
+        {mode === "existing" && accounts.length === 0 && (
+          <p>Belum ada akun tanpa profil guru. Pilih “Buat akun baru”.</p>
+        )}
         <Button type="submit" pending={mutation.pending}>
           Hubungkan akun guru
         </Button>
@@ -321,6 +335,7 @@ export function AccountAccessForm({
   onSuccess?: () => void;
 }) {
   const mutation = useMutation(`/api/users/${encodeURIComponent(account.id)}/access`, "PATCH");
+  const markDone = useAfterRefresh(mutation.pending, onSuccess);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -331,9 +346,7 @@ export function AccountAccessForm({
       role: data.get("role"),
       banned: data.has("banned"),
     });
-    if (ok && onSuccess) {
-      onSuccess();
-    }
+    if (ok) markDone();
   }
   return (
     <form
@@ -382,6 +395,7 @@ export function PasswordResetForm({
     `/api/users/${encodeURIComponent(account.id)}/reset-password`,
     "POST",
   );
+  const markDone = useAfterRefresh(mutation.pending, onSuccess);
 
   const form = useZodForm<ResetFormData>(resetPasswordSchema, {
     defaultValues: {
@@ -393,9 +407,7 @@ export function PasswordResetForm({
       const saved = await mutation.mutate(data);
       if (saved) {
         form.reset({ expectedVersion, newPassword: "" });
-        if (onSuccess) {
-          onSuccess();
-        }
+        markDone();
       }
     },
   });

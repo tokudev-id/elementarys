@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Pencil } from "lucide-react";
 import type { StudentDetail } from "@/contracts/students";
 import type { AcademicYearView, ClassView } from "@/contracts/school-master";
 import type { AttendanceTotals } from "@/domain/attendance";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { Button } from "@/components/button";
+import { Avatar } from "@/components/avatar";
+import { Button, ButtonLink } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -17,12 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { EmptyState } from "@/components/empty-state";
 import { PlacementForm, EndEnrollmentForm, StudentArchiveForm } from "../lifecycle-forms";
 
@@ -39,6 +35,19 @@ function lastDay(exclusive: string) {
   date.setUTCDate(date.getUTCDate() - 1);
   return formatted(date.toISOString().slice(0, 10));
 }
+
+const placementLabel = {
+  cancelled: "Dibatalkan sebelum mulai",
+  upcoming: "Mendatang",
+  done: "Selesai",
+  current: "Berjalan",
+} as const;
+const placementTone = {
+  cancelled: "neutral",
+  upcoming: "info",
+  done: "neutral",
+  current: "success",
+} as const;
 
 export function StudentDetailView({
   student,
@@ -90,6 +99,7 @@ export function StudentDetailView({
   return (
     <>
       <PageHeader
+        leading={<Avatar name={student.fullName} size="lg" />}
         title={student.fullName}
         meta={
           <StatusBadge tone={student.archivedAt ? "neutral" : "success"}>
@@ -100,12 +110,13 @@ export function StudentDetailView({
         actions={
           admin ? (
             <>
-              <Link href={`/students/${student.id}/edit`} className="button-link">
+              <ButtonLink href={`/students/${student.id}/edit`}>
+                <Pencil aria-hidden="true" />
                 Ubah
-              </Link>
+              </ButtonLink>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" aria-label="Aksi siswa">
+                  <Button variant="secondary" size="icon" aria-label="Aksi siswa">
                     <MoreHorizontal aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -167,42 +178,40 @@ export function StudentDetailView({
         <TabsContent value="history">
           <DataCard id="riwayat-penempatan">
             <DataCardHeader title="Riwayat penempatan" />
-            <DataCardContent>
+            <DataCardContent className="data-card__content--padded">
               {student.enrollments.length ? (
                 <ol className="placement-timeline">
                   {student.enrollments
                     .slice((historyPage - 1) * 10, historyPage * 10)
-                    .map((item) => (
-                      <li key={item.id}>
-                        <strong>
-                          {item.className} · {item.yearLabel}
-                        </strong>
-                        <p>
-                          {item.cancelled
-                            ? `Rencana mulai ${formatted(item.startsOn)}`
-                            : `${formatted(item.startsOn)} – ${lastDay(item.endsOnExclusive)}`}
-                        </p>
-                        <StatusBadge
-                          tone={
-                            item.cancelled
-                              ? "neutral"
-                              : item.startsOn > today
-                                ? "info"
-                                : item.endsOnExclusive <= today
-                                  ? "neutral"
-                                  : "success"
-                          }
-                        >
-                          {item.cancelled
-                            ? "Dibatalkan sebelum mulai"
-                            : item.startsOn > today
-                              ? "Mendatang"
-                              : item.endsOnExclusive <= today
-                                ? "Selesai"
-                                : "Berjalan"}
-                        </StatusBadge>
-                      </li>
-                    ))}
+                    .map((item) => {
+                      const state = item.cancelled
+                        ? "cancelled"
+                        : item.startsOn > today
+                          ? "upcoming"
+                          : item.endsOnExclusive <= today
+                            ? "done"
+                            : "current";
+                      return (
+                        <li key={item.id} data-state={state}>
+                          <span className="placement-timeline__marker" aria-hidden="true" />
+                          <div className="placement-timeline__body">
+                            <div className="placement-timeline__title">
+                              <strong>
+                                {item.className} · {item.yearLabel}
+                              </strong>
+                              <StatusBadge tone={placementTone[state]}>
+                                {placementLabel[state]}
+                              </StatusBadge>
+                            </div>
+                            <p>
+                              {item.cancelled
+                                ? `Rencana mulai ${formatted(item.startsOn)}`
+                                : `${formatted(item.startsOn)} – ${lastDay(item.endsOnExclusive)}`}
+                            </p>
+                          </div>
+                        </li>
+                      );
+                    })}
                 </ol>
               ) : (
                 <EmptyState
@@ -222,24 +231,26 @@ export function StudentDetailView({
                     </span>
                   </div>
                   <div className="data-table-pagination__nav">
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       type="button"
-                      className={`pagination-btn pagination-btn--prev${historyPage <= 1 ? " pagination-btn--disabled" : ""}`}
                       disabled={historyPage <= 1}
                       onClick={handlePrevHistoryPage}
                       aria-label="Halaman sebelumnya"
                     >
-                      ‹ Sebelumnya
-                    </button>
-                    <button
+                      Sebelumnya
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       type="button"
-                      className={`pagination-btn pagination-btn--next${historyPage * 10 >= student.enrollments.length ? " pagination-btn--disabled" : ""}`}
                       disabled={historyPage * 10 >= student.enrollments.length}
                       onClick={handleNextHistoryPage}
                       aria-label="Halaman berikutnya"
                     >
-                      Berikutnya ›
-                    </button>
+                      Berikutnya
+                    </Button>
                   </div>
                 </nav>
               </DataCardFooter>
@@ -297,7 +308,11 @@ export function StudentDetailView({
             onClose={close}
             title={student.archivedAt ? "Aktifkan kembali siswa?" : "Arsipkan siswa?"}
           >
-            <StudentArchiveForm key={`archive-${student.version}`} student={student} onSuccess={close} />
+            <StudentArchiveForm
+              key={`archive-${student.version}`}
+              student={student}
+              onSuccess={close}
+            />
           </Dialog>
         </>
       )}

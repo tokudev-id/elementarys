@@ -31,9 +31,7 @@ export function SwitchField({
   const id = suppliedId ?? (name ? `field-${name}` : generatedId);
 
   return (
-    <div
-      className={cn("ui-field ui-field--switch", error && "has-error", className)}
-    >
+    <div className={cn("ui-field ui-field--switch", error && "has-error", className)}>
       <div className="switch-row">
         <Switch
           id={id}

@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { School } from "lucide-react";
 import { AccountForm } from "./form";
+
+export const metadata: Metadata = {
+  title: "Masuk",
+  description: "Masuk ke Absensi Sekolah dengan akun dari admin sekolah.",
+};
 
 export default function LoginPage() {
   return (
@@ -20,4 +26,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

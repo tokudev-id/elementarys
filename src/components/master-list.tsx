@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
 import { MobileCardList } from "./mobile-card-list";
 import { StatusBadge, type StatusTone } from "./status-badge";
+import { Avatar } from "./avatar";
 import { Button } from "./button";
 import {
   DropdownMenu,
@@ -30,7 +31,12 @@ function Actions({ row }: { row: MasterRow }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" aria-label={`Aksi ${row.title}`} className="action-menu-trigger">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={`Aksi ${row.title}`}
+          className="action-menu-trigger"
+        >
           <MoreHorizontal aria-hidden="true" size={18} />
         </Button>
       </DropdownMenuTrigger>
@@ -63,14 +69,27 @@ function rowHref(row: MasterRow) {
   return row.href;
 }
 
-function mobileCard(row: MasterRow) {
+function NameCell({ row, avatar }: { row: MasterRow; avatar: boolean }) {
+  const link = (
+    <Link href={row.href} className="master-name">
+      {row.title}
+    </Link>
+  );
+  if (!avatar) return link;
+  return (
+    <span className="master-name-cell">
+      <Avatar name={row.title} size="sm" />
+      {link}
+    </span>
+  );
+}
+
+function mobileCard(row: MasterRow, avatar = false) {
   return (
     <article className="master-mobile-card">
       <div className="master-mobile-card__content">
         <div className="master-mobile-card__title-row">
-          <Link href={row.href} className="master-name">
-            {row.title}
-          </Link>
+          <NameCell row={row} avatar={avatar} />
           <StatusBadge tone={row.status.tone}>{row.status.label}</StatusBadge>
         </div>
         <p className="master-mobile-card__meta">{row.meta}</p>
@@ -88,7 +107,9 @@ export function MasterList({
   currentSort,
   sortableColumns,
   query,
+  avatars = false,
 }: {
+  avatars?: boolean;
   items: MasterRow[];
   columns: MasterColumn[];
   label: string;
@@ -101,11 +122,7 @@ export function MasterList({
     {
       id: "name",
       header: nameHeader,
-      cell: (context) => (
-        <Link href={context.row.original.href} className="master-name">
-          {context.row.original.title}
-        </Link>
-      ),
+      cell: (context) => <NameCell row={context.row.original} avatar={avatars} />,
     },
     ...columns.map((column) => ({
       id: column.key,
@@ -121,9 +138,7 @@ export function MasterList({
             {context.row.original.classNames.length > 2 && (
               <span>+{context.row.original.classNames.length - 2}</span>
             )}
-            {!context.row.original.classNames.length && (
-              <span className="empty-dash">—</span>
-            )}
+            {!context.row.original.classNames.length && <span className="empty-dash">—</span>}
           </div>
         ) : (
           context.row.original.cells[column.key] || <span className="empty-dash">—</span>
@@ -160,7 +175,7 @@ export function MasterList({
         />
       </div>
       <div className="master-mobile">
-        <MobileCardList items={items} render={mobileCard} />
+        <MobileCardList items={items} render={(row) => mobileCard(row, avatars)} />
       </div>
     </>
   );

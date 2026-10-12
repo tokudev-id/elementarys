@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { requireAdminPageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
 import { AcademicYearForm } from "../form";
+
+export const metadata: Metadata = {
+  title: "Tambah tahun ajaran",
+  description: "Buat periode tahun ajaran baru.",
+};
 
 export default async function NewAcademicYear() {
   const actor = await requireAdminPageActor();
@@ -20,7 +26,10 @@ export default async function NewAcademicYear() {
       ]}
     >
       <div className="form-page">
-        <PageHeader title="Tambah tahun ajaran" description="Buat periode kalender baru untuk sekolah." />
+        <PageHeader
+          title="Tambah tahun ajaran"
+          description="Buat periode kalender baru untuk sekolah."
+        />
         <AcademicYearForm redirect />
       </div>
     </AppShell>

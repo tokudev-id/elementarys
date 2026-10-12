@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, type ReactNode, type FocusEvent } from "react";
 import { Dialog as RadixDialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Button } from "./button";
+import { IconButton } from "./button";
+import { X } from "lucide-react";
 
 export function Dialog({
   open,
@@ -75,16 +76,15 @@ export function Dialog({
       >
         <header className="app-dialog__header">
           <DialogTitle>{title}</DialogTitle>
-          <Button
+          <IconButton
             ref={closeRef}
-            variant="ghost"
             type="button"
             disabled={closeDisabled}
             onClick={onClose}
-            aria-label={`Tutup ${title}`}
+            label={`Tutup ${title}`}
           >
-            Tutup
-          </Button>
+            <X aria-hidden="true" />
+          </IconButton>
         </header>
         <DialogDescription className="sr-only">{title}</DialogDescription>
         <div className="app-dialog__body" ref={bodyRef} onFocusCapture={keepFocusVisible}>

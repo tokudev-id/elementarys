@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listTeachers } from "@/server/services/teachers";
@@ -20,7 +21,14 @@ import {
 } from "@/components/data-card";
 import { parseInput } from "@/contracts/attendance";
 import { teacherListSchema } from "@/contracts/lists";
+import { Plus, GraduationCap, SearchX } from "lucide-react";
+import { ButtonLink } from "@/components/button";
 import { UnlinkedAccountList } from "./unlinked-list";
+
+export const metadata: Metadata = {
+  title: "Guru",
+  description: "Profil guru, kelas utama, dan akun sekolah.",
+};
 
 export default async function Teachers({
   searchParams,
@@ -95,13 +103,15 @@ export default async function Teachers({
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/teachers">
       <PageHeader
+        icon={GraduationCap}
         title="Guru"
         description="Profil, kelas utama dan akun sekolah."
         primaryAction={
           actor.role === "admin" ? (
-            <Link className="button-link" href="/teachers/new">
+            <ButtonLink variant="primary" href="/teachers/new">
+              <Plus aria-hidden="true" />
               Tambah guru
-            </Link>
+            </ButtonLink>
           ) : undefined
         }
       />
@@ -165,6 +175,7 @@ export default async function Teachers({
           <DataCardContent>
             {rows.length ? (
               <MasterList
+                avatars
                 items={rows}
                 label="Daftar guru"
                 currentSort={filter.sort}
@@ -182,6 +193,7 @@ export default async function Teachers({
               />
             ) : (
               <EmptyState
+                icon={SearchX}
                 title="Tidak ada guru yang cocok"
                 description="Periksa filter atau tambahkan profil guru."
                 action={<Link href="/teachers">Reset filter</Link>}

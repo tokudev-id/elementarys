@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
 export type BannerState =
-  | "loading"
-  | "empty"
-  | "error"
-  | "conflict"
-  | "session-expired"
-  | "saved"
-  | "info";
+  "loading" | "empty" | "error" | "conflict" | "session-expired" | "saved" | "info";
 const titles: Record<BannerState, string> = {
   loading: "Sedang memuat",
   empty: "Belum ada data",

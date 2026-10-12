@@ -53,8 +53,7 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
 
   // Sync server errors when they change
   useEffect(() => {
-    if (!options.serverErrors || Object.keys(options.serverErrors).length === 0)
-      return;
+    if (!options.serverErrors || Object.keys(options.serverErrors).length === 0) return;
     const mapped: Record<string, string> = {};
     const summary: FormErrorItem[] = [];
     for (const [key, msgs] of Object.entries(options.serverErrors)) {
@@ -72,9 +71,7 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
     // Focus first server error
     const firstKey = Object.keys(mapped)[0];
     if (firstKey && formRef.current) {
-      const el = formRef.current.querySelector<HTMLElement>(
-        `[name="${firstKey}"]`,
-      );
+      const el = formRef.current.querySelector<HTMLElement>(`[name="${firstKey}"]`);
       if (el) {
         el.focus();
         el.scrollIntoView({ block: "nearest" });
@@ -94,9 +91,7 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
         });
         return null;
       }
-      const fieldIssue = result.error.issues.find(
-        (issue) => String(issue.path[0]) === name,
-      );
+      const fieldIssue = result.error.issues.find((issue) => String(issue.path[0]) === name);
       if (fieldIssue) {
         setErrors((prev) => ({ ...prev, [name]: fieldIssue.message }));
         return fieldIssue.message;
@@ -165,9 +160,7 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
         // Focus & scroll to first error
         if (summary.length > 0 && formRef.current) {
           const firstField = summary[0].field;
-          const firstEl = formRef.current.querySelector<HTMLElement>(
-            `[name="${firstField}"]`,
-          );
+          const firstEl = formRef.current.querySelector<HTMLElement>(`[name="${firstField}"]`);
           if (firstEl) {
             firstEl.focus();
             firstEl.scrollIntoView({ block: "nearest" });
@@ -232,18 +225,15 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
     }
   }, []);
 
-  const reset = useCallback(
-    (newValues?: Partial<TInput>) => {
-      const v = (newValues as Record<string, unknown>) ?? {};
-      valuesRef.current = v;
-      setValues(v);
-      setErrors({});
-      setTouched({});
-      setIsDirty(false);
-      setErrorSummary([]);
-    },
-    [],
-  );
+  const reset = useCallback((newValues?: Partial<TInput>) => {
+    const v = (newValues as Record<string, unknown>) ?? {};
+    valuesRef.current = v;
+    setValues(v);
+    setErrors({});
+    setTouched({});
+    setIsDirty(false);
+    setErrorSummary([]);
+  }, []);
 
   const register = useCallback(
     (name: string) => {
@@ -252,15 +242,9 @@ export function useZodForm<TOutput = unknown, TInput = Record<string, unknown>>(
         name,
         id: fieldId,
         value: (values[name] as string | number | undefined) ?? "",
-        onChange: (
-          e: ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-          >,
-        ) => {
+        onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
           const val =
-            e.target.type === "checkbox"
-              ? (e.target as HTMLInputElement).checked
-              : e.target.value;
+            e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value;
           handleChange(name, val);
         },
         onBlur: () => handleBlur(name),

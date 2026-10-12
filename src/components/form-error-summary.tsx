@@ -16,9 +16,7 @@ export function FormErrorSummary({
   function handleClick(field: string) {
     return (e: MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
-      const el = document.querySelector<HTMLElement>(
-        `[name="${field}"], #${field}`,
-      );
+      const el = document.querySelector<HTMLElement>(`[name="${field}"], #${field}`);
       if (el) {
         el.focus();
         el.scrollIntoView({ behavior: "smooth", block: "nearest" });

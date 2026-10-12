@@ -45,6 +45,11 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    files: ["src/app/**/{icon,apple-icon,opengraph-image,twitter-image}.tsx"],
+    // next/og ImageResponse renders without a stylesheet; inline style is its only styling API.
+    rules: { "no-restricted-syntax": "off" },
+  },
 ]);
 
 export default eslintConfig;

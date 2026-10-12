@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { orNotFound } from "@/server/not-found";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getStudent } from "@/server/services/students";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -6,6 +8,11 @@ import { schoolIdentity } from "@/components/school-identity";
 import { listAcademicYears, listClassOptions } from "@/server/services/school-master";
 import { buildMonthlyAttendanceReport } from "@/server/reports/monthly";
 import { StudentDetailView } from "./detail";
+
+export const metadata: Metadata = {
+  title: "Detail siswa",
+  description: "Identitas, riwayat penempatan, dan kehadiran siswa.",
+};
 
 export default async function Student({
   params,
@@ -16,7 +23,7 @@ export default async function Student({
 }) {
   const actor = await requirePageActor();
   const [student, settings, years, selected] = await Promise.all([
-    getStudent((await params).studentId),
+    orNotFound(getStudent((await params).studentId)),
     getSchoolSettings(),
     listAcademicYears(),
     searchParams,

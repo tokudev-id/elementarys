@@ -1,9 +1,10 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { FileSpreadsheet } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
 import { StatusBadge } from "@/components/status-badge";
-import { Button } from "@/components/button";
+import { Button, ButtonLink } from "@/components/button";
 import { Field } from "@/components/field";
 import { DataCard, DataCardHeader, DataCardContent } from "@/components/data-card";
 import { ReportLegend, ReportChangeNotice, ReportClassView } from "@/components/report-table";
@@ -14,6 +15,11 @@ import { DomainError } from "@/domain/errors";
 import { parseInput } from "@/contracts/attendance";
 import { reportInputSchema } from "@/contracts/reports";
 import type { MonthlyReport } from "@/contracts/reports";
+
+export const metadata: Metadata = {
+  title: "Rekap bulanan",
+  description: "Rekap kehadiran bulanan per kelas, siap diunduh sebagai Excel.",
+};
 
 export default async function Reports({
   searchParams,
@@ -97,6 +103,7 @@ export default async function Reports({
       breadcrumbs={[{ label: "Rekap bulanan" }]}
     >
       <PageHeader
+        icon={FileSpreadsheet}
         title="Rekap bulanan"
         description={
           report
@@ -107,9 +114,9 @@ export default async function Reports({
           report && (
             <div className="flex flex-wrap gap-2 items-center">
               <ReportDownload input={report.input} />
-              <Link className="button-link" href={`/reports/print?${printParams.toString()}`}>
+              <ButtonLink href={`/reports/print?${printParams.toString()}`}>
                 Buka halaman cetak
-              </Link>
+              </ButtonLink>
             </div>
           )
         }
@@ -153,7 +160,9 @@ export default async function Reports({
               </div>
 
               <div className="report-filter-actions">
-                <Button type="submit">Tampilkan rekap</Button>
+                <Button type="submit" variant="soft">
+                  Tampilkan rekap
+                </Button>
               </div>
             </form>
           </DataCardContent>
