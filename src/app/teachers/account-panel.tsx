@@ -88,11 +88,19 @@ export function AccountPanel({
       </div>
       <MutationFeedback mutation={mutation} />
       <Dialog open={accessOpen} onClose={closeAccess} title="Ubah akses akun" variant="sheet">
-        <AccountAccessForm account={account} expectedVersion={expectedVersion} onSuccess={closeAccess} />
+        <AccountAccessForm
+          account={account}
+          expectedVersion={expectedVersion}
+          onSuccess={closeAccess}
+        />
       </Dialog>
       <Dialog open={reset} onClose={closeReset} title="Reset password akun?" variant="sheet">
         <p>Sesi akun akan dicabut. Password sementara wajib diganti saat masuk.</p>
-        <PasswordResetForm account={account} expectedVersion={expectedVersion} onSuccess={closeReset} />
+        <PasswordResetForm
+          account={account}
+          expectedVersion={expectedVersion}
+          onSuccess={closeReset}
+        />
       </Dialog>
       <ConfirmDialog
         open={confirm}

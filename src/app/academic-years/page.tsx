@@ -18,6 +18,8 @@ import {
   DataCardFooter,
 } from "@/components/data-card";
 import { parseInput } from "@/contracts/attendance";
+import { Plus, CalendarRange, SearchX } from "lucide-react";
+import { ButtonLink } from "@/components/button";
 import { academicYearListSchema } from "@/contracts/lists";
 
 export default async function AcademicYears({
@@ -35,10 +37,7 @@ export default async function AcademicYears({
     sort: selected.sort,
   });
 
-  const [settings, years] = await Promise.all([
-    getSchoolSettings(),
-    listAcademicYearsPage(filter),
-  ]);
+  const [settings, years] = await Promise.all([getSchoolSettings(), listAcademicYearsPage(filter)]);
 
   const query = Object.fromEntries(
     Object.entries(filter)
@@ -71,13 +70,15 @@ export default async function AcademicYears({
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/academic-years">
       <PageHeader
+        icon={CalendarRange}
         title="Tahun ajaran"
         description="Periode kalender dan tahun ajaran sekolah."
         primaryAction={
           actor.role === "admin" ? (
-            <Link className="button-link" href="/academic-years/new">
+            <ButtonLink variant="primary" href="/academic-years/new">
+              <Plus aria-hidden="true" />
               Tambah tahun ajaran
-            </Link>
+            </ButtonLink>
           ) : undefined
         }
         secondaryActions={
@@ -118,6 +119,7 @@ export default async function AcademicYears({
             />
           ) : (
             <EmptyState
+              icon={SearchX}
               title="Tidak ada tahun ajaran yang cocok"
               description="Periksa filter atau tambahkan tahun ajaran baru."
               action={

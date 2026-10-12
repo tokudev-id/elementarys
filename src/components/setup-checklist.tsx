@@ -1,9 +1,5 @@
 import type { SetupState } from "@/contracts/settings";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent } from "@/components/data-card";
 import { StatusBadge } from "@/components/status-badge";
 
 export function SetupChecklist({ state }: { state: SetupState }) {
@@ -22,7 +18,9 @@ export function SetupChecklist({ state }: { state: SetupState }) {
         <div className="data-card__title-group">
           <h2 className="data-card__title">
             Checklist kesiapan sekolah
-            <span className="data-card__count"> · {readyCount}/{items.length}</span>
+            <span className="data-card__count">
+              {readyCount}/{items.length}
+            </span>
           </h2>
         </div>
       </DataCardHeader>

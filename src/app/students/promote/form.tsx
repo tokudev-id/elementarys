@@ -17,12 +17,7 @@ import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
 import { Button } from "@/components/button";
 import { StateBanner, type BannerState } from "@/components/state-banner";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 
 function CandidateRowItem({
   student,
@@ -305,11 +300,7 @@ export function PromotionForm({
                 count={selectedStudentIds.size}
                 actions={
                   <div className="button-row">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={selectAllAcrossPages}
-                    >
+                    <Button type="button" variant="secondary" onClick={selectAllAcrossPages}>
                       Pilih semua di semua halaman
                     </Button>
                     <Button type="button" variant="ghost" onClick={deselectAll}>
@@ -352,24 +343,26 @@ export function PromotionForm({
                       </span>
                     </div>
                     <div className="data-table-pagination__nav">
-                      <button
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         type="button"
-                        className={`pagination-btn pagination-btn--prev${candidatePage <= 1 ? " pagination-btn--disabled" : ""}`}
                         disabled={candidatePage <= 1}
                         onClick={handlePrevCandidatePage}
                         aria-label="Halaman sebelumnya"
                       >
-                        ‹ Sebelumnya
-                      </button>
-                      <button
+                        Sebelumnya
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         type="button"
-                        className={`pagination-btn pagination-btn--next${candidatePage * candidatePageSize >= students.length ? " pagination-btn--disabled" : ""}`}
                         disabled={candidatePage * candidatePageSize >= students.length}
                         onClick={handleNextCandidatePage}
                         aria-label="Halaman berikutnya"
                       >
-                        Berikutnya ›
-                      </button>
+                        Berikutnya
+                      </Button>
                     </div>
                   </nav>
                 </DataCardFooter>

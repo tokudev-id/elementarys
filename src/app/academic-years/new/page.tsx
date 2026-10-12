@@ -20,7 +20,10 @@ export default async function NewAcademicYear() {
       ]}
     >
       <div className="form-page">
-        <PageHeader title="Tambah tahun ajaran" description="Buat periode kalender baru untuk sekolah." />
+        <PageHeader
+          title="Tambah tahun ajaran"
+          description="Buat periode kalender baru untuk sekolah."
+        />
         <AcademicYearForm redirect />
       </div>
     </AppShell>

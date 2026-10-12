@@ -20,22 +20,12 @@ export function CheckboxField({
   const generatedId = useId();
   const id = suppliedId ?? (props.name ? `field-${props.name}` : generatedId);
   const describedBy =
-    [
-      hint && `${id}-hint`,
-      error && `${id}-error`,
-      props["aria-describedby"],
-    ]
+    [hint && `${id}-hint`, error && `${id}-error`, props["aria-describedby"]]
       .filter(Boolean)
       .join(" ") || undefined;
 
   return (
-    <div
-      className={cn(
-        "ui-field ui-field--checkbox",
-        error && "has-error",
-        className,
-      )}
-    >
+    <div className={cn("ui-field ui-field--checkbox", error && "has-error", className)}>
       <label htmlFor={id} className="checkbox-label">
         <input
           {...props}

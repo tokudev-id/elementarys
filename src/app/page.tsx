@@ -8,7 +8,13 @@ import {
   Settings,
   CheckCircle2,
   ChevronRight,
+  LayoutDashboard,
+  UserCheck,
+  UserX,
+  Users,
 } from "lucide-react";
+import { AttendanceTrendChart } from "@/components/attendance-trend-chart";
+import { KpiCard } from "@/components/kpi-card";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
@@ -19,6 +25,7 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { getDashboard } from "@/server/queries/dashboard";
+import { ButtonLink } from "@/components/button";
 import { schoolIdentity } from "@/components/school-identity";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
@@ -44,6 +51,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
   const attendanceRate =
     totalRecordedStudents > 0 ? Math.round((totalHadir / totalRecordedStudents) * 100) : null;
 
+  const composition = [
+    { key: "H", label: "Hadir", value: totalHadir },
+    { key: "S", label: "Sakit", value: totalSakit },
+    { key: "I", label: "Izin", value: totalIzin },
+    { key: "A", label: "Alpa", value: totalAlpa },
+  ] as const;
+  // cumulative x offsets (percent) for the stacked composition bar
+  const compositionSegments = composition
+    .filter((item) => item.value > 0)
+    .reduce<{ key: string; x: number; width: number }[]>((segments, item) => {
+      const last = segments.at(-1);
+      const x = last ? last.x + last.width : 0;
+      return [
+        ...segments,
+        { key: item.key, x, width: (item.value / (totalRecordedStudents || 1)) * 100 },
+      ];
+    }, []);
+
   // Pagination for unrecorded classes (page size 10)
   const pageSize = 10;
   const currentPage = Math.max(
@@ -66,12 +91,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
       breadcrumbs={[{ label: "Beranda" }]}
     >
       <PageHeader
+        icon={LayoutDashboard}
         title="Beranda"
         description={`Panel operasional sekolah untuk ${dashboard.schoolToday}.`}
         actions={
-          <Link className="button-link" href="/reports">
+          <ButtonLink href="/reports">
+            <FileSpreadsheet aria-hidden="true" />
             Rekap bulan ini
-          </Link>
+          </ButtonLink>
         }
       />
 
@@ -100,52 +127,113 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
           </StateBanner>
         )}
 
-        {/* KPI Grid */}
         <section aria-label="Ringkasan indikator kinerja" className="dashboard-kpi-grid">
-          <div className="kpi-card">
-            <span className="kpi-card__label">Kehadiran hari ini</span>
-            <span className="kpi-card__value">
-              {!dashboard.isSchoolDay ? "—" : attendanceRate !== null ? `${attendanceRate}%` : "—"}
-            </span>
-            <span className="kpi-card__sub">
-              {!dashboard.isSchoolDay
+          <KpiCard
+            label="Kehadiran hari ini"
+            icon={UserCheck}
+            accent="teal"
+            value={
+              !dashboard.isSchoolDay ? "—" : attendanceRate !== null ? `${attendanceRate}%` : "—"
+            }
+            progress={
+              dashboard.isSchoolDay && attendanceRate !== null ? attendanceRate / 100 : null
+            }
+            context={
+              !dashboard.isSchoolDay
                 ? "Hari libur sekolah"
                 : attendanceRate !== null
                   ? `${totalHadir} dari ${totalRecordedStudents} siswa hadir`
-                  : "Belum ada catatan hari ini"}
-            </span>
-          </div>
-
-          <div className="kpi-card">
-            <span className="kpi-card__label">Kelas sudah dicatat</span>
-            <span className="kpi-card__value">
-              {recordedClasses} / {totalClasses}
-            </span>
-            <span className="kpi-card__sub">
-              {totalClasses - recordedClasses} kelas belum dicatat
-            </span>
-          </div>
-
-          <div className="kpi-card">
-            <span className="kpi-card__label">Siswa aktif</span>
-            <span className="kpi-card__value">{totalActiveStudents}</span>
-            <span className="kpi-card__sub">Terdaftar di {totalClasses} kelas</span>
-          </div>
-
-          <div className="kpi-card">
-            <span className="kpi-card__label">Tidak hadir hari ini</span>
-            <span className="kpi-card__value">
-              {!dashboard.isSchoolDay ? "—" : totalSakit + totalIzin + totalAlpa}
-            </span>
-            <span className="kpi-card__sub">
-              {!dashboard.isSchoolDay
+                  : "Belum ada catatan hari ini"
+            }
+          />
+          <KpiCard
+            label="Kelas sudah dicatat"
+            icon={ClipboardCheck}
+            accent="sky"
+            value={`${recordedClasses} / ${totalClasses}`}
+            progress={totalClasses ? recordedClasses / totalClasses : null}
+            context={`${totalClasses - recordedClasses} kelas belum dicatat`}
+          />
+          <KpiCard
+            label="Siswa aktif"
+            icon={Users}
+            accent="amber"
+            value={totalActiveStudents}
+            context={`Terdaftar di ${totalClasses} kelas`}
+          />
+          <KpiCard
+            label="Tidak hadir hari ini"
+            icon={UserX}
+            accent="rose"
+            value={!dashboard.isSchoolDay ? "—" : totalSakit + totalIzin + totalAlpa}
+            context={
+              !dashboard.isSchoolDay
                 ? "Hari libur sekolah"
-                : `${totalSakit} Sakit · ${totalIzin} Izin · ${totalAlpa} Alpa`}
-            </span>
-          </div>
+                : `${totalSakit} Sakit · ${totalIzin} Izin · ${totalAlpa} Alpa`
+            }
+          />
         </section>
 
-        {/* Card Belum dicatat hari ini */}
+        <div className="dashboard-bento">
+          <DataCard className="dashboard-bento__main">
+            <DataCardHeader
+              title="Tren kehadiran"
+              description={`${dashboard.trend.length} hari sekolah terakhir`}
+            />
+            <DataCardContent className="data-card__content--padded">
+              <AttendanceTrendChart points={dashboard.trend} />
+            </DataCardContent>
+          </DataCard>
+
+          <DataCard className="dashboard-bento__side">
+            <DataCardHeader title="Komposisi hari ini" description={dashboard.schoolToday} />
+            <DataCardContent className="data-card__content--padded">
+              {!dashboard.isSchoolDay || totalRecordedStudents === 0 ? (
+                <p className="empty-text">
+                  {!dashboard.isSchoolDay
+                    ? "Hari ini libur sekolah."
+                    : "Komposisi tampil setelah absensi pertama hari ini disimpan."}
+                </p>
+              ) : (
+                <>
+                  <svg
+                    className="composition-bar"
+                    viewBox="0 0 100 10"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label={`Hadir ${totalHadir}, Sakit ${totalSakit}, Izin ${totalIzin}, Alpa ${totalAlpa}`}
+                  >
+                    {compositionSegments.map((item) => (
+                      <rect
+                        key={item.key}
+                        className={`composition-bar__segment--${item.key}`}
+                        x={item.x}
+                        width={item.width}
+                        height={10}
+                      />
+                    ))}
+                  </svg>
+                  <ul className="composition-legend">
+                    {composition.map((item) => (
+                      <li key={item.key}>
+                        <span
+                          className={`composition-legend__dot composition-bar__segment--${item.key}`}
+                          aria-hidden="true"
+                        >
+                          {item.key}
+                        </span>
+                        <span className="composition-legend__label">{item.label}</span>
+                        <strong>{item.value}</strong>
+                        <small>{Math.round((item.value / totalRecordedStudents) * 100)}%</small>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </DataCardContent>
+          </DataCard>
+        </div>
+
         <DataCard id="card-belum-dicatat">
           <DataCardHeader
             title="Belum dicatat hari ini"
@@ -168,8 +256,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                   <thead>
                     <tr>
                       <th data-slot="table-head">Kelas</th>
-                      <th data-slot="table-head">Tingkat</th>
-                      <th data-slot="table-head">Siswa</th>
+                      <th data-slot="table-head" className="hide-mobile">
+                        Tingkat
+                      </th>
+                      <th data-slot="table-head" className="hide-mobile">
+                        Siswa
+                      </th>
                       <th data-slot="table-head">Status</th>
                       <th data-slot="table-head" className="cell-actions-header">
                         <span className="sr-only">Aksi</span>
@@ -180,20 +272,29 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                     {paginatedUnrecorded.map((item) => (
                       <tr key={item.classId} data-slot="table-row">
                         <td data-slot="table-cell">
-                          <strong>{item.name}</strong>
-                          {item.isPrimary && (
-                            <span className="badge badge--primary ml-2">Kelas utama</span>
-                          )}
+                          <span className="class-name-cell">
+                            <strong>{item.name}</strong>
+                            {item.isPrimary && <StatusBadge tone="info">Kelas utama</StatusBadge>}
+                          </span>
                         </td>
-                        <td data-slot="table-cell">Tingkat {item.grade}</td>
-                        <td data-slot="table-cell">{item.studentCount} siswa</td>
+                        <td data-slot="table-cell" className="hide-mobile">
+                          Tingkat {item.grade}
+                        </td>
+                        <td data-slot="table-cell" className="hide-mobile">
+                          {item.studentCount} siswa
+                        </td>
                         <td data-slot="table-cell">
                           <StatusBadge tone="neutral">Belum dicatat</StatusBadge>
                         </td>
                         <td data-slot="table-cell" className="cell-actions">
-                          <Link className="button-link" href={`/attendance/${item.classId}`}>
+                          <ButtonLink
+                            variant="soft"
+                            size="sm"
+                            href={`/attendance/${item.classId}`}
+                            aria-label={`Catat absensi ${item.name}`}
+                          >
                             Catat
-                          </Link>
+                          </ButtonLink>
                         </td>
                       </tr>
                     ))}
@@ -218,7 +319,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         {/* Quick Actions Card */}
         <DataCard id="card-pintasan">
           <DataCardHeader title="Pintasan cepat" />
-          <DataCardContent>
+          <DataCardContent className="data-card__content--padded">
             <div className="dashboard-quick-actions">
               <Link href="/reports" className="quick-action-card quick-action-card--highlight">
                 <span className="quick-action-icon">

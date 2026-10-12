@@ -13,10 +13,7 @@ export default async function EditAcademicYear({
 }) {
   const actor = await requireAdminPageActor();
   const { yearId } = await params;
-  const [current, settings] = await Promise.all([
-    getAcademicYear(yearId),
-    getSchoolSettings(),
-  ]);
+  const [current, settings] = await Promise.all([getAcademicYear(yearId), getSchoolSettings()]);
 
   return (
     <AppShell

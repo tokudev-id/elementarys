@@ -94,10 +94,8 @@ export function ListFilters({
 
   const hasActiveFilters = Boolean(
     q ||
-      activeFilterCount > 0 ||
-      Object.entries(query).some(
-        ([k, v]) => k !== "page" && k !== "pageSize" && Boolean(v),
-      ),
+    activeFilterCount > 0 ||
+    Object.entries(query).some(([k, v]) => k !== "page" && k !== "pageSize" && Boolean(v)),
   );
 
   function openSheet() {
@@ -109,12 +107,7 @@ export function ListFilters({
 
   return (
     <DataTableToolbar>
-      <form
-        className="list-filter-form"
-        ref={formRef}
-        onSubmit={submit}
-        onChange={changeFilter}
-      >
+      <form className="list-filter-form" ref={formRef} onSubmit={submit} onChange={changeFilter}>
         <div className="list-filter-search-group">
           <Field
             label={searchLabel}
@@ -133,9 +126,7 @@ export function ListFilters({
               aria-label={`Buka filter daftar${activeFilterCount > 0 ? `, ${activeFilterCount} filter aktif` : ""}`}
             >
               <SlidersHorizontal size={18} aria-hidden="true" />
-              <span>
-                Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-              </span>
+              <span>Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
             </Button>
           )}
         </div>
@@ -143,11 +134,7 @@ export function ListFilters({
         {children && (
           <>
             {sheetOpen && (
-              <div
-                className="list-filter-sheet-backdrop"
-                onClick={closeSheet}
-                aria-hidden="true"
-              />
+              <div className="list-filter-sheet-backdrop" onClick={closeSheet} aria-hidden="true" />
             )}
             <div
               className={`list-filter-fields ${sheetOpen ? "is-open" : ""}`}
@@ -171,19 +158,11 @@ export function ListFilters({
 
               <div className="list-filter-actions">
                 {hasActiveFilters && (
-                  <Link
-                    href={pathname}
-                    className="list-reset"
-                    onClick={closeSheet}
-                  >
+                  <Link href={pathname} className="list-reset" onClick={closeSheet}>
                     Reset filter
                   </Link>
                 )}
-                <Button
-                  type="button"
-                  className="list-filter-sheet-done"
-                  onClick={closeSheet}
-                >
+                <Button type="button" className="list-filter-sheet-done" onClick={closeSheet}>
                   Selesai
                 </Button>
               </div>

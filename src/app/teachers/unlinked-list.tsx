@@ -1,4 +1,5 @@
 "use client";
+import { UserCog } from "lucide-react";
 
 import { useState, type MouseEvent } from "react";
 import type { SchoolAccount } from "@/contracts/teachers";
@@ -24,6 +25,7 @@ export function UnlinkedAccountList({ accounts }: { accounts: SchoolAccount[] })
   if (!accounts.length) {
     return (
       <EmptyState
+        icon={UserCog}
         title="Tidak ada akun tanpa profil"
         description="Semua akun sekolah sudah tertaut ke profil guru atau belum ada akun terdaftar."
       />

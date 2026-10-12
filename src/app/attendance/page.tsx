@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Star } from "lucide-react";
+import { Star, ClipboardCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
@@ -16,6 +15,7 @@ import { requirePageActor } from "@/server/auth/page-actor";
 import { DomainError } from "@/domain/errors";
 import { getDashboard } from "@/server/queries/dashboard";
 import { getCalendar } from "@/server/services/school-master";
+import { ButtonLink } from "@/components/button";
 import { AttendanceDatePicker } from "./date-picker";
 
 export default async function Today({
@@ -51,7 +51,10 @@ export default async function Today({
 
   const totalClasses = data.classes.length;
   const pageSize = 24;
-  const page = Math.max(1, Math.min(Number(selected.page ?? 1) || 1, Math.ceil(totalClasses / pageSize) || 1));
+  const page = Math.max(
+    1,
+    Math.min(Number(selected.page ?? 1) || 1, Math.ceil(totalClasses / pageSize) || 1),
+  );
   const paginatedClasses =
     totalClasses > pageSize
       ? data.classes.slice((page - 1) * pageSize, page * pageSize)
@@ -66,7 +69,11 @@ export default async function Today({
       actor={actor}
       currentPath="/attendance"
     >
-      <PageHeader title="Absensi" description="Kelas utama Anda tampil lebih dahulu." />
+      <PageHeader
+        icon={ClipboardCheck}
+        title="Absensi"
+        description="Kelas utama Anda tampil lebih dahulu."
+      />
       <AttendanceDatePicker date={data.date} max={data.schoolToday} calendar={calendar} />
       {!data.setupReady && (
         <StateBanner state="error">
@@ -136,13 +143,14 @@ export default async function Today({
                         {item.totals.A} Alpa
                       </p>
                     )}
-                    <Link
-                      className={`button-link${recordable ? "" : " button-link--secondary"}`}
+                    <ButtonLink
+                      variant={recordable ? "soft" : "secondary"}
+                      size="sm"
                       prefetch={false}
                       href={`/attendance/${item.classId}?date=${data.date}`}
                     >
                       {recordable ? "Catat absensi" : "Lihat"}
-                    </Link>
+                    </ButtonLink>
                   </section>
                 );
               })}

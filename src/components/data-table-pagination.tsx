@@ -67,20 +67,12 @@ export function DataTablePagination({
       </div>
       <div className="data-pagination__controls">
         {page > 1 ? (
-          <Link
-            href={href(page - 1)}
-            className="data-pagination__arrow"
-            aria-label="Sebelumnya"
-          >
+          <Link href={href(page - 1)} className="data-pagination__arrow" aria-label="Sebelumnya">
             <ChevronLeft size={18} aria-hidden="true" />
             <span className="sr-only">Sebelumnya</span>
           </Link>
         ) : (
-          <span
-            className="data-pagination__arrow"
-            aria-disabled="true"
-            aria-label="Sebelumnya"
-          >
+          <span className="data-pagination__arrow" aria-disabled="true" aria-label="Sebelumnya">
             <ChevronLeft size={18} aria-hidden="true" />
             <span className="sr-only">Sebelumnya</span>
           </span>
@@ -107,20 +99,12 @@ export function DataTablePagination({
         </div>
 
         {page < pages ? (
-          <Link
-            href={href(page + 1)}
-            className="data-pagination__arrow"
-            aria-label="Berikutnya"
-          >
+          <Link href={href(page + 1)} className="data-pagination__arrow" aria-label="Berikutnya">
             <ChevronRight size={18} aria-hidden="true" />
             <span className="sr-only">Berikutnya</span>
           </Link>
         ) : (
-          <span
-            className="data-pagination__arrow"
-            aria-disabled="true"
-            aria-label="Berikutnya"
-          >
+          <span className="data-pagination__arrow" aria-disabled="true" aria-label="Berikutnya">
             <ChevronRight size={18} aria-hidden="true" />
             <span className="sr-only">Berikutnya</span>
           </span>

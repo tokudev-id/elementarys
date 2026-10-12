@@ -21,42 +21,43 @@ Batasan dari `PRODUCT.md` tetap berlaku: target sentuh minimal 44px, nama sekola
 - Tabel: TanStack Table, dengan sorting, filter, dan pagination dari server.
 - Ikon: `lucide-react`, ukuran 16/20px, stroke 1.75.
 - Notifikasi: toast (`sonner`) untuk sukses. Error tetap tampil inline di dekat sumbernya.
-- Font: Inter lewat `next/font` (self-host, subset latin, `display: swap`). Fallback ke system sans.
+- Font: Plus Jakarta Sans lewat `next/font` (self-host, subset latin, `display: swap`). Fallback ke Segoe UI/system sans.
+- Chart: `recharts` (hanya di Beranda). Warna diatur lewat CSS (`--chart-*`), dan setiap chart punya tabel `sr-only` sebagai alternatif teks.
 - Token didefinisikan sebagai CSS variable di `:root` dan dipetakan ke tema Tailwind. Warna hex tidak boleh ditulis langsung di komponen.
 
 ## Token warna
 
-Mode terang saja untuk rilis ini. Warna identitas adalah **biru langit ala MBG**. Tidak ada hijau sebagai warna merek; hijau hanya dipakai untuk status Hadir.
+Mode terang saja untuk rilis ini. Identitas visual memakai **teal edukasi dengan aksen amber** (redesign UI-R4, data dari ui-ux-pro-max baris LMS). Teal dipakai untuk aksi dan identitas; hijau murni tetap khusus status Hadir, sehingga Hadir digelapkan ke `#15803d` agar tidak tertukar dengan teal.
 
-Nilai hex di bawah adalah pendekatan, karena panduan warna resmi MBG belum ditemukan. Bila panduan resmi tersedia, ganti `--brand-sky` dengan nilai resmi dan sesuaikan turunannya, dengan syarat kontras tetap lolos.
-
-Biru langit terang (`--brand-sky`) kontrasnya rendah terhadap putih (±2.8:1). Karena itu warna ini hanya dipakai untuk aksen dekoratif: garis indikator menu aktif, progress bar, dan sorotan. Tombol dan teks memakai turunan yang lebih gelap (`--primary`).
+Teal terang (`--brand-teal`, `#0d9488`) hanya ±3.7:1 terhadap putih, jadi tidak dipakai untuk teks atau latar tombol bertulisan putih. Tombol dan teks memakai `--primary` (`#0f766e`, ±5.5:1). Amber (`--accent-amber`) adalah sorotan langka: indikator menu aktif di sidebar, chip "siswa tidak hadir" di kalender, label "Data uji", dan KPI sorotan. Teks di atas amber memakai `--accent-amber-on` yang gelap.
 
 | Token | Nilai | Pemakaian |
 |---|---|---|
-| `--brand-sky` | `#0ea5e9` | Aksen dekoratif: indikator menu aktif, progress bar, garis atas card KPI |
-| `--background` | `#f4f8fb` | Latar halaman |
-| `--surface` | `#ffffff` | Card, tabel, sidebar, dialog |
-| `--surface-muted` | `#eef4f9` | Header tabel, hover baris, area filter |
-| `--border` | `#dbe4ec` | Garis card, input, pemisah |
-| `--border-strong` | `#c2cfdb` | Input hover, pemisah tebal |
-| `--foreground` | `#0f1e2c` | Teks utama |
-| `--muted-foreground` | `#56687a` | Teks sekunder, label bantu |
-| `--primary` | `#0369a1` | Tombol utama, link, teks menu aktif (putih di atasnya ±5.9:1) |
-| `--primary-hover` | `#075985` | Hover tombol utama |
-| `--primary-soft` | `#e0f2fe` | Latar menu aktif, badge info |
-| `--ring` | `#0284c7` | Outline fokus 2px dengan offset 2px |
+| `--brand-teal` | `#0d9488` | Aksen dekoratif: ring fokus, garis tab aktif, chart, ikon besar |
+| `--primary` | `#0f766e` | Tombol utama, link, teks aktif (putih di atasnya ±5.5:1) |
+| `--primary-hover` | `#115e59` | Hover/pressed tombol utama |
+| `--primary-strong` | `#134e4a` | Tooltip, teks di atas latar teal muda |
+| `--primary-soft` / `--primary-tint` | `#ccfbf1` / `#f0fdfa` | Latar tombol soft, badge info, hover baris tabel |
+| `--accent-amber` / `-soft` / `-text` / `-on` | `#d97706` / `#fef3c7` / `#b45309` / `#451a03` | Sorotan (lihat di atas) |
+| `--background` | `#f5faf9` | Latar halaman (mint sangat tipis) |
+| `--surface` | `#ffffff` | Card, tabel, topbar, dialog |
+| `--surface-muted` | `#eef5f4` | Header tabel, footer dialog, area filter |
+| `--border` / `--border-strong` | `#dce7e5` / `#c3d3d0` | Garis card dan pemisah / border tombol secondary |
+| `--foreground` / `--muted-foreground` | `#0f1f1e` / `#52635f` | Teks utama / sekunder |
+| `--sidebar-bg` | `#0b3b39` | Sidebar desktop/rail (teks putih 78%, aktif putih penuh) |
 | `--destructive` | `#c0352b` | Aksi berisiko |
 | `--warning` | `#b45309` | Peringatan, data belum lengkap |
 
+Semua token ada di `src/styles/tokens.css`. Nama token ukuran sengaja tidak memakai namespace Tailwind (`--radius-*`, `--text-*`, `--shadow-*`) supaya tidak menimpa utilitas shadcn: radius `--radius-chip|control|card|pill`, tipe `--type-xs…3xl`, bayangan `--elev-1…4`, gerak `--motion-ease` dan `--dur-fast|base|slow`.
+
 ### Warna status absensi
 
-Pasangan teks dan latar wajib lolos kontras 4.5:1. Huruf (H/S/I/A) dan label selalu ditulis. Izin memakai ungu, bukan biru, supaya tidak tertukar dengan warna primer.
+Pasangan teks dan latar wajib lolos kontras 4.5:1. Huruf (H/S/I/A) dan label selalu ditulis. Izin memakai ungu supaya tidak tertukar dengan warna primer.
 
 | Status | Teks | Latar soft | Latar terpilih (teks putih) |
 |---|---|---|---|
-| H Hadir | `#166534` | `#dcfce7` | `#16a34a` |
-| S Sakit | `#92400e` | `#fef3c7` | `#d97706` |
+| H Hadir | `#15803d` | `#dcfce7` | `#15803d` |
+| S Sakit | `#92400e` | `#fef3c7` | `#d97706` (teks gelap) |
 | I Izin | `#5b21b6` | `#ede9fe` | `#7c3aed` |
 | A Alpa | `#991b1b` | `#fee2e2` | `#dc2626` |
 | ? Belum dicatat | `#475569` | `#f1f5f9` | — |
@@ -64,22 +65,27 @@ Pasangan teks dan latar wajib lolos kontras 4.5:1. Huruf (H/S/I/A) dan label sel
 
 ## Tipografi
 
+Font: **Plus Jakarta Sans** (400/500/600/700) lewat `next/font`.
+
 | Peran | Ukuran / tinggi baris / bobot |
 |---|---|
-| Judul halaman (h1) | 24/32 semibold. Di mobile 20/28 |
+| Judul halaman (h1) | 24/32 bold, tracking -0.015em. Di mobile 20/28 |
 | Judul section/card | 16/24 semibold |
 | Body | 14/20 regular. Di mobile 15/22 |
-| Label form | 14/20 medium |
+| Label form | 13–14/20 medium |
 | Teks bantu, meta | 13/18 regular, `--muted-foreground` |
-| Angka KPI | 28/36 semibold, `tabular-nums` |
-| Sel tabel angka | 14/20, `tabular-nums`, rata kanan |
+| Header kolom tabel | 12 semibold uppercase, tracking 0.04em |
+| Angka KPI | 30/36 bold, `tabular-nums` |
+| Sel tabel angka | 14/20, `tabular-nums` |
+
+Tidak ada teks di bawah 12px, kecuali inisial avatar kecil.
 
 ## Spasi, radius, bayangan
 
 - Skala spasi 4px: 4, 8, 12, 16, 20, 24, 32, 40.
 - Padding halaman: 16px (mobile), 24px (tablet), 32px (desktop). Lebar konten maksimal 1280px.
-- Radius: 6px (input, tombol), 10px (card, dialog), 999px (badge, pill).
-- Bayangan hanya untuk elemen yang mengambang: dropdown, dialog, sticky bar (`0 1px 2px rgb(0 0 0 / .06), 0 4px 12px rgb(0 0 0 / .06)`). Card cukup pakai border.
+- Radius hanya empat: 6px chip/badge kecil (`--radius-chip`), 8px tombol/input/menu (`--radius-control`), 12px card/dialog/sheet (`--radius-card`), pill untuk badge dan avatar.
+- Card memakai border plus `--elev-1` (bayangan 1px sangat tipis). Bayangan lebih besar hanya untuk elemen mengambang: menu/tooltip `--elev-3`, dialog `--elev-4`.
 
 ## Breakpoint dan layout shell
 
@@ -89,7 +95,7 @@ Pasangan teks dan latar wajib lolos kontras 4.5:1. Huruf (H/S/I/A) dan label sel
 | 640–1023 (tablet) | Sidebar rail 72px berisi ikon + label kecil, bisa diperluas jadi drawer. Topbar 56px. Tanpa bottom nav. |
 | ≥ 1024 (laptop/desktop) | Sidebar 248px dengan grup menu dan bisa diciutkan ke rail. Topbar 64px dengan breadcrumb, tanggal sekolah, dan menu user. |
 
-**Navigasi selalu terlihat.** Topbar `position: sticky; top: 0` di semua breakpoint, dengan latar `--surface`, border bawah, dan `z-index` di atas konten. Sidebar desktop/rail tablet sticky setinggi `100dvh` dan scroll sendiri bila menunya panjang. Bottom nav HP fixed. Konten tidak boleh tertutup topbar saat anchor/fokus berpindah (`scroll-margin-top` sebesar tinggi topbar).
+**Navigasi selalu terlihat.** Sidebar desktop/rail berlatar teal gelap (`--sidebar-bg`) dengan nama sekolah dan peran di atas, menu aktif berupa pill transparan plus garis amber 3px di kiri. Sheet menu mobile tetap terang. Topbar `position: sticky; top: 0` di semua breakpoint, dengan latar `--surface` semi-transparan (blur), border bawah, dan `z-index` di atas konten. Sidebar desktop/rail tablet sticky setinggi `100dvh` dan scroll sendiri bila menunya panjang. Bottom nav HP fixed. Konten tidak boleh tertutup topbar saat anchor/fokus berpindah (`scroll-margin-top` sebesar tinggi topbar).
 
 Menu sidebar dikelompokkan sebagai berikut. Menu yang bukan hak peran tidak ditampilkan.
 
@@ -119,11 +125,11 @@ Setiap halaman memakai urutan berikut:
 
 ### Card sebagai wadah data
 
-Semua data yang ditampilkan berada di dalam card (`--surface`, border `--border`, radius 10px, tanpa bayangan): tabel, list card, ringkasan detail, grid kalender, grid rekap, timeline, checklist, KPI, dan form section. Latar halaman (`--background`) hanya untuk page header dan jarak antar card. Tidak ada teks data, list, atau form yang ditulis langsung di latar halaman.
+Semua data yang ditampilkan berada di dalam card (`--surface`, border `--border`, radius 12px, bayangan `--elev-1`): tabel, list card, ringkasan detail, grid kalender, grid rekap, timeline, checklist, KPI, dan form section. Latar halaman (`--background`) hanya untuk page header dan jarak antar card. Tidak ada teks data, list, atau form yang ditulis langsung di latar halaman.
 
 Anatomi card data (urutan tetap):
 
-1. **Card header**: judul + jumlah ("Siswa · 60"), aksi kanan (opsional).
+1. **Card header**: judul + jumlah sebagai pill abu ("Siswa (60)"), aksi kanan (opsional).
 2. **Toolbar**: search dan filter, dipisah border bawah.
 3. **Isi**: tabel atau list card.
 4. **Card footer**: pagination, dipisah border atas.
@@ -193,17 +199,18 @@ Berlaku untuk semua input, termasuk dialog, filter tanggal, login, dan ganti pas
 
 | Varian | Pemakaian |
 |---|---|
-| Primary | Satu per area: Simpan, Tambah, Simpan absensi |
-| Secondary (outline) | Batal, Ekspor, Cetak |
-| Ghost | Aksi di toolbar/tabel, ikon |
-| Destructive | Arsipkan, Nonaktifkan, Batalkan catatan |
+| Primary | Maksimal satu per view: Simpan, Tambah, Simpan absensi. Gradient teal halus + bayangan tipis |
+| Secondary | Batal, Ubah, Ekspor, Cetak, navigasi pendamping. Putih dengan border |
+| Soft | Aksi kontekstual berulang di dalam card/tabel ("Catat"), submit filter ("Tampilkan rekap") |
+| Ghost | Aksi ikon di toolbar/tabel |
+| Destructive | Arsipkan, Nonaktifkan, Batalkan catatan (di dialog konfirmasi) |
 | Link | Navigasi dalam teks |
 
-Ukuran tombol 36px (desktop toolbar), 40px (default), dan 44px (HP). Tombol ikon wajib punya `aria-label` dan tooltip.
+Komponen: `Button`, `IconButton` (wajib `label`), dan `ButtonLink` untuk navigasi berbentuk tombol (`src/components/button.tsx`). Kelas `.button-link` lama tidak dipakai lagi. Semua tombol setinggi 44px (`--control-height`); size `sm` hanya merapatkan padding dan font, bukan tinggi. Aksi "Tambah X" memakai ikon `Plus`, "Ubah" di halaman detail memakai ikon `Pencil` dan varian secondary.
 
 ### Badge status
 
-Berbentuk pill dengan latar soft, teks berwarna, dan opsional titik di depan.
+Berbentuk pill dengan latar soft, teks berwarna, dan titik 6px di depan (selalu ada). Di dalam sel tabel radius turun ke 6px agar teks panjang bisa membungkus.
 
 - Siswa: Aktif, Diarsipkan.
 - Guru/akun: Aktif, Nonaktif, Belum punya akun, Wajib ganti password.
@@ -211,7 +218,15 @@ Berbentuk pill dengan latar soft, teks berwarna, dan opsional titik di depan.
 
 ### Kartu KPI
 
-Card dengan label kecil di atas, angka besar, dan konteks di bawah ("dari 6 kelas"). Satu kolom di HP (atau scroll horizontal 2 kartu terlihat), 2 kolom di tablet, 4 kolom di desktop.
+Komponen `KpiCard`: label kecil + ikon dalam kotak berwarna di kanan atas, angka besar, progress bar opsional, dan konteks di bawah. Aksen warna (garis kiri 3px) per metrik: teal, sky, amber, rose. Dua kolom di HP (ikon disembunyikan), 2 kolom di tablet, 4 kolom di desktop.
+
+### Beranda
+
+KPI di atas, lalu grid bento: chart tren kehadiran 14 hari sekolah (2/3) dan komposisi H/S/I/A hari ini (1/3), lalu tabel "Belum dicatat hari ini" dan pintasan cepat.
+
+### Avatar dan ikon
+
+`Avatar` menampilkan inisial dengan warna deterministik dari nama (6 nada soft). Dipakai di topbar, header detail siswa/guru, dan kolom nama daftar siswa/guru. Page header halaman utama memakai ikon modul (sama dengan ikon menu) di kotak teal muda. Empty state selalu punya ikon dalam lingkaran.
 
 ### Input absensi (pola khusus)
 
@@ -230,7 +245,7 @@ Lihat spesifikasi lengkap di brief bagian Absensi. Ringkasnya:
 
 ## Motion
 
-Durasi 150–200ms ease-out, hanya untuk dropdown, dialog/sheet, toast, dan perubahan state tombol. Tidak ada animasi masuk halaman. Hormati `prefers-reduced-motion`.
+Durasi 150–250ms (`--dur-*`, kurva `--motion-ease`), hanya untuk dropdown, dialog/sheet (fade + scale 0.97), toast, dan perubahan state tombol. Tidak ada animasi masuk halaman. Loading memakai skeleton (`PageSkeleton`) yang bentuknya mengikuti layout akhir; efek shimmer hanya aktif bila `prefers-reduced-motion` tidak diset.
 
 ## Aksesibilitas
 

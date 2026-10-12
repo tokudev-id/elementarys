@@ -1,3 +1,4 @@
+import { History } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requirePageActor } from "@/server/auth/page-actor";
@@ -6,12 +7,7 @@ import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { AuditClient } from "./audit-client";
 
 export default async function Audit({
@@ -48,6 +44,7 @@ export default async function Audit({
   return (
     <AppShell actor={actor} school={schoolIdentity(settings)} currentPath="/audit">
       <PageHeader
+        icon={History}
         title="Audit administratif"
         description="Perubahan dan ekspor yang tercatat. Waktu mengikuti zona waktu sekolah."
       />
@@ -65,10 +62,7 @@ export default async function Audit({
           <nav className="data-table-pagination" aria-label="Navigasi audit">
             <div className="data-table-pagination__info">
               {values.cursor || values.before ? (
-                <Link
-                  href={`/audit?${resetQuery}`}
-                  className="data-table-pagination__reset"
-                >
+                <Link href={`/audit?${resetQuery}`} className="data-table-pagination__reset">
                   Kembali ke halaman pertama
                 </Link>
               ) : (

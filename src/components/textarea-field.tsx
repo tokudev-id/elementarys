@@ -32,9 +32,7 @@ export function TextareaField({
   const generatedId = useId();
   const id = suppliedId ?? (props.name ? `field-${props.name}` : generatedId);
   const [isFocused, setIsFocused] = useState(false);
-  const [currentVal, setCurrentVal] = useState(
-    String(value ?? defaultValue ?? ""),
-  );
+  const [currentVal, setCurrentVal] = useState(String(value ?? defaultValue ?? ""));
 
   function handleFocus(e: FocusEvent<HTMLTextAreaElement>) {
     setIsFocused(true);
@@ -51,8 +49,7 @@ export function TextareaField({
     onChange?.(e);
   }
 
-  const length =
-    value !== undefined ? String(value).length : currentVal.length;
+  const length = value !== undefined ? String(value).length : currentVal.length;
   const describedBy =
     [
       hint && `${id}-hint`,
@@ -64,13 +61,7 @@ export function TextareaField({
       .join(" ") || undefined;
 
   return (
-    <div
-      className={cn(
-        "ui-field ui-field--textarea",
-        error && "has-error",
-        className,
-      )}
-    >
+    <div className={cn("ui-field ui-field--textarea", error && "has-error", className)}>
       <div className="ui-field__header">
         <label htmlFor={id}>
           {label}
@@ -85,11 +76,7 @@ export function TextareaField({
           )}
         </label>
         {maxLength && isFocused && (
-          <span
-            id={`${id}-counter`}
-            className="field-counter"
-            aria-live="polite"
-          >
+          <span id={`${id}-counter`} className="field-counter" aria-live="polite">
             {length}/{maxLength}
           </span>
         )}

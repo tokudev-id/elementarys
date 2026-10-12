@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Button } from "./button";
+import { Button, ButtonLink } from "./button";
 
 export function FormActions({
   cancelHref,
@@ -12,9 +11,7 @@ export function FormActions({
 }) {
   return (
     <div className="form-actions">
-      <Link className="button-link button-link--secondary" href={cancelHref}>
-        Batal
-      </Link>
+      <ButtonLink href={cancelHref}>Batal</ButtonLink>
       <Button type="submit" pending={pending}>
         {label}
       </Button>

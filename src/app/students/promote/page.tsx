@@ -39,7 +39,9 @@ export default async function Promote({
                 </option>
               ))}
             </SelectField>
-            <Button type="submit">Pilih kelas asal</Button>
+            <Button type="submit" variant="soft">
+              Pilih kelas asal
+            </Button>
           </form>
           <p>Daftar memuat siswa yang penempatannya mencapai akhir tahun kelas asal.</p>
           {students.length ? (

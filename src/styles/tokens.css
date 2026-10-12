@@ -17,37 +17,59 @@
   --color-border: var(--border);
   --color-input: var(--control-border);
   --color-ring: var(--ring);
-  --font-sans: var(--font-inter), Arial, sans-serif;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.625rem;
-  --radius-xl: 0.625rem;
+  --font-sans: var(--font-jakarta), "Segoe UI", Arial, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 12px;
 }
 
 :root {
   color-scheme: light;
-  --brand-sky: #0ea5e9;
-  --background: #f4f8fb;
-  --surface: #ffffff;
-  --surface-muted: #eef4f9;
-  --border: #dbe4ec;
-  --border-strong: #c2cfdb;
-  --control-border: #7b8a98;
-  --foreground: #0f1e2c;
-  --muted-foreground: #56687a;
-  --primary: #0369a1;
+
+  /* brand: education teal + amber highlight */
+  --brand-teal: #0d9488;
+  --primary: #0f766e;
   --primary-foreground: #ffffff;
-  --primary-hover: #075985;
-  --primary-soft: #e0f2fe;
-  --primary-soft-hover: #cbe9fb;
-  --destructive-hover: #a32c23;
-  --control-height: 44px;
-  --ring: #0284c7;
+  --primary-hover: #115e59;
+  --primary-strong: #134e4a;
+  --primary-soft: #ccfbf1;
+  --primary-soft-hover: #99f6e4;
+  --primary-tint: #f0fdfa;
+  --accent-amber: #d97706;
+  --accent-amber-soft: #fef3c7;
+  --accent-amber-text: #b45309;
+  --accent-amber-on: #451a03;
+
+  /* neutrals */
+  --background: #f5faf9;
+  --surface: #ffffff;
+  --surface-muted: #eef5f4;
+  --surface-sunken: #e6efed;
+  --border: #dce7e5;
+  --border-strong: #c3d3d0;
+  --control-border: #8a9c98;
+  --foreground: #0f1f1e;
+  --muted-foreground: #52635f;
+  --ring: #0d9488;
   --destructive: #c0352b;
+  --destructive-hover: #a32c23;
+  --destructive-soft: #fdecea;
   --warning: #b45309;
-  --status-h: #166534;
+
+  /* app shell */
+  --sidebar-bg: #0b3b39;
+  --sidebar-fg: rgb(255 255 255 / 0.78);
+  --sidebar-fg-muted: rgb(255 255 255 / 0.55);
+  --sidebar-fg-active: #ffffff;
+  --sidebar-hover-bg: rgb(255 255 255 / 0.07);
+  --sidebar-active-bg: rgb(255 255 255 / 0.12);
+  --sidebar-border: rgb(255 255 255 / 0.1);
+
+  /* attendance status: always paired with a letter or label, never color alone */
+  --status-h: #15803d;
   --status-h-soft: #dcfce7;
-  --status-h-selected: #166534;
+  --status-h-selected: #15803d;
   --status-s: #92400e;
   --status-s-soft: #fef3c7;
   --status-s-selected: #92400e;
@@ -61,7 +83,42 @@
   --status-pending-soft: #f1f5f9;
   --status-holiday: #606976;
   --status-holiday-soft: #f3f4f6;
+
+  /* charts */
+  --chart-1: #0d9488;
+  --chart-2: #d97706;
+  --chart-grid: #e3ecea;
+
+  /* sizing */
+  --control-height: 44px;
+  --radius-chip: 6px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+
+  /* type scale */
+  --type-xs: 12px;
+  --type-sm: 13px;
+  --type-base: 14px;
+  --type-md: 16px;
+  --type-lg: 18px;
+  --type-xl: 20px;
+  --type-2xl: 24px;
+  --type-3xl: 30px;
+
+  /* elevation */
+  --elev-1: 0 1px 2px rgb(15 31 30 / 0.05);
+  --elev-2: 0 1px 2px rgb(15 31 30 / 0.06), 0 2px 6px rgb(15 31 30 / 0.05);
+  --elev-3: 0 4px 12px rgb(15 31 30 / 0.08), 0 1px 3px rgb(15 31 30 / 0.06);
+  --elev-4: 0 16px 40px rgb(15 31 30 / 0.16), 0 4px 12px rgb(15 31 30 / 0.08);
+  --floating-shadow: var(--elev-3);
+
+  /* motion */
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-slow: 250ms;
+
   --accent: var(--primary);
   --muted: var(--muted-foreground);
-  --floating-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.06);
 }

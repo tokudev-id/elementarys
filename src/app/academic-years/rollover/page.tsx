@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { CalendarRange } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { listAcademicYears, listClassOptions } from "@/server/services/school-master";
@@ -8,7 +8,7 @@ import { schoolIdentity } from "@/components/school-identity";
 import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
 import { SelectField } from "@/components/select-field";
-import { Button } from "@/components/button";
+import { Button, ButtonLink } from "@/components/button";
 import { StatusBadge } from "@/components/status-badge";
 import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { DataTablePagination } from "@/components/data-table-pagination";
@@ -41,16 +41,16 @@ export default async function Rollover({
       ]}
     >
       <PageHeader
+        icon={CalendarRange}
         title="Persiapan tahun ajaran"
         description="Langkah transisi periode, penataan kelas, kalender belajar, dan aktivasi tahun ajaran baru."
         actions={
           selected && preparation ? (
-            <Link
-              className="button-link button-link--secondary"
+            <ButtonLink
               href={`/reports?yearId=${selected}&month=${preparation.year.startsOn.slice(0, 7)}`}
             >
               Rekap tahun ini
-            </Link>
+            </ButtonLink>
           ) : undefined
         }
       />
@@ -75,7 +75,9 @@ export default async function Rollover({
                         </option>
                       ))}
                     </SelectField>
-                    <Button type="submit">Tampilkan persiapan</Button>
+                    <Button type="submit" variant="soft">
+                      Tampilkan persiapan
+                    </Button>
                   </div>
                 </form>
               </DataCardContent>
@@ -111,15 +113,8 @@ export default async function Rollover({
                               : "Lengkapi nama dan zona waktu sekolah."}
                           </p>
                           <div className="rollover-step-actions">
-                            <Link className="button-link button-link--secondary" href="/settings">
-                              Konfigurasi sekolah
-                            </Link>
-                            <Link
-                              className="button-link button-link--secondary"
-                              href="/academic-years"
-                            >
-                              Buat atau edit periode
-                            </Link>
+                            <ButtonLink href="/settings">Konfigurasi sekolah</ButtonLink>
+                            <ButtonLink href="/academic-years">Buat atau edit periode</ButtonLink>
                           </div>
                         </div>
                       </div>
@@ -134,12 +129,7 @@ export default async function Rollover({
                             tersedia.
                           </p>
                           <div className="rollover-step-actions">
-                            <Link
-                              className="button-link button-link--secondary"
-                              href={`/classes?yearId=${selected}`}
-                            >
-                              Atur kelas
-                            </Link>
+                            <ButtonLink href={`/classes?yearId=${selected}`}>Atur kelas</ButtonLink>
                           </div>
                         </div>
                       </div>
@@ -155,12 +145,11 @@ export default async function Rollover({
                               : "Hari belajar belum diatur."}
                           </p>
                           <div className="rollover-step-actions">
-                            <Link
-                              className="button-link button-link--secondary"
+                            <ButtonLink
                               href={`/calendar?yearId=${selected}&month=${preparation.year.startsOn.slice(0, 7)}`}
                             >
                               Atur kalender
-                            </Link>
+                            </ButtonLink>
                           </div>
                         </div>
                       </div>
@@ -222,15 +211,8 @@ export default async function Rollover({
                             setelah tanggal sekolah. Laporan lama tetap dapat dibaca dan diekspor.
                           </p>
                           <div className="rollover-step-actions">
-                            <Link className="button-link button-link--secondary" href="/classes">
-                              Periksa arsip kelas
-                            </Link>
-                            <Link
-                              className="button-link button-link--secondary"
-                              href="/academic-years"
-                            >
-                              Periksa arsip tahun
-                            </Link>
+                            <ButtonLink href="/classes">Periksa arsip kelas</ButtonLink>
+                            <ButtonLink href="/academic-years">Periksa arsip tahun</ButtonLink>
                           </div>
                         </div>
                       </div>

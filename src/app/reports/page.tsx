@@ -1,9 +1,9 @@
-import Link from "next/link";
+import { FileSpreadsheet } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
 import { StatusBadge } from "@/components/status-badge";
-import { Button } from "@/components/button";
+import { Button, ButtonLink } from "@/components/button";
 import { Field } from "@/components/field";
 import { DataCard, DataCardHeader, DataCardContent } from "@/components/data-card";
 import { ReportLegend, ReportChangeNotice, ReportClassView } from "@/components/report-table";
@@ -97,6 +97,7 @@ export default async function Reports({
       breadcrumbs={[{ label: "Rekap bulanan" }]}
     >
       <PageHeader
+        icon={FileSpreadsheet}
         title="Rekap bulanan"
         description={
           report
@@ -107,12 +108,9 @@ export default async function Reports({
           report && (
             <div className="flex flex-wrap gap-2 items-center">
               <ReportDownload input={report.input} />
-              <Link
-                className="button-link button-link--secondary"
-                href={`/reports/print?${printParams.toString()}`}
-              >
+              <ButtonLink href={`/reports/print?${printParams.toString()}`}>
                 Buka halaman cetak
-              </Link>
+              </ButtonLink>
             </div>
           )
         }
@@ -156,7 +154,9 @@ export default async function Reports({
               </div>
 
               <div className="report-filter-actions">
-                <Button type="submit">Tampilkan rekap</Button>
+                <Button type="submit" variant="soft">
+                  Tampilkan rekap
+                </Button>
               </div>
             </form>
           </DataCardContent>

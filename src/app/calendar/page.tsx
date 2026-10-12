@@ -1,3 +1,4 @@
+import { CalendarDays } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { listAcademicYears, getCalendar } from "@/server/services/school-master";
 import { getSchoolSettings } from "@/server/services/settings";
@@ -66,6 +67,7 @@ export default async function Calendar({
       breadcrumbs={[{ label: "Kalender" }]}
     >
       <PageHeader
+        icon={CalendarDays}
         title="Kalender akademik"
         description={`${year.label} · ${year.startsOn} s/d ${year.endsOnExclusive}`}
       />

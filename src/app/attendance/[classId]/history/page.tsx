@@ -1,20 +1,17 @@
+import { History } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { StateBanner } from "@/components/state-banner";
 import { EmptyState } from "@/components/empty-state";
-import {
-  DataCard,
-  DataCardHeader,
-  DataCardContent,
-  DataCardFooter,
-} from "@/components/data-card";
+import { DataCard, DataCardHeader, DataCardContent, DataCardFooter } from "@/components/data-card";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getAttendanceHistory } from "@/server/queries/attendance-history";
 import { DomainError } from "@/domain/errors";
 import { formatSchoolTime } from "@/domain/format";
 import { statusLabels, formatAttendanceDate } from "../attendance-state";
+import { ButtonLink } from "@/components/button";
 import type { AttendanceHistory } from "@/contracts/attendance-history";
 
 const actionLabels = {
@@ -103,7 +100,10 @@ export default async function AttendanceHistoryPage({
   const students = new Map(history.students.map((student) => [student.id, student]));
   const pageSize = 10;
   const total = history.events.length;
-  const currentPage = Math.max(1, Math.min(Number(rawPage ?? 1) || 1, Math.ceil(total / pageSize) || 1));
+  const currentPage = Math.max(
+    1,
+    Math.min(Number(rawPage ?? 1) || 1, Math.ceil(total / pageSize) || 1),
+  );
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedEvents = history.events.slice(startIndex, startIndex + pageSize);
 
@@ -122,16 +122,16 @@ export default async function AttendanceHistoryPage({
       ]}
     >
       <PageHeader
+        icon={History}
         title="Riwayat absensi"
         description={`${history.className} · ${formatAttendanceDate(history.date)}`}
         primaryAction={
-          <Link
-            className="button-link button-link--secondary"
+          <ButtonLink
             href={`/attendance/${classId}?date=${history.date}`}
             aria-label="Kembali ke catatan kelas"
           >
             Kembali ke catatan kelas
-          </Link>
+          </ButtonLink>
         }
       />
       <DataCard id="daftar">
@@ -139,6 +139,7 @@ export default async function AttendanceHistoryPage({
         <DataCardContent>
           {!total ? (
             <EmptyState
+              icon={History}
               title="Belum ada riwayat"
               description="Belum ada perubahan tercatat pada tanggal ini."
             />

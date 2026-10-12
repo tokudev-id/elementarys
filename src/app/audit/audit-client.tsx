@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Filter } from "lucide-react";
+import { Filter, SearchX } from "lucide-react";
 import type { AuditEvent } from "@/contracts/audit";
 import { auditEntities } from "@/contracts/audit";
 import { formatSchoolTime } from "@/domain/format";
@@ -360,6 +360,7 @@ export function AuditClient({
 
       {!events.length ? (
         <EmptyState
+          icon={SearchX}
           title="Tidak ada catatan yang cocok dengan filter ini."
           description="Tidak ada aktivitas yang cocok dengan kriteria filter saat ini."
           action={<Link href="/audit">Reset filter</Link>}

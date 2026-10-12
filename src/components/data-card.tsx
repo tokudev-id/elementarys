@@ -48,7 +48,7 @@ export function DataCardHeader({
           <div className="data-card__title-group">
             <h2 className="data-card__title">
               {title}
-              {count !== undefined && <span className="data-card__count"> · {count}</span>}
+              {count !== undefined && <span className="data-card__count">{count}</span>}
             </h2>
             {description && <p className="data-card__description">{description}</p>}
           </div>

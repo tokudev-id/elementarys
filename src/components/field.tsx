@@ -30,11 +30,7 @@ export function Field({
   }
 
   const describedBy =
-    [
-      hint && `${id}-hint`,
-      error && `${id}-error`,
-      props["aria-describedby"],
-    ]
+    [hint && `${id}-hint`, error && `${id}-error`, props["aria-describedby"]]
       .filter(Boolean)
       .join(" ") || undefined;
 

@@ -30,8 +30,7 @@ export function AccountForm({ change = false }: { change?: boolean }) {
           setMessage(
             response.status === 401
               ? "Email atau password tidak sesuai. Coba kembali."
-              : (error.error?.message ??
-                  "Belum berhasil. Periksa isian lalu coba kembali."),
+              : (error.error?.message ?? "Belum berhasil. Periksa isian lalu coba kembali."),
           );
         } else {
           router.push("/attendance");
@@ -65,10 +64,7 @@ export function AccountForm({ change = false }: { change?: boolean }) {
         });
         if (!response.ok) {
           const error = await response.json();
-          setMessage(
-            error.error?.message ??
-              "Belum berhasil. Periksa isian lalu coba kembali.",
-          );
+          setMessage(error.error?.message ?? "Belum berhasil. Periksa isian lalu coba kembali.");
         } else {
           router.push("/attendance");
           router.refresh();

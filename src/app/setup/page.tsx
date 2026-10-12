@@ -1,10 +1,11 @@
-import Link from "next/link";
+import { ListChecks } from "lucide-react";
 import { requirePageActor } from "@/server/auth/page-actor";
 import { getSchoolSettings } from "@/server/services/settings";
 import { AppShell } from "@/components/app-shell";
 import { SetupChecklist } from "@/components/setup-checklist";
 import { StateBanner } from "@/components/state-banner";
 import { PageHeader } from "@/components/page-header";
+import { ButtonLink } from "@/components/button";
 import { schoolIdentity } from "@/components/school-identity";
 
 export default async function Setup() {
@@ -18,13 +19,14 @@ export default async function Setup() {
       breadcrumbs={[{ label: "Persiapan sekolah" }]}
     >
       <PageHeader
+        icon={ListChecks}
         title="Persiapan sekolah"
         description="Kelengkapan data master dan konfigurasi awal sebelum operasional dimulai."
         actions={
           actor.role === "admin" ? (
-            <Link className="button-link" href="/settings">
+            <ButtonLink variant="primary" href="/settings">
               Atur identitas sekolah
-            </Link>
+            </ButtonLink>
           ) : undefined
         }
       />

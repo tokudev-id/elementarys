@@ -1,8 +1,5 @@
+import { PageSkeleton } from "./page-skeleton";
+
 export function MasterLoading() {
-  return (
-    <div className="main-content-loading" role="status" aria-label="Memuat daftar...">
-      <div className="circular-spinner" aria-hidden="true" />
-      <span className="sr-only">Memuat daftar...</span>
-    </div>
-  );
+  return <PageSkeleton variant="list" label="Memuat daftar" />;
 }

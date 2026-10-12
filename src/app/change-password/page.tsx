@@ -21,7 +21,9 @@ export default async function ChangePassword() {
         </div>
         <div className="auth-card__header">
           <h1 className="auth-card__title">Ganti password</h1>
-          <p className="auth-card__subtitle">Ganti password sementara sebelum membuka data sekolah.</p>
+          <p className="auth-card__subtitle">
+            Ganti password sementara sebelum membuka data sekolah.
+          </p>
         </div>
         <AccountForm change />
         <div className="auth-card__footer">
@@ -31,4 +33,3 @@ export default async function ChangePassword() {
     </main>
   );
 }
-

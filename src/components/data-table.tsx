@@ -70,12 +70,14 @@ export function DataTable<T>({
                   <TableHead
                     key={header.id}
                     aria-sort={sortKey ? (isSorted ? "ascending" : "none") : undefined}
-                    className={[
-                      isDesktop ? "data-column--desktop" : "",
-                      isActions ? "data-column--actions" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ") || undefined}
+                    className={
+                      [
+                        isDesktop ? "data-column--desktop" : "",
+                        isActions ? "data-column--actions" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
                   >
                     {header.isPlaceholder ? null : sortKey ? (
                       <button
@@ -107,12 +109,14 @@ export function DataTable<T>({
                 return (
                   <TableCell
                     key={cell.id}
-                    className={[
-                      isDesktop ? "data-column--desktop" : "",
-                      isActions ? "data-column--actions" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ") || undefined}
+                    className={
+                      [
+                        isDesktop ? "data-column--desktop" : "",
+                        isActions ? "data-column--actions" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

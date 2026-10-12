@@ -1,6 +1,8 @@
 "use client";
 import { useState, type ChangeEvent } from "react";
-import { Button } from "@/components/button";
+import { ClipboardCheck, Plus, Star, TriangleAlert, Users } from "lucide-react";
+import { Avatar } from "@/components/avatar";
+import { Button, IconButton } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Field } from "@/components/field";
 import { SelectField } from "@/components/select-field";
@@ -90,6 +92,33 @@ export function ComponentPreview() {
       />
 
       <section className="preview-section">
+        <h2>Tombol dan avatar</h2>
+        <div className="button-row">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="soft">Soft</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="destructive">Destructive</Button>
+          <Button variant="link">Link</Button>
+          <IconButton label="Tambah contoh" variant="secondary">
+            <Plus aria-hidden="true" />
+          </IconButton>
+        </div>
+        <div className="button-row">
+          {[
+            "Ahmad Fauzan",
+            "Siti Nurhaliza",
+            "Budi Santoso",
+            "Dewi Lestari",
+            "Rina Wati",
+            "Joko",
+          ].map((name) => (
+            <Avatar key={name} name={name} />
+          ))}
+        </div>
+      </section>
+
+      <section className="preview-section">
         <h2>DataCard dan tabel paginasi</h2>
         <DataCard id="daftar">
           <DataCardHeader title="Contoh DataCard" count={exampleRows.length} />
@@ -128,12 +157,22 @@ export function ComponentPreview() {
 
       <section className="preview-section">
         <h2>Ringkasan dan KPI</h2>
-        <div className="kpi-grid">
+        <div className="dashboard-kpi-grid">
           <KpiCard
             label="Siswa contoh"
+            icon={Users}
             value={exampleRows.length}
             context="Fixture komponen, bukan data sekolah"
           />
+          <KpiCard
+            label="Progres"
+            icon={ClipboardCheck}
+            accent="sky"
+            value="3 / 4"
+            progress={0.75}
+          />
+          <KpiCard label="Sorotan" icon={Star} accent="amber" value={12} />
+          <KpiCard label="Perlu tindakan" icon={TriangleAlert} accent="rose" value={2} />
         </div>
         <div className="button-row">
           {["H", "S", "I", "A"].map((status) => (
